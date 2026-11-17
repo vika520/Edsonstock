@@ -1,0 +1,455 @@
+(function(){
+"use strict";
+const D = JSON.parse(document.getElementById('DATA').textContent);
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d'), box = $('#chartbox'), tip = $('#tip');
+const hcv = $('#hist'), hctx = hcv.getContext('2d');
+const N = D.d.length;
+const denom = i => Math.max(1, D.up[i] + D.dn[i] + D.fl[i]);
+const temp  = i => D.up[i] / denom(i) * 100;
+const pad2 = n => String(n).padStart(2,'0');
+const fmt = n => n.toLocaleString('zh-CN',{maximumFractionDigits:0});
+const fmt2 = n => n.toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dstr = s => s.slice(0,4)+'/'+s.slice(4,6)+'/'+s.slice(6,8);
+function dObj(s){ return new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8)); }
+function heat(v){ // 0 冷(蓝绿) → 1 热(红)
+  v=Math.min(1,Math.max(0,v));
+  const S=[[0,[38,110,200]],[.25,[32,170,160]],[.5,[120,180,60]],[.72,[230,180,40]],[1,[232,69,60]]];
+  let i=0; while(i<S.length-2 && v>S[i+1][0]) i++;
+  const t=(v-S[i][0])/(S[i+1][0]-S[i][0]);
+  const c=[0,1,2].map(k=>Math.round(S[i][1][k]+(S[i+1][1][k]-S[i][1][k])*t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+const S = {mode:'abs', thr:4000, streak:2, range:'3y',
+           view:{start:0,end:N-1}, hover:-1, drag:null, geo:null, sig:null, ev:null};
+const YBARS = 250;
+const HORIZONS = [1,3,5,10,20];
+// 温度多为 30~70%，线性拉伸以放大配色层次
+const tone = i => Math.min(1, Math.max(0, (temp(i)-25)/50));
+function movingAvg(arr,w){
+  const out=new Float64Array(arr.length);let s=0;
+  for(let i=0;i<arr.length;i++){s+=arr[i];if(i>=w)s-=arr[i-w];out[i]=s/Math.min(i+1,w);}
+  return out;
+}
+const TEMP=Array.from({length:N},(_,i)=>temp(i));
+const MA_UP=movingAvg(D.up,20), MA_T=movingAvg(TEMP,20);
+
+/* ---------- 信号（全历史，因果） ---------- */
+function isIce(i){ return S.mode==='abs' ? D.dn[i]>=S.thr : D.dn[i]/denom(i)>=S.thr/100; }
+function isBoil(i){ return S.mode==='abs' ? D.up[i]>=S.thr : D.up[i]/denom(i)>=S.thr/100; }
+function computeSignals(){
+  const ice=new Uint8Array(N), boil=new Uint8Array(N), dbl=[], runLen=new Uint8Array(N);
+  let run=0, segStart=-1;
+  for(let i=0;i<N;i++){
+    ice[i]=isIce(i)?1:0; boil[i]=isBoil(i)?1:0;
+    if(ice[i]){ if(run===0) segStart=i; run++; } else run=0;
+    runLen[i]=run;
+    if(run===S.streak) dbl.push(i);
+  }
+  // 连续段总长度（供事件表）
+  const segLen = {};
+  for(const k of dbl){
+    let len=S.streak, p=k+1;
+    while(p<N && ice[p]){ len++; p++; }
+    segLen[k]=len;
+  }
+  return {ice,boil,dbl,segLen};
+}
+function fwd(i,h){ return i+h<N ? (D.px[i+h]/D.px[i]-1)*100 : null; }
+function stat(vals){
+  if(!vals.length) return {n:0,mean:0,med:0,win:0};
+  const s=[...vals].sort((a,b)=>a-b);
+  return {n:vals.length, mean:vals.reduce((a,b)=>a+b,0)/vals.length,
+          med:s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2,
+          win:vals.filter(v=>v>0).length/vals.length*100};
+}
+function bootDiff(vals, base, seed){
+  let s=seed>>>0; const rnd=()=>{s=(Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296;};
+  const out=[];
+  for(let k=0;k<1200;k++){
+    let sum=0; for(let j=0;j<vals.length;j++) sum+=vals[Math.floor(rnd()*vals.length)];
+    out.push(sum/vals.length-base);
+  }
+  out.sort((a,b)=>a-b);
+  return [out[Math.floor(.025*out.length)], out[Math.floor(.975*out.length)]];
+}
+function eventStudy(sig){
+  const all={}, ev={};
+  for(const h of HORIZONS){
+    const av=[], evv=[];
+    for(let i=0;i+h<N;i++) av.push(fwd(i,h));
+    for(const k of sig.dbl){ const v=fwd(k,h); if(v!==null) evv.push(v); }
+    all[h]=stat(av); ev[h]=stat(evv);
+    ev[h].ci = evv.length>2 ? bootDiff(evv, all[h].mean, 20261114+h) : null;
+    ev[h].vals = evv;
+  }
+  return {all,ev};
+}
+function recompute(){ S.sig=computeSignals(); S.ev=eventStudy(S.sig); }
+
+/* ---------- view ---------- */
+function setRange(){
+  const y={'1y':1,'3y':3,'5y':5,'all':Infinity}[S.range];
+  const cnt=y===Infinity?N:Math.min(N,Math.round(YBARS*y));
+  S.view={start:Math.max(0,N-cnt),end:N-1};
+}
+function clampView(){
+  const w=S.view.end-S.view.start;
+  S.view.start=Math.max(0,Math.min(N-30,S.view.start));
+  S.view.end=Math.min(N-1,S.view.start+Math.max(29,w));
+  if(S.view.end<=S.view.start) S.view.end=Math.min(N-1,S.view.start+29);
+}
+
+/* ---------- 主图 ---------- */
+const CH=720;
+function draw(){
+  const W=box.clientWidth-2,H=CH,dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  cv.style.width=W+'px';cv.style.height=H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const pad={l:16,r:96,t:22,b:28}, plotW=W-pad.l-pad.r;
+  const avail=H-pad.t-pad.b;
+  const mainH=Math.round(avail*.43), gap=30;
+  const bTop=pad.t+mainH+gap, bH=Math.round(avail*.31);
+  const tTop=bTop+bH+gap, tH=H-pad.b-tTop;
+  const a=S.view.start,b=S.view.end,span=Math.max(1,b-a);
+  const X=i=>pad.l+(i-a)/span*plotW;
+
+  let lo=Infinity,hi=-Infinity;
+  for(let i=a;i<=b;i++){ if(D.px[i]<lo)lo=D.px[i]; if(D.px[i]>hi)hi=D.px[i]; }
+  const lgLo=Math.log(Math.max(1,lo*.96)),lgHi=Math.log(hi*1.04);
+  const Y=p=>pad.t+(lgHi-Math.log(Math.max(1,p)))/(lgHi-lgLo)*mainH;
+  let maxCnt=S.mode==='abs'?S.thr:0;
+  for(let i=a;i<=b;i++){ maxCnt=Math.max(maxCnt,D.tt[i],D.up[i],D.dn[i]); }
+  maxCnt*=1.06;
+  const YB=v=>bTop+bH-v/maxCnt*bH;
+  const YT=v=>tTop+tH-v/100*tH;
+  S.geo={pad,plotW,mainH,bTop,bH,tTop,tH,X,Y,YB,YT,a,b,W,H};
+
+  ctx.fillStyle='#0b0e11';ctx.fillRect(0,0,W,H);
+
+  // 网格 & 刻度
+  ctx.font='10px Consolas,monospace';ctx.textBaseline='middle';
+  ctx.strokeStyle='rgba(255,255,255,.055)';ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){
+    const v=Math.exp(lgLo+(lgHi-lgLo)*g/4),y=Y(v);
+    ctx.beginPath();ctx.moveTo(pad.l,y+.5);ctx.lineTo(W-pad.r+4,y+.5);ctx.stroke();
+    ctx.fillStyle='#6f7986';ctx.textAlign='left';ctx.fillText(fmt2(v),W-pad.r+10,y);
+  }
+  for(let g=0;g<=3;g++){
+    const v=maxCnt*g/3,y=YB(v);
+    ctx.strokeStyle='rgba(255,255,255,.045)';
+    ctx.beginPath();ctx.moveTo(pad.l,y+.5);ctx.lineTo(W-pad.r+4,y+.5);ctx.stroke();
+    ctx.fillStyle='#6f7986';ctx.textAlign='left';ctx.fillText(fmt(v),W-pad.r+10,y);
+  }
+  for(const v of [0,25,50,75,100]){
+    const y=YT(v);
+    ctx.strokeStyle=v===50?'rgba(255,255,255,.14)':'rgba(255,255,255,.05)';
+    ctx.setLineDash(v===50?[3,4]:[]);
+    ctx.beginPath();ctx.moveTo(pad.l,y+.5);ctx.lineTo(W-pad.r+4,y+.5);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.fillStyle='#6f7986';ctx.textAlign='left';
+  for(const v of [0,50,100]) ctx.fillText(v+'%',W-pad.r+10,YT(v));
+
+  // 阈值线
+  const thrY=S.mode==='abs'?YB(S.thr):null;
+  if(thrY!==null){
+    ctx.strokeStyle='rgba(232,69,60,.55)';ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(pad.l,thrY);ctx.lineTo(W-pad.r+4,thrY);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#e8453c';ctx.textAlign='left';ctx.font='9.5px Consolas,monospace';
+    ctx.fillText('冰点/沸点阈值 '+fmt(S.thr)+' 家',pad.l+5,thrY-8);
+  }
+  // 相对口径：动态阈值（按当日分母换算成家数）
+  if(S.mode==='ratio'){
+    ctx.strokeStyle='rgba(232,69,60,.35)';ctx.beginPath();
+    for(let i=a;i<=b;i++){const y=YB(S.thr/100*denom(i));i===a?ctx.moveTo(X(i),y):ctx.lineTo(X(i),y);}
+    ctx.stroke();
+  }
+
+  // 情绪温度带的冰点/沸点底色
+  for(let i=a;i<b;i++){
+    const x1=X(i),x2=X(i+1);
+    if(S.sig.ice[i]){ctx.fillStyle='rgba(232,69,60,.13)';ctx.fillRect(x1,tTop,x2-x1+.6,tH);}
+    else if(S.sig.boil[i]){ctx.fillStyle='rgba(240,180,41,.10)';ctx.fillRect(x1,tTop,x2-x1+.6,tH);}
+  }
+
+  // 信号：双冰点保留主图红带 + 贯穿细线；沸点/单冰点只留底部刻度，避免竖条刷屏
+  for(const k of S.sig.dbl){
+    if(k<a||k>b) continue;
+    const x=X(k),w=Math.max(2,plotW/span*1.3);
+    ctx.fillStyle='rgba(232,69,60,.22)';ctx.fillRect(x-w/2,pad.t,w,mainH);
+    ctx.strokeStyle='rgba(255,90,80,.45)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x+.5,pad.t);ctx.lineTo(x+.5,tTop+tH);ctx.stroke();
+    ctx.fillStyle='#ff5a4e';ctx.beginPath();ctx.moveTo(x,pad.t+2);ctx.lineTo(x-4,pad.t-5);ctx.lineTo(x+4,pad.t-5);ctx.closePath();ctx.fill();
+  }
+  const bw=Math.max(1,plotW/span);
+  for(let i=a;i<=b;i++){
+    const x=X(i);
+    if(S.sig.boil[i]){ctx.fillStyle='rgba(240,180,41,.8)';ctx.fillRect(x-bw/2,pad.t+mainH-7,bw,3);}
+    if(S.sig.ice[i]){ctx.fillStyle='rgba(232,69,60,.85)';ctx.fillRect(x-bw/2,pad.t+mainH-4,bw,3);}
+  }
+
+  // 主图：按情绪温度着色的上证曲线
+  const NB=20,pm=new Array(NB);
+  for(let i=a;i<b;i++){
+    const k=Math.min(NB-1,Math.floor(tone(i)*NB));
+    if(!pm[k])pm[k]=new Path2D();
+    pm[k].moveTo(X(i),Y(D.px[i]));pm[k].lineTo(X(i+1),Y(D.px[i+1]));
+  }
+  ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=2.1;
+  for(let k=0;k<NB;k++) if(pm[k]){ctx.strokeStyle=heat((k+.5)/NB);ctx.stroke(pm[k]);}
+
+  // 副图1：上涨/下跌家数双线
+  ctx.lineWidth=1.5;
+  const drawLine=(key,color)=>{
+    ctx.strokeStyle=color;ctx.beginPath();
+    for(let i=a;i<=b;i++){const x=X(i),y=YB(D[key][i]);i===a?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.stroke();
+  };
+  drawLine('dn','#31c48d');   // 绿=下跌
+  drawLine('up','#ff6157');   // 红=上涨
+  // 总品种数（淡灰，显示分母扩容）
+  ctx.strokeStyle='rgba(180,192,210,.42)';ctx.lineWidth=1.1;ctx.setLineDash([4,3]);
+  ctx.beginPath();for(let i=a;i<=b;i++){const y=YB(D.tt[i]);i===a?ctx.moveTo(X(i),y):ctx.lineTo(X(i),y);}ctx.stroke();
+  ctx.setLineDash([]);
+  // 上涨家数 MA20：看情绪的趋势而不是逐日毛刺
+  ctx.strokeStyle='rgba(235,242,255,.8)';ctx.lineWidth=1.5;ctx.beginPath();
+  for(let i=a;i<=b;i++){const y=YB(MA_UP[i]);i===a?ctx.moveTo(X(i),y):ctx.lineTo(X(i),y);}
+  ctx.stroke();
+  ctx.fillStyle='#8c96a3';ctx.textAlign='left';ctx.font='10.5px "Microsoft YaHei",sans-serif';
+  ctx.fillText('涨跌家数 · 红涨 / 绿跌 / 灰虚线=总品种 / 白线=上涨MA20',pad.l+5,bTop+11);
+
+  // 副图2：情绪温度
+  const pt=new Array(NB);
+  for(let i=a;i<b;i++){
+    const k=Math.min(NB-1,Math.floor(tone(i)*NB));
+    if(!pt[k])pt[k]=new Path2D();
+    pt[k].moveTo(X(i),YT(temp(i)));pt[k].lineTo(X(i+1),YT(temp(i+1)));
+  }
+  ctx.lineWidth=1.9;
+  for(let k=0;k<NB;k++) if(pt[k]){ctx.strokeStyle=heat((k+.5)/NB);ctx.stroke(pt[k]);}
+  ctx.strokeStyle='rgba(235,242,255,.8)';ctx.lineWidth=1.5;ctx.beginPath();
+  for(let i=a;i<=b;i++){const y=YT(MA_T[i]);i===a?ctx.moveTo(X(i),y):ctx.lineTo(X(i),y);}
+  ctx.stroke();
+  ctx.fillStyle='#8c96a3';ctx.font='10.5px "Microsoft YaHei",sans-serif';ctx.textAlign='left';
+  ctx.fillText('情绪温度 = 上涨占比 · 白线=MA20',pad.l+5,tTop+11);
+  if(S.mode==='ratio'){
+    const y=YT((1-S.thr/100)*100);
+    ctx.strokeStyle='rgba(232,69,60,.5)';ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r+4,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#e8453c';ctx.textAlign='right';ctx.font='9.5px Consolas,monospace';
+    ctx.fillText('冰点线 '+(100-S.thr)+'%',W-pad.r,y-7);
+  }
+
+  // 分区标题 & 分隔
+  ctx.fillStyle='#8c96a3';ctx.font='10.5px "Microsoft YaHei",sans-serif';ctx.textAlign='left';
+  ctx.fillText('上证指数（对数）· 红带 = 双冰点',pad.l+5,pad.t+10);
+  ctx.strokeStyle='rgba(255,255,255,.10)';
+  for(const y of [pad.t+mainH,bTop+bH]){ctx.beginPath();ctx.moveTo(pad.l,y+.5);ctx.lineTo(W-pad.r+4,y+.5);ctx.stroke();}
+
+  // 时间轴
+  const ticks=Math.max(3,Math.min(9,Math.floor(plotW/130)));
+  ctx.font='10px Consolas,monospace';ctx.fillStyle='#6f7986';ctx.textBaseline='top';
+  for(let g=0;g<=ticks;g++){
+    const i=Math.round(a+span*g/ticks),x=X(i);
+    ctx.strokeStyle='rgba(255,255,255,.05)';ctx.beginPath();ctx.moveTo(x+.5,pad.t);ctx.lineTo(x+.5,tTop+tH);ctx.stroke();
+    const d=D.d[i],lab=d.slice(0,4)+'/'+d.slice(4,6);
+    ctx.textAlign=g===0?'left':(g===ticks?'right':'center');
+    ctx.fillText(lab,x,tTop+tH+7);
+  }
+
+  // 十字光标
+  if(S.hover>=a&&S.hover<=b){
+    const i=S.hover,x=X(i),y=Y(D.px[i]);
+    ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(210,220,235,.55)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x+.5,pad.t);ctx.lineTo(x+.5,tTop+tH);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(pad.l,y+.5);ctx.lineTo(W-pad.r+4,y+.5);ctx.stroke();ctx.restore();
+    ctx.fillStyle='#0b0e11';ctx.strokeStyle=heat(tone(i));ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();ctx.stroke();
+    for(const yy of [YB(D.dn[i]),YB(D.up[i]),YT(temp(i))]){
+      ctx.beginPath();ctx.arc(x,yy,3,0,Math.PI*2);ctx.fillStyle=heat(tone(i));ctx.fill();
+    }
+    ctx.fillStyle='#2b3441';ctx.fillRect(W-pad.r+6,y-9,pad.r-12,18);
+    ctx.fillStyle='#fff';ctx.font='10px Consolas,monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(fmt2(D.px[i]),W-pad.r+10,y);
+    const dl=dstr(D.d[i]),dw=78;
+    const dx=Math.min(W-pad.r+4-dw,Math.max(pad.l,x-dw/2));
+    ctx.fillStyle='#2b3441';ctx.fillRect(dx,tTop+tH+2,dw,17);
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(dl,dx+dw/2,tTop+tH+11);
+  }
+}
+
+/* ---------- 事件研究面板 ---------- */
+function showTip(px,py){
+  const g=S.geo,i=S.hover;
+  if(!g||i<g.a||i>g.b){tip.style.display='none';return;}
+  const t=temp(i), ice=S.sig.ice[i], boil=S.sig.boil[i];
+  const isDbl=S.sig.dbl.includes(i);
+  const chg=i>0?(D.px[i]/D.px[i-1]-1)*100:0;
+  let state='常态';
+  if(isDbl)state='★ 双冰点（信号日）';else if(ice)state='情绪冰点';else if(boil)state='情绪沸点';
+  tip.innerHTML=
+    `<div class="d">${dstr(D.d[i])}　${['周日','周一','周二','周三','周四','周五','周六'][dObj(D.d[i]).getDay()]}</div>`+
+    `<div class="r"><span>上证收盘</span><b class="mono">${fmt2(D.px[i])}</b></div>`+
+    `<div class="r"><span>当日</span><b class="mono" style="color:${chg>=0?'#ff6b61':'#3ecf8e'}">${chg>=0?'+':''}${chg.toFixed(2)}%</b></div>`+
+    `<div class="hr"></div>`+
+    `<div class="r"><span>上涨家数</span><b class="mono" style="color:#ff6b61">${fmt(D.up[i])}</b></div>`+
+    `<div class="r"><span>下跌家数</span><b class="mono" style="color:#3ecf8e">${fmt(D.dn[i])}</b></div>`+
+    `<div class="r"><span>平盘 / 总品种</span><b class="mono">${fmt(D.fl[i])} / ${fmt(D.tt[i])}</b></div>`+
+    `<div class="r"><span>情绪温度</span><b class="mono" style="color:${heat(tone(i))}">${t.toFixed(1)}%</b></div>`+
+    `<div class="r"><span>状态</span><b style="color:${isDbl?'#ff9d96':(ice?'#f0a09c':(boil?'#f0b429':'#8ea0b8'))}">${state}</b></div>`;
+  tip.style.display='block';
+  const tw=tip.offsetWidth,th=tip.offsetHeight;
+  tip.style.left=Math.min(box.clientWidth-tw-8,px+16)+'px';
+  tip.style.top=Math.max(6,Math.min(CH-th-6,py-th/2))+'px';
+}
+function drawHist(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const W=hcv.clientWidth||420,H=210;
+  hcv.width=W*dpr;hcv.height=H*dpr;hctx.setTransform(dpr,0,0,dpr,0,0);
+  hctx.fillStyle='#0b0e11';hctx.fillRect(0,0,W,H);
+  const vals=S.ev.ev[5].vals, all=[];
+  for(let i=0;i+5<N;i++) all.push(fwd(i,5));
+  if(vals.length<3) return;
+  const lo=-12,hi=12,NB=24,bw=(hi-lo)/NB;
+  const bin=a=>{const c=new Array(NB).fill(0);for(const v of a){const k=Math.floor((Math.max(lo,Math.min(hi-.0001,v))-lo)/bw);c[k]++;}return c.map(x=>x/a.length);};
+  const be=bin(vals),ba=bin(all);
+  const pad={l:34,r:12,t:26,b:26},pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+  const mx=Math.max(...be,...ba)*1.12;
+  hctx.strokeStyle='rgba(255,255,255,.07)';
+  for(let g=0;g<=3;g++){const y=pad.t+ph*g/3;hctx.beginPath();hctx.moveTo(pad.l,y+.5);hctx.lineTo(W-pad.r,y+.5);hctx.stroke();}
+  const bwid=pw/NB;
+  for(let k=0;k<NB;k++){
+    const x=pad.l+k*bwid,y=pad.t+ph-be[k]/mx*ph;
+    hctx.fillStyle='rgba(232,69,60,.62)';hctx.fillRect(x+1,y,bwid-2,pad.t+ph-y);
+  }
+  hctx.strokeStyle='rgba(170,186,208,.85)';hctx.lineWidth=1.6;hctx.beginPath();
+  for(let k=0;k<NB;k++){
+    const x=pad.l+(k+.5)*bwid,y=pad.t+ph-ba[k]/mx*ph;
+    k===0?hctx.moveTo(x,y):hctx.lineTo(x,y);
+  }
+  hctx.stroke();
+  hctx.strokeStyle='rgba(255,255,255,.25)';hctx.beginPath();
+  const zx=pad.l+(0-lo)/(hi-lo)*pw;hctx.moveTo(zx,pad.t);hctx.lineTo(zx,pad.t+ph);hctx.stroke();
+  hctx.font='9.5px Consolas,monospace';hctx.fillStyle='#6f7986';hctx.textAlign='center';hctx.textBaseline='top';
+  for(const v of [-10,-5,0,5,10]) hctx.fillText((v>0?'+':'')+v+'%',pad.l+(v-lo)/(hi-lo)*pw,pad.t+ph+6);
+  hctx.textAlign='left';hctx.font='10.5px "Microsoft YaHei",sans-serif';hctx.fillStyle='#8c96a3';
+  hctx.fillText('T+5 收益分布（频率）',pad.l-26,7);
+  hctx.fillStyle='#e8453c';hctx.fillText('■ 双冰点',pad.l+120,7);
+  hctx.fillStyle='#aab8d0';hctx.fillText('— 全样本',pad.l+190,7);
+}
+function updatePanels(){
+  const i=N-1, t=temp(i), sig=S.sig, ev=S.ev;
+  const last=sig.dbl.length?sig.dbl[sig.dbl.length-1]:null;
+  const lastDate=last?dstr(D.d[last]):'—';
+  const iceDays=sig.ice.reduce((s,x)=>s+x,0), boilDays=sig.boil.reduce((s,x)=>s+x,0);
+  const items=[
+    ['最新情绪温度',t.toFixed(1)+'%', t<20?'偏冷':(t>80?'过热':'中性')],
+    ['最新上涨 / 下跌',fmt(D.up[i])+' / '+fmt(D.dn[i]),'总品种 '+fmt(D.tt[i])],
+    ['最近一次双冰点',lastDate,last?(N-1-last)+' 个交易日前':'—'],
+    [S.mode==='abs'?'双冰点次数':'双冰点次数',String(sig.dbl.length),'全样本 '+N+' 个交易日'],
+    ['冰点日 / 沸点日',iceDays+' / '+boilDays,'阈值 '+(S.mode==='abs'?fmt(S.thr)+' 家':S.thr+'%')],
+    ['统计起点',dstr(D.d[0]),S.mode==='abs'?'绝对口径无更早样本':'相对口径覆盖全区间']
+  ];
+  $('#metrics').innerHTML=items.map(x=>`<div class="metric"><div class="k">${x[0]}</div><div class="v mono">${x[1]}</div><div class="s">${x[2]}</div></div>`).join('');
+
+  const modeName=S.mode==='abs'?('下跌家数 ≥ '+fmt(S.thr)+' 家'):('下跌占比 ≥ '+S.thr+'%');
+  $('#evSub').textContent=`口径：${modeName}，连续 ${S.streak} 天；信号日 = 连续段首次满足日，每段只记一次，共 ${sig.dbl.length} 次事件。以信号日收盘为基准，对照全样本同期收益。`;
+  const rows=[];
+  for(const h of HORIZONS){
+    const e=ev.ev[h],a=ev.all[h],ex=e.mean-a.mean;
+    const ci=e.ci?`[${e.ci[0]>=0?'+':''}${e.ci[0].toFixed(2)}, ${e.ci[1]>=0?'+':''}${e.ci[1].toFixed(2)}]`:'—';
+    const signif=e.ci&&(e.ci[0]>0||e.ci[1]<0);
+    rows.push(`<tr><td>T+${h}</td><td>${e.n}</td>`+
+      `<td class="${e.mean>=0?'pos':'neg'}">${e.mean>=0?'+':''}${e.mean.toFixed(2)}%</td>`+
+      `<td class="${e.med>=0?'pos':'neg'}">${e.med>=0?'+':''}${e.med.toFixed(2)}%</td>`+
+      `<td>${e.win.toFixed(1)}%</td><td class="mute">${a.mean>=0?'+':''}${a.mean.toFixed(2)}%</td>`+
+      `<td class="${ex>=0?'pos':'neg'}">${ex>=0?'+':''}${ex.toFixed(2)}%</td>`+
+      `<td class="mono mute">${ci}</td>`+
+      `<td><span class="pill ${signif?'yes':'no'}">${signif?'超额显著':'不显著'}</span></td></tr>`);
+  }
+  $('#evTable tbody').innerHTML=rows.join('');
+  const e5=ev.ev[5],e20=ev.ev[20];
+  $('#verdict').innerHTML=`<b>怎么读这张表：</b>均值容易被少数暴力反弹拉高，务必与中位数、胜率一起看。当前口径下 `+
+    `T+5 均值 ${e5.mean>=0?'+':''}${e5.mean.toFixed(2)}% 但中位数仅 ${e5.med>=0?'+':''}${e5.med.toFixed(2)}%、胜率 ${e5.win.toFixed(1)}%；`+
+    `T+20 均值 ${e20.mean>=0?'+':''}${e20.mean.toFixed(2)}%、中位数 ${e20.med>=0?'+':''}${e20.med.toFixed(2)}%。`+
+    `事件样本仅 ${sig.dbl.length} 次且高度重叠（连续下跌段彼此相邻），加上全部落在急跌/熊市区间，`+
+    `<b>不能据此认定「双冰点 = 可交易抄底信号」</b>。切换阈值或口径后数字会明显变化，正说明结论对参数敏感。`;
+
+  const list=[...sig.dbl].reverse().map(k=>{
+    const f5=fwd(k,5),f20=fwd(k,20);
+    const c=v=>v===null?'<td class="mute">—</td>':`<td class="${v>=0?'pos':'neg'}">${v>=0?'+':''}${v.toFixed(2)}%</td>`;
+    return `<tr><td>${dstr(D.d[k])}</td><td class="mono">${fmt(D.dn[k-1])}</td>`+
+      `<td class="mono">${fmt(D.dn[k])}</td><td class="mono">${(D.dn[k]/denom(k)*100).toFixed(1)}%</td>`+
+      `<td class="mono">${fmt2(D.px[k])}</td>${c(f5)}${c(f20)}`+
+      `<td class="mono mute">${sig.segLen[k]||S.streak} 天</td></tr>`;
+  });
+  $('#evList tbody').innerHTML=list.join('')||'<tr><td colspan="8" class="mute">当前阈值下无双冰点事件</td></tr>';
+
+  $('#statusInfo').textContent=`${dstr(D.d[S.view.start])} ~ ${dstr(D.d[S.view.end])} · ${S.view.end-S.view.start+1} 根 · 全样本 ${N} 根`;
+  $('#sym').innerHTML='上证指数 <small>000001</small>';
+  $('#last').textContent=fmt2(D.px[N-1]);
+  const chg=(D.px[N-1]/D.px[N-2]-1)*100,e=$('#chg');
+  e.textContent=(chg>=0?'+':'')+chg.toFixed(2)+'%';e.className='chg mono '+(chg>=0?'up':'down');
+  $('#asof').textContent=dstr(D.d[N-1]);
+  $('#nBars').textContent=N;$('#nRange').textContent=dstr(D.d[0])+' ~ '+dstr(D.d[N-1]);
+  $('#foot').textContent=`数据源：${D.meta.breadthSource}；上证收盘 ${D.meta.indexSource}；${D.meta.crosscheck}。抓取 ${D.meta.fetchedAt}。`;
+  $('#alertText').textContent=`2016 年全市场约 2,800 只股票，2021 年约 4,400 只，2026 年约 5,580 只。固定 4000 家阈值在 2021 年前不可能触发，因此绝对口径的 ${S.sig.dbl.length} 次双冰点全部集中在 2022 年以后（口径漂移，非市场变坏）。跨年度比较请切到「相对占比」口径。`;
+  drawHist();
+}
+function refresh(){recompute();clampView();draw();updatePanels();}
+
+/* ---------- events ---------- */
+function bindGroup(id,key,after){
+  $('#'+id).addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    [...$('#'+id).querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x===b));
+    S[key]=isNaN(+b.dataset.v)?b.dataset.v:+b.dataset.v;after();
+  });
+}
+bindGroup('modeBtns','mode',()=>{
+  const r=$('#thr');
+  if(S.mode==='abs'){r.min=3000;r.max=5200;r.step=100;r.value=4000;S.thr=4000;}
+  else{r.min=60;r.max=95;r.step=1;r.value=80;S.thr=80;}
+  $('#thrVal').textContent=S.mode==='abs'?fmt(S.thr):S.thr+'%';
+  refresh();
+});
+bindGroup('streakBtns','streak',()=>refresh());
+bindGroup('rangeBtns','range',()=>{setRange();refresh();});
+$('#thr').addEventListener('input',e=>{
+  S.thr=+e.target.value;
+  $('#thrVal').textContent=S.mode==='abs'?fmt(S.thr):S.thr+'%';
+  refresh();
+});
+$('#exportBtn').addEventListener('click',()=>{
+  S.hover=-1;tip.style.display='none';draw();
+  const a=document.createElement('a');
+  a.download='双冰点情绪指标_'+(S.mode==='abs'?'绝对':'相对')+'_'+D.d[S.view.end]+'.png';
+  a.href=cv.toDataURL('image/png');a.click();
+});
+function idxAt(px){const g=S.geo;return g?Math.round(g.a+(px-g.pad.l)/g.plotW*(g.b-g.a)):-1;}
+cv.addEventListener('mousemove',e=>{
+  const rc=cv.getBoundingClientRect(),px=e.clientX-rc.left,py=e.clientY-rc.top;
+  if(S.drag){
+    const g=S.geo,d=Math.round((S.drag.x-px)/g.plotW*(g.b-g.a));
+    S.view.start=S.drag.start+d;S.view.end=S.drag.end+d;clampView();draw();tip.style.display='none';return;
+  }
+  S.hover=Math.max(S.view.start,Math.min(S.view.end,idxAt(px)));draw();showTip(px,py);
+});
+cv.addEventListener('mousedown',e=>{S.drag={x:e.clientX-cv.getBoundingClientRect().left,start:S.view.start,end:S.view.end};cv.style.cursor='grabbing';});
+window.addEventListener('mouseup',()=>{S.drag=null;cv.style.cursor='crosshair';});
+cv.addEventListener('mouseleave',()=>{S.hover=-1;tip.style.display='none';draw();});
+cv.addEventListener('wheel',e=>{
+  e.preventDefault();const px=e.clientX-cv.getBoundingClientRect().left;
+  const anchor=idxAt(px),f=e.deltaY>0?1.18:.85,w=(S.view.end-S.view.start)*f;
+  const r=Math.max(0,Math.min(1,(anchor-S.view.start)/(S.view.end-S.view.start)));
+  S.view.start=Math.round(anchor-w*r);S.view.end=Math.round(anchor+w*(1-r));
+  clampView();draw();
+},{passive:false});
+window.addEventListener('resize',()=>{draw();drawHist();});
+$('#thrVal').textContent='4000';
+setRange();refresh();
+})();

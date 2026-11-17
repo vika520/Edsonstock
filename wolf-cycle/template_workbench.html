@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EdsonStock</title>
+<link rel="icon" type="image/svg+xml" href="__MARK__">
+<style>
+:root{
+  --bg:#07090c; --panel:#11151b; --panel2:#151a22; --panel3:#1b222c;
+  --line:#222a35; --line2:#2e3948;
+  --txt:#d5d9e0; --dim:#8892a0; --dim2:#5b6470;
+  --up:#e8453c; --down:#22a06b; --accent:#f0b429; --blue:#4b9fea; --purple:#9b7cf0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  -webkit-font-smoothing:antialiased;font-size:13px}
+.mono{font-family:"JetBrains Mono",Consolas,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+a{color:var(--blue);text-decoration:none}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:#0b0e12}
+::-webkit-scrollbar-thumb{background:#2b3542;border-radius:5px}
+::-webkit-scrollbar-thumb:hover{background:#3c4959}
+
+/* ---------- sidebar ---------- */
+.side{position:fixed;left:0;top:0;bottom:0;width:212px;background:#0d1117;
+  border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:20;
+  transition:width .2s ease}
+.side.collapsed{width:56px}
+.side .logo{position:relative;padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+.side .logo .brandwrap{display:flex;align-items:center;min-height:36px;padding-right:26px}
+.side .logo .brand{display:block;width:100%;max-width:150px;height:auto;opacity:.97;pointer-events:none}
+.side .logo .t{font-size:15px;font-weight:700;letter-spacing:.5px;color:#f2f4f8}
+.side .logo .s{font-size:10.5px;color:var(--dim2);margin-top:7px;letter-spacing:1.2px}
+.side .logo .mini{display:none;align-items:center;justify-content:center;height:32px}
+.side .logo .mini .mark{display:block;width:32px;height:32px}
+#collapseBtn{position:absolute;right:9px;top:14px;width:23px;height:23px;line-height:1;z-index:2;
+  background:#151b24;border:1px solid var(--line2);border-radius:5px;color:var(--dim);
+  cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+#collapseBtn:hover{color:#fff;border-color:#4b6b91;background:#1e2937}
+.side.collapsed .logo{padding:16px 8px;text-align:center}
+.side.collapsed .logo .t,.side.collapsed .logo .s,.side.collapsed .logo .brandwrap,
+.side.collapsed .navlabel,
+.side.collapsed .nav button .txt,.side.collapsed .foot{display:none}
+.side.collapsed .logo .mini{display:flex}
+.side.collapsed #collapseBtn{position:static;margin:9px auto 0;display:block}
+.side.collapsed .nav{padding:8px 5px 10px}
+.side.collapsed .nav button{justify-content:center;padding:11px 0;margin:3px 0}
+.side.collapsed .nav button .no{width:auto;flex:none;font-size:12px}
+.side .navlabel{padding:16px 18px 7px;font-size:10px;color:var(--dim2);letter-spacing:1.5px}
+.navgrp{display:flex;align-items:center;margin:13px 4px 6px;padding:8px 6px 0;
+  border-top:1px solid var(--line);min-width:0;cursor:default}
+.navgrp:first-child{margin-top:4px;border-top:0;padding-top:2px}
+.navgrp .gn{font-size:10px;font-weight:600;letter-spacing:1.1px;color:var(--accent);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side.collapsed .navgrp{margin:7px 3px 4px;padding:0;height:1px;
+  border-top:1px solid var(--line2);overflow:hidden;display:block}
+.side.collapsed .navgrp:first-child{margin-top:2px}
+.side.collapsed .navgrp .gn{display:none}
+.nav{flex:1;overflow:auto;padding:0 9px 10px}
+.nav button{width:100%;display:flex;align-items:center;gap:10px;padding:10px 10px;margin:2px 0;
+  background:transparent;border:1px solid transparent;border-radius:7px;color:var(--dim);
+  cursor:pointer;text-align:left;transition:.15s;font-family:inherit}
+.nav button:hover{background:#151b24;color:var(--txt)}
+.nav button.on{background:#182231;border-color:#2c3b50;color:#f2f5fa;box-shadow:inset 3px 0 0 var(--accent)}
+.nav button .no{font:600 10px "JetBrains Mono",Consolas,monospace;color:var(--dim2);
+  width:20px;flex:0 0 20px;text-align:center}
+.nav button.on .no{color:var(--accent)}
+.nav button .txt{min-width:0}
+.nav button .nm{display:block;font-size:12.5px;font-weight:600;line-height:1.3}
+.nav button .sb{display:block;font-size:10px;color:var(--dim2);margin-top:2px;line-height:1.2}
+.nav button.on .sb{color:#7f8fa4}
+.side .foot{padding:12px 16px 16px;border-top:1px solid var(--line);font-size:10px;color:var(--dim2);line-height:1.7}
+.side .foot b{color:var(--dim);font-weight:600}
+
+/* ---------- main ---------- */
+.main{margin-left:212px;height:100vh;display:flex;flex-direction:column;min-width:0;
+  transition:margin-left .2s ease}
+.side.collapsed + .main{margin-left:56px}
+.wbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 12px;margin-bottom:14px;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.wbar .lb{font-size:10px;color:var(--dim2)}
+.wbar .btn{background:#1b2431;border:1px solid var(--line2);color:var(--dim);border-radius:6px;
+  padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.wbar .btn:hover{color:var(--txt);background:#243040}
+.mhead{flex:0 0 66px;display:flex;align-items:center;gap:14px;padding:0 22px;
+  border-bottom:1px solid var(--line);background:#0b0f14}
+.mhead .eyebrow{font:600 10px "JetBrains Mono",Consolas,monospace;color:var(--accent);letter-spacing:1.5px}
+.mhead h1{margin:3px 0 0;font-size:17px;font-weight:700;letter-spacing:.3px}
+.mhead .spacer{flex:1}
+.mhead .badge{font-size:10.5px;padding:5px 9px;border-radius:5px;border:1px solid var(--line2);color:var(--dim)}
+.mhead .badge.warn{border-color:#5c4a1e;background:#251e0e;color:#e6be5d}
+.mbody{flex:1;min-height:0;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:none;overflow:auto;padding:18px 22px 48px}
+.view.active{display:block}
+.view.frame{padding:0}
+.view.frame.active{display:block}
+.view.frame iframe{width:100%;height:100%;border:0;display:block;background:var(--bg)}
+
+/* ---------- common blocks ---------- */
+.lead{display:flex;align-items:flex-start;gap:10px;margin:0 0 16px;color:var(--dim);font-size:12px;line-height:1.7}
+.lead .bar{flex:0 0 3px;background:var(--accent);border-radius:2px;align-self:stretch;min-height:30px}
+.tag{display:inline-flex;align-items:center;font-size:10px;padding:2px 7px;border-radius:4px;
+  border:1px solid var(--line2);color:var(--dim);white-space:nowrap;line-height:1.5}
+.tag.real{border-color:#235c4c;background:#10251f;color:#58c39b}
+.tag.proxy{border-color:#5c4a1e;background:#251e0e;color:#e6be5d}
+.tag.na{border-color:#5a3030;background:#251313;color:#e58a84}
+.tag.blue{border-color:#274a6b;background:#101f2e;color:#7db8ec}
+.caveat{margin:16px 0 0;padding:12px 14px;border:1px solid #5c4a1e;background:#1b1710;
+  border-radius:7px;color:#c9b78c;font-size:11.5px;line-height:1.85}
+.caveat b{color:#f0c96b}
+.caveat ul{margin:7px 0 0;padding-left:18px}
+.caveat li{margin:3px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:14px;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#151b23,#11161d);flex-wrap:wrap}
+.card-h .t{font-size:12.5px;font-weight:700;color:#e6eaf0}
+.card-h .d{font-size:10.5px;color:var(--dim2)}
+.card-h .spacer{flex:1}
+.card-b{padding:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:1250px){.grid2,.grid3{grid-template-columns:1fr}}
+.cv{position:relative;width:100%;height:270px}
+.cv.h220{height:220px}.cv.h300{height:300px}.cv.h330{height:330px}.cv.h360{height:360px}
+.cv.h520{height:520px}
+.cv canvas{display:block;position:absolute;left:0;top:0}
+.cv-note{font-size:10px;color:var(--dim2);padding:0 2px 8px;line-height:1.6}
+
+/* controls */
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.seg button{background:#121821;border:0;border-right:1px solid var(--line2);color:var(--dim);
+  padding:5px 11px;font-size:11px;cursor:pointer;font-family:inherit}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--txt);background:#1b2431}
+.seg button.on{background:#2b3a4f;color:#fff;font-weight:600}
+select,input[type=text]{background:#121821;border:1px solid var(--line2);color:var(--txt);
+  border-radius:6px;padding:5px 8px;font-size:11px;font-family:inherit;outline:none}
+select:focus,input[type=text]:focus{border-color:#4b6b91}
+label.ck{display:inline-flex;align-items:center;gap:5px;color:var(--dim);font-size:11px;cursor:pointer}
+label.ck input{accent-color:var(--accent)}
+
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:1250px){.kpis{grid-template-columns:repeat(3,1fr)}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px 12px}
+.kpi .k{font-size:10px;color:var(--dim2);letter-spacing:.3px}
+.kpi .v{font:600 19px "JetBrains Mono",Consolas,monospace;margin-top:6px;color:#eef2f7;letter-spacing:-.5px}
+.kpi .vsmall{font:600 15px "JetBrains Mono",Consolas,monospace;margin-top:7px;color:#eef2f7}
+.kpi .s{font-size:10px;color:var(--dim);margin-top:5px}
+.up{color:var(--up)!important}.down{color:var(--down)!important}.amber{color:var(--accent)!important}
+
+/* decision cards */
+.dec{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.dec .h{padding:10px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.dec .h .n{font:700 11px "JetBrains Mono",Consolas,monospace;color:var(--accent)}
+.dec .h .t{font-size:12px;font-weight:700}
+.dec .h .q{font-size:10px;color:var(--dim2);margin-left:auto}
+.dec .b{padding:8px 13px 12px}
+.dec .row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed #1c2430;font-size:11.5px}
+.dec .row:last-child{border-bottom:0}
+.dec .row .rk{font:600 10px "JetBrains Mono",Consolas,monospace;color:var(--dim2);width:16px}
+.dec .row .nm{font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dec .row .meta{font-size:10px;color:var(--dim2);white-space:nowrap}
+.dec .row .v{font:600 12px "JetBrains Mono",Consolas,monospace;min-width:58px;text-align:right}
+.dec .empty{color:var(--dim2);font-size:11px;padding:12px 0}
+
+/* table */
+.tw{overflow:auto;max-height:430px;border:1px solid var(--line);border-radius:7px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+thead th{position:sticky;top:0;background:#182029;color:var(--dim);font-weight:600;text-align:right;
+  padding:8px 9px;border-bottom:1px solid var(--line2);white-space:nowrap;z-index:2;font-size:10.5px}
+thead th:first-child,tbody td:first-child{text-align:left}
+thead th.l,tbody td.l{text-align:left}
+tbody td{padding:7px 9px;border-bottom:1px solid #1a202a;text-align:right;
+  font-family:"JetBrains Mono",Consolas,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:hover{background:#192130;cursor:default}
+tbody tr.sel{background:#243044}
+tbody tr.click{cursor:pointer}
+.pill{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-family:inherit}
+
+/* tooltip */
+#TIP{position:fixed;z-index:99;pointer-events:none;display:none;background:#0e141c;border:1px solid #3b4b60;
+  border-radius:6px;padding:8px 10px;font-size:11px;color:#dfe6ef;box-shadow:0 8px 24px #000a;line-height:1.7;max-width:290px}
+#TIP b{color:#fff}
+.hint{font-size:10.5px;color:var(--dim2);line-height:1.7;margin-top:8px}
+.hl{background:#243044!important}
+
+/* ---------- 09 每日复盘：文章列表 + 正文 ---------- */
+.rv-wrap{display:grid;grid-template-columns:326px 1fr;gap:14px;align-items:start}
+@media(max-width:1250px){.rv-wrap{grid-template-columns:1fr}.rv-kpis{grid-template-columns:repeat(3,1fr)!important}}
+.rv-item{display:flex;gap:10px;padding:10px;border:1px solid var(--line);border-radius:7px;margin-bottom:9px;
+  cursor:pointer;background:var(--panel2);transition:.15s}
+.rv-item:hover{border-color:#3c4d63;background:#1b2431}
+.rv-item.on{border-color:#5c4a1e;background:#1e2018;box-shadow:inset 3px 0 0 var(--accent)}
+.rv-thumb{flex:0 0 62px;height:74px;border-radius:6px;background:linear-gradient(160deg,#1b2431,#10151c);
+  border:1px solid var(--line2);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.rv-thumb .ym{font-size:8.5px;color:var(--dim2);letter-spacing:.4px;line-height:1.2}
+.rv-thumb .dd{font:700 25px "JetBrains Mono",Consolas,monospace;line-height:1.15}
+.rv-thumb svg{display:block;width:56px;height:14px;margin-top:3px}
+.rv-t{font-size:11.5px;font-weight:600;line-height:1.5;color:#e6eaf0;display:-webkit-box;
+  -webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rv-d{font-size:10px;color:var(--dim2);margin-top:5px}
+.rv-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.rv-tags span{font-size:9px;padding:1px 5px;border:1px solid var(--line2);border-radius:3px;color:var(--dim2)}
+.rv-h1{font-size:16px;font-weight:700;line-height:1.7;color:#f2f5fa;margin:0 0 12px}
+.rv-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px}
+.rv-kpis .kpi .v{font-size:14px}
+.rv-sum{font-size:12px;line-height:1.9;color:var(--dim);background:#151b23;
+  border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:16px}
+.rv-sec{border:1px solid var(--line);border-radius:7px;margin-bottom:9px;overflow:hidden}
+.rv-sec>.h{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#151b23;border-bottom:1px solid var(--line)}
+.rv-sec>.h .n{font:700 10px "JetBrains Mono",Consolas,monospace;color:var(--accent);
+  border:1px solid #5c4a1e;border-radius:3px;padding:1px 5px}
+.rv-sec>.b{padding:10px 12px}
+.rv-sec .kpis{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.rv-sec .kp{background:#1b2431;border-radius:4px;padding:4px 8px;font-size:10px;color:var(--dim2)}
+.rv-sec .kp b{color:#eef2f7;font-family:"JetBrains Mono",Consolas,monospace;margin-left:5px}
+.rv-sec p{margin:0;font-size:11.5px;line-height:1.9;color:var(--dim)}
+.rv-adv{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:1250px){.rv-adv{grid-template-columns:1fr}}
+.rv-adv .box{border:1px solid var(--line);border-radius:7px;padding:12px;background:var(--panel2)}
+.rv-adv .box>.h{font-size:12.5px;font-weight:700;margin-bottom:8px}
+.rv-adv .lbl{font-size:10px;color:var(--accent);margin:10px 0 4px;letter-spacing:.5px}
+.rv-adv ul{margin:0;padding-left:16px}
+.rv-adv li{font-size:11px;line-height:1.85;color:var(--dim);margin:3px 0}
+.rv-flag{font-size:10px;color:var(--dim2);line-height:1.7}
+.rv-next{border:1px dashed #33404f;border-radius:7px;padding:14px 12px;text-align:center;
+  background:#10151c;margin-top:2px}
+.rv-next .d{font:700 10px "JetBrains Mono",Consolas,monospace;color:var(--dim2);letter-spacing:1.5px}
+.rv-next .t{font-size:11px;color:var(--dim);margin-top:7px}
+.rv-next .s{font-size:9.5px;color:var(--dim2);margin-top:5px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="side">
+  <div class="logo">
+    <button id="collapseBtn" title="收起 / 展开菜单">«</button>
+    <div class="brandwrap"><img class="brand" src="__LOGO__" alt="EdsonStock"></div>
+    <div class="s">MARKET STRUCTURE DESK</div>
+    <div class="mini"><img class="mark" src="__MARK__" alt="EdsonStock"></div>
+  </div>
+  <div class="navlabel" id="NAVLABEL">栏目导航</div>
+  <div class="nav" id="NAV">
+    <button data-v="wave"><span class="no">01</span><span class="txt"><span class="nm">狼波周期指数</span><span class="sb">大盘周期相位 · 因果/事后对照</span></span></button>
+    <button data-v="breadth"><span class="no">02</span><span class="txt"><span class="nm">双冰点情绪</span><span class="sb">涨跌家数冰沸点 · 事件研究</span></span></button>
+    <button data-v="rotate"><span class="no">03</span><span class="txt"><span class="nm">板块轮动</span><span class="sb">主线 · 退潮 · 拥挤</span></span></button>
+    <button data-v="volume"><span class="no">04</span><span class="txt"><span class="nm">放量信号</span><span class="sb">事件驱动 · 历史放量回看</span></span></button>
+    <button data-v="etf"><span class="no">05</span><span class="txt"><span class="nm">ETF 日度申赎</span><span class="sb">季度真实申赎 · 日度份额估计</span></span></button>
+    <button data-v="daily"><span class="no">06</span><span class="txt"><span class="nm">日度全景</span><span class="sb">成交额 · 结构 · 月度表格</span></span></button>
+    <button data-v="wyckoff"><span class="no">07</span><span class="txt"><span class="nm">威科夫吸筹</span><span class="sb">结构原理图 · 多周期标注</span></span></button>
+    <button data-v="flow"><span class="no">08</span><span class="txt"><span class="nm">市场宽度与拥挤度</span><span class="sb">ADL · 麦克莱伦 · NH-NL · TRIN</span></span></button>
+    <button data-v="erp"><span class="no">09</span><span class="txt"><span class="nm">股债利差(ERP)区间</span><span class="sb">估值档位 · ±2σ 通道 · 点位换算</span></span></button>
+    <button data-v="derivatives"><span class="no">10</span><span class="txt"><span class="nm">衍生品 / 对冲压力</span><span class="sb">基差贴水 · PCR · 会员净多空</span></span></button>
+    <button data-v="leverage"><span class="no">11</span><span class="txt"><span class="nm">杠杆与真实资金</span><span class="sb">两融全历史 · ETF 真实申赎</span></span></button>
+    <button data-v="sentiment"><span class="no">12</span><span class="txt"><span class="nm">短线情绪与连板</span><span class="sb">涨跌停 · 连板高度 · 炸板率</span></span></button>
+    <button data-v="valuation"><span class="no">13</span><span class="txt"><span class="nm">行业估值与预期修正</span><span class="sb">PE 横截面 · 业绩预告方向</span></span></button>
+    <button data-v="events"><span class="no">14</span><span class="txt"><span class="nm">筹码供给与事件</span><span class="sb">解禁 · 龙虎榜 · 事件日历</span></span></button>
+    <button data-v="cross"><span class="no">15</span><span class="txt"><span class="nm">跨市场与宏观</span><span class="sb">外盘 · 汇率 · 中债10Y</span></span></button>
+    <button data-v="review"><span class="no">16</span><span class="txt"><span class="nm">每日复盘</span><span class="sb">全栏汇总 · 短线与中长线建议</span></span></button>
+  </div>
+  <div class="foot">
+    数据截止 <b id="ASOF">—</b><span style="font-size:9px">（每天更新会变动）</span><br>
+    网站作者微信：<b style="color:#c9a24c">edsonzj</b>
+  </div>
+</div>
+
+<div class="main">
+  <div class="mhead">
+    <div><div class="eyebrow" id="HD_EYEBROW">VIEW 01</div><h1 id="HD_TITLE">狼波周期指数</h1></div>
+    <div class="spacer"></div>
+    <div id="HD_TAGS"></div>
+    <div class="badge" id="HD_DATE">—</div>
+    <div class="badge warn">代理口径已标注</div>
+  </div>
+  <div class="mbody">
+
+    <!-- 01 / 02 : 已交付页面原样嵌入 -->
+    <div class="view frame" id="V_wave"><iframe id="FRAME_wave" title="狼波周期指数"></iframe></div>
+    <div class="view frame" id="V_breadth"><iframe id="FRAME_breadth" title="双冰点情绪指标"></iframe></div>
+
+    <!-- 03 板块轮动 -->
+    <div class="view" id="V_rotate">
+      <div class="lead"><div class="bar"></div><div>
+        <b>板块轮动</b> — 回答「今天 / 本周看哪条主线、哪条在退潮、哪里拥挤」。
+        当日横截面为新浪行业 / 概念 / 地域板块真实快照；「本周」维度来自重点板块领涨股真实日线与主题 ETF 日线。
+        <span class="tag real">真实行情</span> <span class="tag proxy">代理动量</span> <span class="tag na">无板块指数历史</span>
+      </div></div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-4px 0 12px">
+        <label class="ck"><input type="checkbox" id="rot-noattr" checked> 决策卡剔除「属性类板块」</label>
+        <span style="font-size:10px;color:var(--dim2)">属性类＝重仓 / 两融 / 次新 / ST / 预增 / 送转 / 指数纳入等非题材板块；下方全量榜单仍保留全部 252 个</span>
+      </div>
+      <div class="grid3" id="ROT_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">板块象限 · 涨幅 × 成交额占比</span><span class="spacer"></span><span class="d">点击散点定位板块</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="rot-scatter"></canvas></div>
+            <div class="cv-note"><span style="color:#4b9fea">●</span> 行业 &nbsp;<span style="color:#9b7cf0">●</span> 概念 &nbsp;<span style="color:#8892a0">●</span> 地域 &nbsp;·&nbsp; 点大小＝成交额占比<br>横轴为板块成交额占全市场成交额比例（对数），纵轴为当日涨跌幅。右上＝放量领涨（主线）；右下＝放量下跌（退潮 / 派发嫌疑）；最右侧＝拥挤区。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">本周动量榜 · 领涨股代理</span><span class="spacer"></span><span class="d">5 日涨跌幅 %</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="rot-mom"></canvas></div>
+            <div class="cv-note">取成交额前 60 及涨跌幅两端板块的 59 只领涨股，展示 5 日动量前 10 / 后 10。领涨股由当日快照选出，其历史收益只代表该股自身，不等于板块指数，存在选择偏差。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h">
+          <span class="t">全量板块明细</span>
+          <span class="spacer"></span>
+          <div class="seg" id="rot-cat"><button class="on" data-c="全部">全部</button><button data-c="行业">行业</button><button data-c="概念">概念</button><button data-c="地域">地域</button></div>
+          <select id="rot-sort">
+            <option value="chg">按当日涨跌</option><option value="amount">按成交额</option>
+            <option value="r5">按领涨股 5 日</option><option value="r20">按领涨股 20 日</option>
+            <option value="crowd">按拥挤度</option><option value="score">按主线强度</option>
+          </select>
+          <input type="text" id="rot-q" placeholder="搜索板块 / 领涨股" style="width:150px">
+          <span class="d" id="rot-count"></span>
+        </div>
+        <div class="card-b"><div class="tw"><table id="rot-tab"><thead><tr>
+          <th class="l">板块</th><th>类别</th><th>当日 %</th><th>成交额(亿)</th><th>占全市场</th><th>成分</th>
+          <th class="l">领涨股</th><th>领涨股 5日%</th><th>领涨股 20日%</th><th>量能比</th><th>象限</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="ROT_CAVEAT"></div>
+    </div>
+
+    <!-- 04 放量信号 -->
+    <div class="view" id="V_volume">
+      <div class="lead"><div class="bar"></div><div>
+        <b>放量信号</b> — 把「两张并排的柱线图」重构为事件驱动页：先看到最近一次放量是什么时候、有多大，再点任意历史放量日回看当时的量价窗口。
+        <span class="tag real">全市场成交额真实</span> <span class="tag proxy">MA20 用 T-1 及之前，无未来数据</span>
+      </div></div>
+      <div class="kpis" id="VOL_KPI"></div>
+      <div class="grid2" style="grid-template-columns:1.35fr 1fr">
+        <div class="card">
+          <div class="card-h"><span class="t">事件窗口 · 放量日前后 12 个交易日</span><span class="spacer"></span><span class="d" id="VOL_WINLABEL">—</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="vol-window"></canvas></div>
+            <div class="cv-note">柱＝全市场成交额（亿元，左轴）；黄线＝成交额 MA20；白线＝上证指数收盘（右轴）。竖带为选中放量日。原「两张并排柱线图」已合并为单张双轴事件图。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">放量后指数表现</span><span class="spacer"></span><span class="d">vs 全样本基准</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="vol-fwd"></canvas></div>
+            <div class="cv-note">按当前阈值筛出的所有放量事件，统计其后 T+N 上证指数平均收益与全样本同期平均收益。样本重叠会低估独立性，不构成交易信号。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">全历史成交额与放量事件</span><span class="spacer"></span>
+          <div class="seg" id="vol-range"><button data-r="250" class="on">近 1 年</button><button data-r="750">近 3 年</button><button data-r="0">全历史</button></div>
+          <span class="d">点击图中琥珀点选中该次放量</span></div>
+        <div class="card-b"><div class="cv h220"><canvas id="vol-overview"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">历史放量日明细</span><span class="spacer"></span>
+          <span class="d">阈值</span>
+          <div class="seg" id="vol-thr"><button data-t="1.15">1.15×</button><button data-t="1.20" class="on">1.20×</button><button data-t="1.30">1.30×</button><button data-t="1.50">1.50×</button></div>
+          <label class="ck"><input type="checkbox" id="vol-first"> 仅每段首日</label>
+          <span class="d" id="vol-count"></span></div>
+        <div class="card-b"><div class="tw"><table id="vol-tab"><thead><tr>
+          <th class="l">日期</th><th>成交额(亿)</th><th>MA20(亿)</th><th>放量倍数</th><th>上证 %</th><th>涨/跌家数</th>
+          <th>T+1 %</th><th>T+3 %</th><th>T+5 %</th><th>T+10 %</th><th>T+20 %</th>
+        </tr></thead><tbody></tbody></table></div>
+          <div class="hint">点击任意一行切换事件窗口。MA20 为「不含当日」的前 20 日均额，保证信号在收盘时即可判定，不使用未来数据。</div>
+        </div>
+      </div>
+      <div class="caveat" id="VOL_CAVEAT"></div>
+    </div>
+
+    <!-- 05 ETF 日度申赎：日度量价为主视觉，季度真实申赎为低频核验 -->
+    <div class="view" id="V_etf">
+      <div class="lead"><div class="bar"></div><div>
+        <b>ETF 日度申赎</b> — <b>先看每天</b>：32 只 ETF 逐日成交额、20 只重点宽基合计量能、量比、方向代理、占全市场成交额比与宽基分类堆积，全部来自真实日线，可回看约 690 个交易日。
+        <b>再看份额</b>：季度申购 / 赎回 / 期末份额是基金定期报告披露的唯一可核验口径；日度份额只能由当日总市值反推估计，<b>交易所日度官方份额没有免费公开源，历史不可回补</b>。原「国家队护盘」栏目已撤销，本栏不做买方身份归因。
+        <span class="tag real">日度量价 690 日真实</span> <span class="tag real">季度申赎真实</span> <span class="tag proxy">日度份额为反推估计</span> <span class="tag na">日度官方份额历史不可得</span>
+      </div></div>
+      <div class="kpis" id="ETF_KPI"></div>
+      <div class="card" id="ETF_VERDICT"></div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">① 每日核心宽基 ETF 成交额</span><span class="spacer"></span>
+            <div class="seg" id="etf-range"><button data-r="120" class="on">近 120 日</button><button data-r="250">近 250 日</button><button data-r="500">近 500 日</button></div>
+            <span class="d">亿元 · 白线＝20 日均额</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-amt"></canvas></div>
+            <div class="cv-note">20 只重点宽基 ETF 每日成交额合计，是<b>二级市场成交口径</b>。放量说明换手活跃，<b>不等于一级市场申购</b>；上方切换同时作用于本页所有日度图。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">② 宽基分类成交额堆积</span><span class="spacer"></span><span class="d" id="etf-stacksub">按 ETF 分类 · 亿元</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-stack"></canvas></div>
+            <div class="cv-note">按沪深300 / 上证50 / 中证500 等分类逐日堆积，看「哪类宽基在承接成交」。这是旧版「宽基分类申赎结构」的<b>日度真实可得版本</b>，不是申赎份额。</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">③ 今日谁在动 · ETF 量比排行</span><span class="spacer"></span><span class="d">当日成交额 / 前 20 日均额</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-today"></canvas></div>
+            <div class="cv-note">条长按量比，颜色按当日涨跌（红涨绿跌）。量比高只说明二级市场换手放大，<b>不等于有份额申购</b>。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">④ 方向代理 · 按宽基分类</span><span class="spacer"></span><span class="d">Σ 涨跌方向 × 成交额（亿元）</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-dir"></canvas></div>
+            <div class="cv-note">「价格涨跌方向 × 成交额」的量价符号加权和。真实主动净买入需要逐笔成交方向标记，本页没有该数据，切勿当作真实资金流或申赎。</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">⑤ 宽基 ETF 合计量比时间序列</span><span class="spacer"></span><span class="d">白线＝量比；虚线＝1.30× 放量参考</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-hist"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">⑥ 核心宽基成交占全市场比</span><span class="spacer"></span><span class="d">% · 分母为两市成交额</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-ratio"></canvas></div>
+            <div class="cv-note">占比抬升常出现在指数承压、宽基放量时，但同样<b>不能证明是谁在买</b>；与第 03 栏双冰点、第 04 栏拥挤度交叉看更稳妥。</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span class="t">⑦ 日度明细 · 最近 22 个交易日</span><span class="spacer"></span><span class="d" id="etf-dsub">—</span></div>
+        <div class="card-b"><div class="tw" style="max-height:330px"><table id="etf-dtab"><thead><tr>
+          <th class="l">日期</th><th>核心成交额(亿)</th><th>量比</th><th>占两市 %</th><th>上证 %</th><th>方向代理(亿)</th><th>20日均额(亿)</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">⑧ 季度真实申赎 · 8 只核心 ETF（低频）</span><span class="spacer"></span><span class="d">期间申购 / 赎回（亿份）</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-quarter"></canvas></div>
+            <div class="cv-note">东财基金 F10「规模变动」按季披露，是<b>唯一可核验的份额口径，不是日度数据</b>。红＝净申购，绿＝净赎回。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">⑨ 日度份额估计 · 仅当日，历史不可回补</span><span class="spacer"></span><span class="d">亿份（f116 / 收盘价）</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="etf-share"></canvas></div>
+            <div class="cv-note">由场内总市值反推，含折溢价与计价误差。<b>实测结论：交易所日度申赎份额无免费公开源，f116 无历史接口，腾讯 ETF 日线不含份额 / 换手率</b>，因此本图只能从 2026-11-13 起逐日累积，不伪造历史。</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">季度真实申赎明细</span><span class="spacer"></span><span class="d" id="etf-gcount"></span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="etf-gtab"><thead><tr>
+            <th class="l">报告期</th><th class="l">ETF</th><th>申购(亿份)</th><th>赎回(亿份)</th><th>净额</th><th>期末份额</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">32 只 ETF 全景</span><span class="spacer"></span>
+            <div class="seg" id="etf-grp"><button class="on" data-g="all">全部</button><button data-g="core">重点宽基 20</button><button data-g="theme">主题 12</button></div></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="etf-atab"><thead><tr>
+            <th class="l">ETF</th><th>分类</th><th>收盘</th><th>当日 %</th><th>成交额(亿)</th><th>量比</th><th>5日 %</th><th>20日 %</th>
+          </tr></thead><tbody></tbody></table></div>
+            <div class="hint">前 5 只 ETF 为通达信真实成交额；其余用腾讯日线「成交量(手)×100×收盘价」估算，150 天样本中位偏差 −0.05%，5%/95% 分位 −0.92% / +1.28%。</div></div>
+        </div>
+      </div>
+      <div class="caveat" id="ETF_CAVEAT"></div>
+    </div>
+
+    <!-- 06 日度全景 -->
+    <div class="view" id="V_daily">
+      <div class="lead"><div class="bar"></div><div>
+        <b>日度全景</b> — 成交额图 + 净流入代理图 + 宽基分类堆积图 + 一个月表格合成一页；同时看 20 只重点宽基 ETF 的中长期成交额趋势与分类结构。
+        <span class="tag real">成交额 / 涨跌家数真实</span> <span class="tag proxy">净流入与「申赎结构」为代理</span>
+      </div></div>
+      <div class="kpis" id="DAY_KPI"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">全市场成交额</span><span class="spacer"></span>
+            <div class="seg" id="day-range"><button data-r="60">近 60 日</button><button data-r="120" class="on">近 120 日</button><button data-r="250">近 250 日</button></div></div>
+          <div class="card-b"><div class="cv h300"><canvas id="day-amt"></canvas></div>
+            <div class="cv-note">柱＝每日两市成交额（亿元，通达信 880005 Amount 字段）；黄线＝MA20，蓝线＝MA60。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">净流入方向代理</span><span class="spacer"></span><span class="tag proxy">代理</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="day-flow"></canvas></div>
+            <div class="cv-note">定义：(上涨家数 − 下跌家数) / (涨+跌+平) × 当日成交额。它是「广度加权的方向代理」，不是真实资金净流入；真实资金流需要逐笔/席位数据。白线为该代理的 10 日累计。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">宽基分类成交额堆积</span><span class="spacer"></span><span class="tag proxy">非申赎</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="day-stack"></canvas></div>
+            <div class="cv-note">按 20 只重点宽基 ETF 的标的分类，堆叠每日成交额（亿元）。这是<strong>成交额结构</strong>；公开数据没有日度 ETF 份额申赎，请勿读作「申赎结构」。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">20 只重点 ETF 中长期趋势</span><span class="spacer"></span><span class="d">合计成交额滚动均值（亿元）</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="day-trend"></canvas></div>
+            <div class="cv-note">白线＝20 只核心 ETF 合计成交额 20 日均值，黄线＝60 日均值，虚线＝占全市场成交额比例（右轴）。用于观察宽基 ETF 交投热度的中长期抬升 / 回落。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">20 只重点 ETF · 60 日累计成交额</span><span class="spacer"></span><span class="d">按累计额排序，颜色＝近 20 日相对前 20 日变化</span></div>
+        <div class="card-b"><div class="cv h220"><canvas id="day-etfbar"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">一个月逐日全景</span><span class="spacer"></span><span class="d">最近 22 个交易日</span></div>
+        <div class="card-b"><div class="tw" style="max-height:520px"><table id="day-tab"><thead><tr>
+          <th class="l">日期</th><th>成交额(亿)</th><th>环比 %</th><th>上证 %</th><th>涨/跌/平</th>
+          <th>方向代理(亿)</th><th>核心 ETF(亿)</th><th>占全市场 %</th><th>放量倍数</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="DAY_CAVEAT"></div>
+    </div>
+
+    <!-- 07 威科夫吸筹结构 -->
+    <div class="view" id="V_wyckoff">
+      <div class="lead"><div class="bar"></div><div>
+        <b>威科夫吸筹结构</b> — 上半是经典 Phase A→E 原理图（合成示意），下半把同一套事件规则标注到真实多周期 K 线上，可切换日线 / 周线 / 60 分钟 / 30 分钟 / 15 分钟与 8 个标的。<b>数据已拉长到 3 年以上</b>：日线 4.13 年 / 周线 9.75 年 / 60 分钟 4.13 年；30 分钟 2.58 年、15 分钟 1.29 年受公开接口 5001 根上限限制，已在下方标注。
+        <span class="tag real">真实 K 线</span> <span class="tag proxy">事件为算法等价标注</span> <span class="tag na">原理图非真实行情</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">标的</span><select id="wy-sym"></select>
+        <span class="lb">周期</span>
+        <div class="seg" id="wy-tf">
+          <button data-t="1200">周线</button><button data-t="240" class="on">日线</button>
+          <button data-t="60">60分钟</button><button data-t="30">30分钟</button><button data-t="15">15分钟</button>
+        </div>
+        <span class="spacer" style="flex:1"></span>
+        <span class="lb">区间窗口</span><select id="wy-win">
+          <option value="40">40 根</option><option value="60" selected>60 根</option><option value="90">90 根</option>
+        </select>
+        <span class="lb">反转阈值</span><select id="wy-rev">
+          <option value="0.008">0.8%</option><option value="0.012">1.2%</option>
+          <option value="0.015">1.5%</option><option value="0.025" selected>2.5%</option>
+          <option value="0.04">4%</option><option value="0.05">5%</option><option value="0.06">6%</option>
+        </select>
+        <span class="lb">放量</span><select id="wy-volk">
+          <option value="1.2">1.2×</option><option value="1.4" selected>1.4×</option><option value="1.8">1.8×</option>
+        </select>
+        <span class="lb">显示</span><select id="wy-view">
+          <option value="150">150 根</option>
+          <option value="500">500 根</option>
+          <option value="750" selected>750 根（≈3 年日线）</option>
+          <option value="1500">1500 根</option>
+          <option value="3000">3000 根（≈3 年 60 分钟）</option>
+          <option value="0">全部（最长）</option>
+        </select>
+        <button class="btn" id="wy-reset" title="回到最新数据并恢复默认 750 根">重置视图</button>
+        <label class="ck"><input type="checkbox" id="wy-labels" checked> 事件标签</label>
+      </div>
+      <div class="card" id="WY_INFO"></div>
+      <div class="card">
+        <div class="card-h"><span class="t">经典威科夫吸筹结构原理图</span><span class="spacer"></span>
+          <span class="tag proxy">合成示意路径，非真实行情</span></div>
+        <div class="card-b"><div class="cv h330"><canvas id="wy-schematic"></canvas></div>
+          <div class="cv-note">下跌趋势 → 停止下跌（A）→ 反复吸筹（B）→ 弹簧 / 测试（C）→ 需求占优（D）→ 趋势展开（E）。CREEK 为区间上沿阻力，SUPPORT 为下沿支撑；底部为示意量能：SC / AR / SOS 放量，区间内缩量。悬停圆点看事件释义。</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">真实行情 · 因果事件标注</span><span class="spacer"></span>
+          <span class="d" id="wy-cover"></span>
+          <span class="d">红涨绿跌 · 下方为成交量</span><span class="tag proxy">区间为事后选取</span></div>
+        <div class="card-b"><div class="cv h520"><canvas id="wy-chart"></canvas></div>
+          <div class="cv-note"><b>全历史多段标注</b>：淡蓝带 / 琥珀 CREEK / 蓝色 SUPPORT 会画出<b>所有</b>历史横盘段，不只是最近一段；最后一段用高亮点与完整标签，并作为当前判读依据。<b>顶部独立「事件轨道」</b>把事件标签从 K 线上移开，按横向间距自动分 3~4 行错排并用细引线连回事件点，拖近放大时字号同步变大、时间轴刻度自动加密，不再挤成一片；缩放到 ≤300 根会显示历史段事件名。<b>滚轮以鼠标为锚缩放、按住拖拽平移、双击或「重置视图」回到最新</b>。悬停 K 线看 OHLC 与量比，悬停事件点看所属区间、判定依据与确认滞后。</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">事件明细（倒序）</span><span class="spacer"></span><span class="d" id="wy-evcount"></span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="wy-evtab"><thead><tr>
+            <th class="l">时间</th><th class="l">区间</th><th class="l">事件</th><th class="l">名称</th><th>收盘</th><th>量比</th><th>确认</th><th class="l">判定依据</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">威科夫事件速查</span><span class="spacer"></span><span class="d">9 类事件</span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="wy-legend"><thead><tr>
+            <th class="l">缩写</th><th class="l">名称</th><th class="l">含义</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="caveat" id="WY_CAVEAT"></div>
+    </div>
+
+    <!-- 08 市场宽度与拥挤度（资金流指标） -->
+    <div class="view" id="V_flow">
+      <div class="lead"><div class="bar"></div><div>
+        <b>市场宽度与拥挤度</b> — 从「逐只个股日线」而不是从「涨跌家数比例分摊」计算宽度与量能：ADL 腾落线、麦克莱伦振荡 / 合计、NH-NL 新高新低、TRIN 阿姆斯指数、Up/Down Volume、OBV 与 A-D 累积派发线、相对强度，外加一个由扩展窗口分位合成的拥挤度状态分。所有公式写死在取数脚本里，页面只做可视化；上方为<b>当日读数</b>，下方每张图都是<b>历史序列</b>。另增 <b>TMT 交易拥挤度</b>：电子 / 通信 / 计算机 / 传媒四大行业成交额占沪深两市成交额的比重，用于观察资金是否过度集中在科技赛道。
+        <span class="tag real">逐股日线全市场可得</span> <span class="tag real">完全公式化</span> <span class="tag real">TMT 行业成交额真实</span> <span class="tag proxy">拥挤度为自定义合成</span> <span class="tag na">不是真实资金流</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">显示区间</span><select id="fl-range">
+          <option value="120">近 120 日</option>
+          <option value="250" selected>近 250 日（≈1 年）</option>
+          <option value="600">近 600 日（逐股全序列）</option>
+          <option value="0">全部（家数序列 10 年）</option>
+        </select>
+        <span class="lb">新高/新低窗口</span><select id="fl-nh">
+          <option value="60" selected>60 日</option><option value="250">250 日（≈52 周）</option>
+        </select>
+        <span class="lb">相对强度基准</span><select id="fl-rsbase">
+          <option value="sh000001" selected>上证指数</option><option value="sh000300">沪深300</option>
+          <option value="sz399006">创业板指</option><option value="sz399001">深证成指</option>
+        </select>
+        <span style="flex:1"></span><span class="lb" id="fl-cover"></span>
+      </div>
+      <div class="kpis" id="FL_KPI"></div>
+      <div class="card" id="FL_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">01 · ADL 腾落线 与 上证指数</span><span class="spacer"></span>
+            <span class="d">累计 (涨家数 − 跌家数)</span><span class="tag real">2016 起</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-adl"></canvas></div>
+            <div class="cv-note">黄线＝ADL（左轴，逐日累加涨跌家数差，起点为 2016-01-26）；白线＝上证指数（右轴）。<b>指数创新高而 ADL 不创新高＝广度背离</b>，说明上涨集中在权重股。悬停看当日涨跌家数与 20 日 ADL 变化。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">02 · 麦克莱伦振荡 与 合计</span><span class="spacer"></span>
+            <span class="d">EMA19 − EMA39 / 累计</span><span class="tag real">比率口径</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-mcc"></canvas></div>
+            <div class="cv-note">RANA＝(涨−跌)/(涨+跌+平)×100（用比率消除市场扩容导致的家数漂移）；OSC＝EMA19(RANA)−EMA39(RANA)，柱为左轴；SUM＝ΣOSC，蓝线为右轴。红/绿淡带标出 OSC 极端区。悬停看三项读数。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">03 · NH-NL 新高 / 新低家数</span><span class="spacer"></span>
+            <span class="d" id="fl-nhlabel">60 日窗口</span><span class="tag real">逐股复权收盘</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-nhnl"></canvas></div>
+            <div class="cv-note">红柱＝创窗口新高的家数，绿柱＝创窗口新低家数（画在零轴下方），黄线＝净额 NH−NL（右轴）。<b>分母 e_w 会随新股上市 / 停牌变化</b>，悬停同时给出 NH% / NL% 与有效样本数，占比更适合跨期比较。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">04 · TRIN 阿姆斯指数</span><span class="spacer"></span>
+            <span class="d">(涨/跌) ÷ (涨量/跌量)</span><span class="tag real">真实逐股量</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-trin"></canvas></div>
+            <div class="cv-note">蓝线＝TRIN，黄线＝10 日均线；虚线＝1。<b>TRIN &lt; 1 表示上涨股承接了相对更多的成交量</b>（买盘占优），&gt; 1 反之。此处涨量/跌量为逐只个股成交量合计，不是按家数分摊的估算。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">05 · Up / Down Volume</span><span class="spacer"></span>
+            <span class="d">亿股</span><span class="tag real">逐股成交量合计</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-udvol"></canvas></div>
+            <div class="cv-note">红柱＝当日上涨股票成交量合计，绿柱＝下跌股票成交量合计（零轴下方），黄线＝UV/DV 比（右轴）。平盘股不计入任一方向。悬停看净量与比值。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">06 · OBV / A-D 累积派发线</span><span class="spacer"></span>
+            <span class="d">上证真实 OHLCV</span><span class="tag real">指数日线</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-obvad"></canvas></div>
+            <div class="cv-note">OBV＝Σ sign(C<sub>t</sub>−C<sub>t−1</sub>)×V；A-D＝Σ((2C−H−L)/(H−L))×V。C/H/L/V 取上证指数真实日线。三条线均按「相对所选区间起点、以区间最大波动为 100%」归一化，只比较形态，不代表收益率。<b>OBV/A-D 与指数走势分化即为量价背离</b>。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">07 · 相对强度</span><span class="spacer"></span>
+            <span class="d">等权全 A ÷ 基准</span><span class="tag real">逐股等权收益复利</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-rs"></canvas></div>
+            <div class="cv-note">黄线＝等权全 A 净值 / 基准指数净值（同样做区间起点归一化）；蓝虚线＝宽度 ADL 归一化。<b>黄线上行＝小盘 / 个股整体跑赢权重</b>；两条线同向说明上涨有广度支撑，分叉说明只是权重拉指数。基准可在上方切换。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">08 · 拥挤度综合分</span><span class="spacer"></span>
+            <span class="d">扩展窗口分位 · 0–100</span><span class="tag proxy">自定义合成，非行业标准</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-crowd"></canvas></div>
+            <div class="cv-note">5 个分项各自取<b>截至当日</b>的历史分位（只用 t 及之前数据，无未来函数）后等权合成：UV/DV 高分位、NH% 高分位、麦克莱伦合计高分位、TRIN 低分位（取 1−p）、小盘相对强度高分位。≥75 偏拥挤，≤25 偏冷清。悬停看 5 个分项分位。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">09 · TMT 交易拥挤度（成交占比）</span><span class="spacer"></span>
+            <span class="d">TMT 四大行业成交额 ÷ 沪深两市成交额</span><span class="tag real">东财行业板块 f6</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-tmt"></canvas></div>
+            <div class="cv-note"><b id="fl-tmtnow" style="color:var(--accent)">—</b><br>黄线＝TMT 成交占比（%），蓝虚线＝已入库样本的均值；淡红带为占比 ≥ 45% 的「交易过热」参考区。四大行业按东财二级行业板块名称精确匹配（电子 / 通信 / 计算机 / 传媒），板块互斥不重复计入，概念板块不计入分母分子。<b>同口径历史实测不可回补</b>：需东财 push2his 11 个二级行业板块 K 线的每日成交额，实测仅 4 个可取、7 个经 6 轮补齐仍为空，用残缺板块加总会严重低估占比，因此不发布残缺历史，只保留当日锁定读数与逐日累积，样本不足 20 日不出分位。悬停看当日 TMT 成交额、两市成交额与占比。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">10 · TMT 四大行业当日分解</span><span class="spacer"></span>
+            <span class="d"><span id="fl-tmtasof">—</span></span><span class="tag proxy">成交额占比非资金流</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="fl-tmtg"></canvas></div>
+            <div class="cv-note">横条＝各行业成交额占<b>两市总成交额</b>的百分比，右侧标注绝对成交额与当日板块涨跌幅（红涨绿跌，中国习惯）；虚线为四个行业合计占比。<b>成交占比高只说明交易集中，不等于资金净流入</b>——行业板块行情接口不含逐笔主动买卖方向。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">TMT 四大行业 · 当日板块明细</span><span class="spacer"></span>
+          <span class="d" id="fl-tmtsum">—</span></div>
+        <div class="card-b"><div class="tw" style="max-height:320px"><table id="fl-tmttab"><thead><tr>
+          <th class="l">行业</th><th class="l">板块</th><th>成交额(亿)</th><th>占两市</th><th>涨跌幅</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">最近 22 个交易日明细</span><span class="spacer"></span>
+          <span class="d">涨−跌 / TRIN / 净量 / UV-DV / NH-NL / 等权收益 / 拥挤度</span></div>
+        <div class="card-b"><div class="tw" style="max-height:460px"><table id="fl-tab"><thead><tr>
+          <th class="l">日期</th><th>涨−跌</th><th>TRIN</th><th>净量(亿股)</th><th>UV/DV</th>
+          <th>NH60</th><th>NL60</th><th>NH−NL</th><th>等权 %</th><th>拥挤度</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="FL_CAVEAT"></div>
+    </div>
+
+    <!-- 09 每日复盘 -->
+    <div class="view" id="V_review">
+      <div class="lead"><div class="bar"></div><div>
+        <b>每日复盘</b> — 每交易日盘后把其余 <b id="RV_NCOL">全部</b> 个数据栏目的当日读数汇总成一篇完整报告：大盘快照、逐栏判读（第 04 栏的 <b>TMT 交易拥挤度</b>单列一节）、短线（1~3 日）与中长线（1~3 月）参考，以及每条结论的<b>触发条件与证伪场景</b>。标题由当日大盘指数、全栏汇总与 ERP 档位自动浓缩成一句话；左侧文章列表的缩略图是当日日期 + 近 20 日上证迷你走势。新增栏目自动纳入汇总，复盘<b>永远排在菜单末尾</b>。
+        <span class="tag real" id="RV_TAG_NCOL">全栏数据同源</span> <span class="tag real">ERP 数值锁定只读</span> <span class="tag proxy">固定规则自动生成</span> <span class="tag na">非投资建议</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">文章列表</span><span class="d" id="rv-count">—</span>
+        <span style="flex:1"></span>
+        <span class="tag blue">盘后自动追加一篇 · 按日期去重</span>
+        <span class="tag proxy">不回溯生成历史，避免未来函数</span>
+      </div>
+      <div class="rv-wrap">
+        <div class="card">
+          <div class="card-h"><span class="t">复盘文章</span><span class="spacer"></span>
+            <span class="d" id="rv-count2">—</span></div>
+          <div class="card-b" style="padding:10px"><div id="rv-list"></div>
+            <div class="rv-flag" style="margin-top:8px">缩略图＝当日时间（年.月 / 日 / 周几）+ 近 20 日上证收盘走势，红涨绿跌。</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">复盘正文</span><span class="spacer"></span>
+            <span class="d" id="rv-meta">—</span></div>
+          <div class="card-b" id="rv-detail"></div>
+        </div>
+      </div>
+      <div class="caveat" id="RV_CAVEAT"></div>
+    </div>
+
+    <!-- 10 股债利差(ERP)区间 -->
+    <div class="view" id="V_erp">
+      <div class="lead"><div class="bar"></div><div>
+        <b>股债利差(ERP)区间</b> — 固定口径 <span class="mono">ERP = 100 / 沪深300 PE-TTM − 中债10年期国债收益率</span>，通道取 <b>1250 交易日滚动均值 ± 2σ</b>，档位按<b>全样本分位</b>划分。除展示当前 ERP、历史分位、PE-TTM、盈利收益率、10Y 国债、5 年中枢与上下轨、σ 偏离外，还给出距 <b>90 / 95 / 98 分位与极端上轨</b>的点位换算、历史条件概率、本轮区间事件进度与操作建议。
+        <span class="tag blue">数值一次性计算并锁定</span> <span class="tag real">PE / 国债 / 指数均为真实数据</span> <span class="tag proxy">日频 PE 为月末锚点重构</span> <span class="tag na">不构成投资建议</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">显示区间</span><select id="ep-range">
+          <option value="250">近 250 日（≈1 年）</option>
+          <option value="750">近 750 日（≈3 年）</option>
+          <option value="1250" selected>近 1250 日（≈5 年 / 通道窗口）</option>
+          <option value="0">全部（全样本）</option>
+        </select>
+        <span style="flex:1"></span>
+        <span class="tag blue">页面只读 · 不重算 · 不改口径</span>
+        <span class="lb" id="ep-cover">—</span>
+      </div>
+      <div class="kpis" id="EP_KPI"></div>
+      <div class="card" id="EP_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">01 · ERP 历史与 1250 日 ±2σ 通道</span><span class="spacer"></span>
+            <span class="d">含 90 / 95 / 98 分位与极端上轨</span><span class="tag real">已锁定序列</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="ep-main"></canvas></div>
+            <div class="cv-note">黄线＝ERP，蓝虚线＝1250 日滚动中枢，红/绿虚线＝±2σ 上下轨，淡蓝带为通道区间；四条彩色虚线是 90 / 95 / 98 分位与 +2σ 极端上轨。<b>ERP 越高代表股票相对债券越便宜</b>。悬停看当日 ERP / PE-TTM / 10Y / 沪深300 收盘与通道读数（均为锁定值）。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">02 · 沪深300 与 ERP 双轴对照</span><span class="spacer"></span>
+            <span class="d">指数点位 vs 股债性价比</span><span class="tag real">真实日线</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="ep-px"></canvas></div>
+            <div class="cv-note">白线＝沪深300 收盘（右轴），黄线＝ERP（左轴）。指数下跌而 ERP 抬升是「估值变便宜」的常规形态；若两者同向，通常来自盈利端或国债收益率的变化，需结合 PE 与 10Y 分解。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">03 · 四档阈值 → 点位换算</span><span class="spacer"></span>
+            <span class="d">假设盈利与 10Y 不变</span><span class="tag proxy">情景换算</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="ep-point"></canvas></div>
+            <div class="cv-note">每条横条表示「若 ERP 升到该阈值，沪深300 需要跌到多少点」。换算公式与全部输入值均取自锁定快照：<span class="mono">点位 = 现价 × 目标PE / 当前PE</span>，<span class="mono">目标PE = 100 / (目标ERP + 当前10Y)</span>。这是估值情景，不是价格预测。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">04 · 历史条件概率</span><span class="spacer"></span>
+            <span class="d">20 / 60 / 120 交易日</span><span class="tag proxy">样本重叠，未做显著性检验</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="ep-prob"></canvas></div>
+            <div class="cv-note">历史条件＝ERP 处于当前档位（不低于该档下界），统计其后 20 / 60 / 120 交易日沪深300 收益。黄＝平均、蓝＝中位（左轴），紫＝胜率（右轴），黄虚线为 50% 胜率基准。<b>样本高度重叠且区间相依，只能作描述，不能视为独立样本或预测概率</b>。</div></div>
+        </div>
+      </div>
+      <div class="card" id="EP_EVENT"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">三档分位 + 极端上轨 · 点位明细</span><span class="spacer"></span>
+            <span class="d">全部为锁定数字</span></div>
+          <div class="card-b"><div class="tw"><table id="ep-thtab"><thead><tr>
+            <th class="l">阈值</th><th>目标 ERP</th><th>距当前 ERP</th><th>目标 PE</th><th>对应点位</th><th>点位差</th><th>涨跌幅 %</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">历史条件收益明细</span><span class="spacer"></span>
+            <span class="d">当前档位样本</span></div>
+          <div class="card-b"><div class="tw"><table id="ep-probtab"><thead><tr>
+            <th class="l">持有期</th><th>样本数</th><th>胜率 %</th><th>平均收益 %</th><th>中位收益 %</th>
+          </tr></thead><tbody></tbody></table></div>
+            <div class="hint">条件定义见下方「固定口径」说明。历史条件概率存在样本重叠与区间依赖，不能视为独立样本。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">最近 22 个交易日明细</span><span class="spacer"></span>
+          <span class="d">ERP / PE-TTM / 10Y / 沪深300 / 通道</span></div>
+        <div class="card-b"><div class="tw" style="max-height:460px"><table id="ep-tab"><thead><tr>
+          <th class="l">日期</th><th>ERP</th><th>PE-TTM</th><th>10Y</th><th>沪深300</th><th>中枢</th><th>+2σ</th><th>−2σ</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="EP_CAVEAT"></div>
+    </div>
+
+    <!-- 10 衍生品 / 对冲压力 -->
+    <div class="view" id="V_derivatives">
+      <div class="lead"><div class="bar"></div><div>
+        <b>衍生品 / 对冲压力</b> — 中金所日行情 XML 全合约 + 会员持仓排名 XML，配合 4 个现货指数真实日线。基差＝当月合约收盘−现货收盘；年化贴水＝基差/现货×365/剩余自然日（当月临近到期会放大，另给次月口径）。期权 PCR＝Σ认沽/Σ认购成交量与持仓量。
+        <span class="tag real">中金所行情真实</span> <span class="tag real">会员持买/持卖排名真实</span> <span class="tag na">IV / IV skew 未接入</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">品种</span>
+        <div class="seg" id="dv-prod"><button class="on" data-p="IF">IF 沪深300</button><button data-p="IH">IH 上证50</button><button data-p="IC">IC 中证500</button><button data-p="IM">IM 中证1000</button></div>
+        <span style="flex:1"></span>
+        <div class="seg" id="dv-range"><button class="on" data-r="30">近 30 日</button><button data-r="60">近 60 日</button></div>
+        <span class="tag blue" id="dv-cover">—</span>
+      </div>
+      <div class="kpis" id="DV_KPI"></div>
+      <div class="card" id="DV_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">当月合约基差 · 期货 vs 现货</span><span class="spacer"></span><span class="d">点</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="dv-basis"></canvas></div>
+            <div class="cv-note">柱＝基差（负为贴水），白线＝现货指数收盘（右轴）。基差为负说明期货相对现货折价，常与对冲需求、分红预期或悲观情绪相关，<b>不能单独当成方向信号</b>。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">年化贴水 · 当月 vs 次月</span><span class="spacer"></span><span class="d">%</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="dv-ann"></canvas></div>
+            <div class="cv-note">当月合约临近到期时 365/剩余天数会把年化剧烈放大；次月合约口径更平滑，两者应一起看。零轴以下为年化贴水。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">股指期权 PCR · 成交量 / 持仓量</span><span class="spacer"></span><span class="d" id="dv-pcrsub">IO 沪深300</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="dv-pcr"></canvas></div>
+            <div class="cv-note">红＝成交量 PCR（ΣP.vol / ΣC.vol），蓝＝持仓量 PCR（ΣP.OI / ΣC.OI）。PCR 上升通常代表认沽相对活跃，但<b>不能等同于看空</b>——卖 put 也会推高成交量。点击上方「期权品种」切换。</div></div>
+          <div class="card-b" style="padding-top:0"><div class="seg" id="dv-opt"><button class="on" data-o="IO">IO 沪深300</button><button data-o="HO">HO 上证50</button><button data-o="MO">MO 中证1000</button></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">四品种总持仓量</span><span class="spacer"></span><span class="d">手</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="dv-oi"></canvas></div>
+            <div class="cv-note">全部挂牌合约持仓量合计。持仓变化反映未平仓对冲/投机规模，与成交量是两个不同维度。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">会员净多空 · 前 20 席位</span><span class="spacer"></span><span class="d" id="dv-ranksub">—</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="dv-rank"></canvas></div>
+            <div class="cv-note">中金所排名表 datatypeid 0/1/2 按惯例＝成交量 / 持买单量 / 持卖单量。净多空＝前 20 席位持买−持卖，<b>不是全市场净头寸</b>，且不含非会员与散户型账户。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">当日全部挂牌合约</span><span class="spacer"></span><span class="d" id="dv-tabsub">—</span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="dv-tab"><thead><tr>
+            <th class="l">合约</th><th>收盘</th><th>基差</th><th>持仓</th><th>成交</th><th>到期</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="caveat" id="DV_CAVEAT"></div>
+    </div>
+
+    <!-- 11 杠杆与真实资金 -->
+    <div class="view" id="V_leverage">
+      <div class="lead"><div class="bar"></div><div>
+        <b>杠杆与真实资金</b> — 两融是少数<b>真实可核验</b>的杠杆资金：东财 RPTA_RZRQ_LSHJ 提供 2010-03-31 以来全市场日频融资余额、融资买入额、融资净买入、融券余额、两融余额及占流通市值比（<b>T+1 披露</b>）。ETF 部分给基金定期报告披露的季度真实申购 / 赎回份额，不做「国家队」归因。
+        <span class="tag real">两融全历史真实</span> <span class="tag real">ETF 季度申赎真实</span> <span class="tag proxy">T+1 / 季度频率</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">显示区间</span>
+        <div class="seg" id="lv-range"><button data-r="120">近 120 日</button><button class="on" data-r="250">近 250 日</button><button data-r="750">近 750 日</button><button data-r="0">全部</button></div>
+        <span style="flex:1"></span><span class="tag blue" id="lv-cover">—</span>
+      </div>
+      <div class="kpis" id="LV_KPI"></div>
+      <div class="card" id="LV_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">两融余额 vs 上证指数</span><span class="spacer"></span><span class="d">万亿元 / 点</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="lv-bal"></canvas></div>
+            <div class="cv-note">红线＝两融余额（左轴），白线＝上证收盘（右轴）。杠杆余额与指数常同向，但属于同步指标，<b>不具备领先性</b>。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">融资净买入 / 买入额</span><span class="spacer"></span><span class="d">亿元</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="lv-net"></canvas></div>
+            <div class="cv-note">柱＝融资净买入（红正绿负），白线＝融资买入额。融资买入额占全市场成交额比例是常用的杠杆活跃度代理。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">两融余额占流通市值</span><span class="spacer"></span><span class="d">%</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="lv-ratio"></canvas></div>
+            <div class="cv-note">分母为报表同期的 A 股流通市值。该比例是杠杆拥挤度的粗略代理，跨制度变化期不宜直接比较。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">ETF 季度净申赎 · 核心 8 只</span><span class="spacer"></span><span class="d">亿份</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="lv-etf"></canvas></div>
+            <div class="cv-note">真实季报口径：期间申购−期间赎回。与第 07 栏同源，此处按报告期汇总展示全市场宽基 ETF 的份额净变化方向。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">最近 30 个交易日两融明细</span><span class="spacer"></span><span class="d">亿元 / %</span></div>
+        <div class="card-b"><div class="tw" style="max-height:340px"><table id="lv-tab"><thead><tr>
+          <th class="l">日期</th><th>融资余额</th><th>日变动</th><th>融资买入</th><th>融资净买入</th><th>融券余额</th><th>两融余额</th><th>占流通市值</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="LV_CAVEAT"></div>
+    </div>
+
+    <!-- 12 短线情绪与连板 -->
+    <div class="view" id="V_sentiment">
+      <div class="lead"><div class="bar"></div><div>
+        <b>短线情绪与连板</b> — 东财涨停池 / 跌停池 / 炸板池当日真实快照：涨停 / 跌停家数、最高连板高度、连板家数、炸板率、晋级率。与第 03 栏「双冰点」形成两层：<b>双冰点是收盘后的广度极值</b>，本栏是<b>日内封板与接力结构</b>。
+        <span class="tag real">涨跌停池真实</span> <span class="tag real">涨停/连板已回补 250 日</span> <span class="tag na">炸板率历史不可回补</span>
+      </div></div>
+      <div class="kpis" id="ST_KPI"></div>
+      <div class="card" id="ST_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">涨停 / 跌停 / 炸板家数（当日快照口径）</span><span class="spacer"></span><span class="d" id="st-bars">—</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="st-count"></canvas></div>
+            <div class="cv-note">红＝涨停，绿＝跌停，琥珀＝炸板。东财三池的 <span class="mono">date</span> 参数实测失效，这三项<b>只有当日快照</b>，不伪造回补；长历史请看下方同花顺口径回补图。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">炸板率与晋级率（当日）</span><span class="spacer"></span><span class="d">%</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="st-rate"></canvas></div>
+            <div class="cv-note">炸板率＝炸板数 /(涨停数+炸板数)，<b>历史不可回补</b>；晋级率＝今日连板家数 / 昨日涨停家数，已在下方按日回补 250 日。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">涨停家数 · 250 日历史回补</span><span class="spacer"></span><span class="d" id="st-histsub">—</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="st-hist"></canvas></div>
+            <div class="cv-note">同花顺涨停池按 <span class="mono">date</span> 逐日回补，红柱＝涨停家数，蓝线＝连板（≥2 板）家数。与当日东财池是<b>两套口径</b>，家数接近但定义略有差异，不混算。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">最高连板 / 晋级率 · 250 日历史回补</span><span class="spacer"></span><span class="d" id="st-promosub">—</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="st-promo"></canvas></div>
+            <div class="cv-note">琥珀＝最高连板高度（板），蓝＝晋级率（%）。晋级率＝今日连板家数 / 昨日涨停家数；首日无前值留空，不插值。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">连板梯队分布</span><span class="spacer"></span><span class="d">按连板数</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="st-ladder"></canvas></div>
+            <div class="cv-note">当日涨停池按 <span class="mono">lbc</span>（连板数）分桶。梯队完整＝有高标也有首板；断层＝高度孤立，短线接力风险偏高。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">当日连板 / 封板明细</span><span class="spacer"></span><span class="d" id="st-tabsub">—</span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="st-tab"><thead><tr>
+            <th class="l">代码</th><th class="l">名称</th><th>连板</th><th>炸板次数</th><th>封单(万)</th><th class="l">行业</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="caveat" id="ST_CAVEAT"></div>
+    </div>
+
+    <!-- 13 行业估值与预期修正 -->
+    <div class="view" id="V_valuation">
+      <div class="lead"><div class="bar"></div><div>
+        <b>行业估值与预期修正</b> — 补 ERP 之外的结构维度：东财行业板块 PE-TTM（<span class="mono">f9</span>）当日横截面，配合业绩预告的家数与幅度分布作为「盈利预期修正方向」的代理。<b>不是分析师一致预期修正</b>，也没有行业 PE 的长历史分位。
+        <span class="tag real">行业 PE 真实</span> <span class="tag proxy">预期修正为业绩预告代理</span> <span class="tag na">横截面口径</span>
+      </div></div>
+      <div class="kpis" id="VA_KPI"></div>
+      <div class="card" id="VA_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">行业 PE 分布</span><span class="spacer"></span><span class="d" id="va-distsub">—</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="va-dist"></canvas></div>
+            <div class="cv-note">按 PE 分桶的行业个数。极端高 PE（亏损修复 / 微利行业）已在上限处截断显示，虚线为中位数；均为当日横截面，<b>不是时间序列分位</b>。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">估值两端 · 最低 / 最高 12 个行业</span><span class="spacer"></span><span class="d">PE-TTM（倍）</span></div>
+          <div class="card-b"><div class="cv h330"><canvas id="va-rank"></canvas></div>
+            <div class="cv-note">左侧为最低估值 12 个，右侧为最高估值 12 个。高 PE 不等于「贵」，低 PE 也不等于「便宜」，需结合盈利周期看。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">中位数 / 四分位 · 250 日按日回补</span><span class="spacer"></span><span class="d" id="va-trendsub">倍</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="va-trend"></canvas></div>
+            <div class="cv-note">东财 <span class="mono">RPT_VALUEINDUSTRY_DET</span> 行业估值报表（127 个行业 PE-TTM）按日回补，最早可回溯 2017 年，本图取近 250 个交易日。与左侧 KPI 的 219 个二级行业板块 f9 横截面是<b>两套口径</b>，样本数不同，中位数不横向比绝对值，趋势图只用于看方向。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">业绩预告方向 · 预期修正代理</span><span class="spacer"></span><span class="d" id="va-fcsub">—</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="va-fc"></canvas></div>
+            <div class="cv-note">按预告净利润变动幅度上下限分类：预增（下限&gt;0）、预减（上限&lt;0）、其他。来自东财 RPT_PUBLIC_OP_NEWPREDICT 最近 200 条，<b>是公告口径，不是分析师一致预期</b>。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">全量行业明细</span><span class="spacer"></span>
+          <div class="seg" id="va-sort"><button class="on" data-s="pe">按 PE 升序</button><button data-s="chg">按涨幅降序</button><button data-s="amt">按成交额降序</button></div>
+          <span class="d" id="va-tabsub">—</span></div>
+        <div class="card-b"><div class="tw" style="max-height:400px"><table id="va-tab"><thead><tr>
+          <th class="l">行业板块</th><th>PE-TTM</th><th>当日 %</th><th>成交额(亿)</th><th>横截面分位</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="VA_CAVEAT"></div>
+    </div>
+
+    <!-- 14 筹码供给与事件 -->
+    <div class="view" id="V_events">
+      <div class="lead"><div class="bar"></div><div>
+        <b>筹码供给与事件</b> — 未来限售解禁日历（供给压力）、当日龙虎榜（异动资金公开席位）、业绩预告（盈利预期事件）。这三类都是<b>公开披露的真实事件</b>，不是量价推算。Level-2 逐笔委托 / 封单 / 主动买卖方向无免费源，本栏不提供。
+        <span class="tag real">解禁 / 龙虎榜真实</span> <span class="tag proxy">事件不等于因果</span> <span class="tag na">无 Level-2</span>
+      </div></div>
+      <div class="kpis" id="EV_KPI"></div>
+      <div class="card" id="EV_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">未来解禁市值 · 按日</span><span class="spacer"></span><span class="d">万元</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="ev-unlock"></canvas></div>
+            <div class="cv-note">东财 RPT_LIFT_STAGE 未来解禁记录按日期汇总。解禁是可流通股本增加，<b>不等于实际减持</b>；实际冲击取决于股东意愿、锁定期安排与二级市场承接。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">龙虎榜成交额前列</span><span class="spacer"></span><span class="d">万元</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="ev-board"></canvas></div>
+            <div class="cv-note">当日上榜个股的龙虎榜成交金额，颜色按当日涨跌幅（红涨绿跌）。上榜只说明达到交易所异动阈值，不代表有特定机构参与。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">解禁日历明细</span><span class="spacer"></span><span class="d" id="ev-unlocksub">—</span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="ev-utab"><thead><tr>
+            <th class="l">解禁日</th><th class="l">代码</th><th class="l">名称</th><th>市值(万元)</th><th>占比</th><th class="l">类型</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">龙虎榜明细</span><span class="spacer"></span><span class="d" id="ev-boardsub">—</span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="ev-btab"><thead><tr>
+            <th class="l">代码</th><th class="l">名称</th><th>当日 %</th><th>成交额(万元)</th><th>占比 %</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="caveat" id="EV_CAVEAT"></div>
+    </div>
+
+    <!-- 15 跨市场与宏观 -->
+    <div class="view" id="V_cross">
+      <div class="lead"><div class="bar"></div><div>
+        <b>跨市场与宏观</b> — 恒指 / 纳指 / 道指 / 标普 / 美元指数 / COMEX 黄金当日涨跌，人民币在岸与离岸汇率，中债 10 年期国债收益率。用于给 A 股当日结构补一层外部环境语境；<b>各市场收盘时点不同，不是同步快照，也不是盘中实时</b>。
+        <span class="tag real">外盘 / 汇率 / 中债真实</span> <span class="tag proxy">跨时区口径</span> <span class="tag na">非盘中实时</span>
+      </div></div>
+      <div class="kpis" id="CR_KPI"></div>
+      <div class="card" id="CR_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">外盘当日涨跌幅</span><span class="spacer"></span><span class="d">%</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="cr-quotes"></canvas></div>
+            <div class="cv-note">红涨绿跌（A 股习惯）。美元指数与 COMEX 黄金为价格型标的，涨跌幅同样按东财 <span class="mono">f3</span> 口径；海外指数为各自最近一个收盘，与 A 股当日并不完全同周期。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">人民币汇率与中债 10Y</span><span class="spacer"></span><span class="d">USDCNY / %</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="cr-macro"></canvas></div>
+            <div class="cv-note">左轴＝在岸人民币（USDCNY，数值上行＝人民币走弱），右轴＝中债 10 年期国债到期收益率。中债收益率与第 12 栏 ERP 的固定口径同源（10Y）。</div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">外部环境 · 460 日历史回补</span><span class="spacer"></span><span class="d">%</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="cr-daily"></canvas></div>
+            <div class="cv-note">恒指 / 纳指 / 标普逐日涨跌幅，由腾讯外盘日线回补 460 个交易日；美股取「不晚于该日」的最近收盘（隔夜），跨时区不同步，<b>不能据此算领先 / 滞后相关性</b>。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">当日跨市场读数</span><span class="spacer"></span><span class="d" id="cr-tabsub">—</span></div>
+          <div class="card-b"><div class="tw" style="max-height:330px"><table id="cr-tab"><thead><tr>
+            <th class="l">标的</th><th>最新价</th><th>涨跌 %</th><th>口径</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="caveat" id="CR_CAVEAT"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="TIP"></div>
+<script id="DATA" type="application/json">__DATA__</script>
+<script id="WYCK" type="application/json">__WYCK__</script>
+<script id="FLOW" type="application/json">__FLOW__</script>
+<script id="REVIEWS" type="application/json">__REVIEWS__</script>
+<script id="ERP" type="application/json">__ERP__</script>
+<script id="TMT" type="application/json">__TMT__</script>
+<script id="EXTRAS" type="application/json">__EXTRAS__</script>
+<script id="HIST" type="application/json">__HIST__</script>
+<script>
+const PAGE_B64 = {wave:"__PAGE1__", breadth:"__PAGE2__"};
+/*__JS__*/
+</script>
+</body>
+</html>

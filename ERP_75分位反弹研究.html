@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ERP 75 分位反弹研究 · EdsonStock</title><style>
+:root{--ink:#1f2430;--dim:#5d6675;--line:#e3e7ed;--up:#c0392b;--down:#178a5a;--acc:#b7791f}
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:var(--ink);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+ font-size:14px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:28px auto;background:#fff;padding:40px 46px 46px;
+ border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 28px #1f24300d}
+h1{font-size:21px;line-height:1.6;margin:10px 0 6px}h2{font-size:15px;margin:26px 0 10px;padding-left:9px;border-left:4px solid var(--acc)}
+.sub{font-size:12px;color:var(--dim);border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.kpi{background:#f8f9fb;border:1px solid var(--line);border-radius:7px;padding:10px 12px}
+.kpi .k{font-size:10.5px;color:var(--dim)}.kpi .v{font:600 17px "JetBrains Mono",Consolas,monospace;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:11.5px;margin:8px 0 4px}
+th,td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{background:#f7f8fa;font-weight:600;color:var(--dim);line-height:1.4}
+tr.sig td{background:#fdf6ec}r{font-family:"JetBrains Mono",Consolas,monospace}
+.note{background:#fdf9ee;border-left:4px solid var(--acc);padding:12px 15px;border-radius:0 6px 6px 0;
+ font-size:12.5px;line-height:1.9;color:#4a463c;margin:12px 0}
+.warn{background:#fbecea;border-left-color:var(--up);color:#5a3834}
+.good{background:#eaf5ef;border-left-color:var(--down);color:#28503d}
+ul{margin:6px 0;padding-left:20px}li{font-size:12px;line-height:1.9;color:#4a5260;margin:2px 0}
+.foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--dim)}
+@media(max-width:760px){.wrap{margin:0;padding:20px 16px;border:0;border-radius:0}
+ .kpis{grid-template-columns:repeat(2,1fr)}h1{font-size:18px}table{font-size:10px}}
+@media print{body{background:#fff}.wrap{box-shadow:none;border:0;margin:0;max-width:none}}
+</style></head><body><div class="wrap">
+<div class="sub">EDSONSTOCK · ERP 75 分位（偏便宜档下界）反弹研究 · 数据截止 20261116</div>
+<h1>ERP 达到 75 分位后，沪深300 真的反弹了吗</h1>
+<div class="sub">样本 5234 日（20050429 ~ 20261116）· data/erp.json → series（ERP 与沪深300收盘同源）</div>
+<h2>一、直接回答</h2>
+<div class="kpis">
+<div class="kpi"><div class="k">75 分位阈值</div><div class="v">6.1996</div></div>
+<div class="kpi"><div class="k">历史达标区间</div><div class="v">48 次</div></div>
+<div class="kpi"><div class="k">严格因果 · 扩展窗口</div><div class="v">54 次</div></div>
+<div class="kpi"><div class="k">严格因果 · 1250 日滚动</div><div class="v">39 次</div></div>
+</div>
+<div class="note good"><b>当前状态（20261116）</b>：ERP 6.3843 <b>已在 75 分位之上</b>（阈值 6.1996，高出 0.1847），即处于「偏便宜」达标区间。<br><b>短期（5–20 日）：没有稳定反弹优势。</b>B 口径 20 日上涨 50.0%、基准 53.1454%，p=0.726；C 口径 20 日上涨仅 36.8421%，反而低于基准。<br><b>中长期（120–250 日）：有正收益倾向，但不稳健。</b>B 口径 120 日 68.6275%（p=0.0275）、250 日 74.5098%（p=0.0032）；C 口径 120 日 68.4211%（p=0.0565）、250 日 65.7895%（p=0.119）不显著。差异主要来自 2008/2009 等少数历史大底。</div>
+<h2>二、口径 A：全样本 75 分位（含未来函数，仅描述）</h2>
+<div class="note warn"><b>未来函数警告</b>：全样本 75 分位阈值，含未来数据，仅描述。阈值 q75=6.1996，按「区间首次进入」去重后 48 次事件，达标日 1309 天（25.0%）。</div>
+<table><thead><tr><th>持有期</th><th>样本</th><th>上涨<br>占比</th><th>下跌<br>占比</th><th>明显反弹<br>&gt;5%</th><th>基准上涨<br>占比</th><th>平均<br>收益</th><th>p 值</th></tr></thead><tbody><tr><td>5 日</td><td><r>48</r></td><td><r>56.25%</r></td><td><r>43.75%</r></td><td><r>6.25%</r></td><td><r>53.5858%</r></td><td><r>+0.58%</r></td><td><r>0.4123</r></td></tr><tr><td>10 日</td><td><r>48</r></td><td><r>56.25%</r></td><td><r>43.75%</r></td><td><r>12.5%</r></td><td><r>53.5988%</r></td><td><r>+0.66%</r></td><td><r>0.4130</r></td></tr><tr><td>20 日</td><td><r>48</r></td><td><r>50.0%</r></td><td><r>50.0%</r></td><td><r>25.0%</r></td><td><r>53.1454%</r></td><td><r>+0.85%</r></td><td><r>0.7199</r></td></tr><tr><td>60 日</td><td><r>46</r></td><td><r>56.5217%</r></td><td><r>43.4783%</r></td><td><r>39.1304%</r></td><td><r>52.9184%</r></td><td><r>+2.74%</r></td><td><r>0.3674</r></td></tr><tr><td>120 日</td><td><r>46</r></td><td><r>56.5217%</r></td><td><r>43.4783%</r></td><td><r>45.6522%</r></td><td><r>54.3997%</r></td><td><r>+4.16%</r></td><td><r>0.4458</r></td></tr><tr><td>250 日</td><td><r>46</r></td><td><r>63.0435%</r></td><td><r>36.9565%</r></td><td><r>58.6957%</r></td><td><r>54.9759%</r></td><td><r>+7.33%</r></td><td><r>0.1708</r></td></tr></tbody></table>
+<h2>三、口径 B：扩展窗口 75 分位（严格因果）</h2>
+<div class="note">扩展窗口 75 分位，严格因果。达标日 2005 天，首次进入 <b>54 次</b>。120/250 日显著，但见第六节样本起点检验。</div>
+<table><thead><tr><th>持有期</th><th>样本</th><th>上涨<br>占比</th><th>下跌<br>占比</th><th>明显反弹<br>&gt;5%</th><th>基准上涨<br>占比</th><th>平均<br>收益</th><th>p 值</th></tr></thead><tbody><tr><td>5 日</td><td><r>54</r></td><td><r>51.8519%</r></td><td><r>48.1481%</r></td><td><r>12.963%</r></td><td><r>53.5858%</r></td><td><r>+0.74%</r></td><td><r>0.6533</r></td></tr><tr><td>10 日</td><td><r>54</r></td><td><r>55.5556%</r></td><td><r>44.4444%</r></td><td><r>16.6667%</r></td><td><r>53.5988%</r></td><td><r>+0.99%</r></td><td><r>0.4410</r></td></tr><tr><td>20 日</td><td><r>54</r></td><td><r>50.0%</r></td><td><r>50.0%</r></td><td><r>31.4815%</r></td><td><r>53.1454%</r></td><td><r>+1.13%</r></td><td><r>0.7260</r></td></tr><tr><td>60 日</td><td><r>51</r></td><td><r>54.902%</r></td><td><r>45.098%</r></td><td><r>37.2549%</r></td><td><r>52.9184%</r></td><td><r>+3.96%</r></td><td><r>0.4441</r></td></tr><tr class="sig"><td>120 日</td><td><r>51</r></td><td><r>68.6275%</r></td><td><r>31.3725%</r></td><td><r>60.7843%</r></td><td><r>54.3997%</r></td><td><r>+10.40%</r></td><td><r>0.0275</r> <b>显著</b></td></tr><tr class="sig"><td>250 日</td><td><r>51</r></td><td><r>74.5098%</r></td><td><r>25.4902%</r></td><td><r>70.5882%</r></td><td><r>54.9759%</r></td><td><r>+17.43%</r></td><td><r>0.0032</r> <b>显著</b></td></tr></tbody></table>
+<h2>四、口径 C：1250 日滚动 75 分位（严格因果）</h2>
+<div class="note">1250 日滚动 75 分位，严格因果，样本量恒定。达标日 1728 天，首次进入 <b>39 次</b>。各期限均不显著，20 日上涨占比低于基准。</div>
+<table><thead><tr><th>持有期</th><th>样本</th><th>上涨<br>占比</th><th>下跌<br>占比</th><th>明显反弹<br>&gt;5%</th><th>基准上涨<br>占比</th><th>平均<br>收益</th><th>p 值</th></tr></thead><tbody><tr><td>5 日</td><td><r>39</r></td><td><r>58.9744%</r></td><td><r>41.0256%</r></td><td><r>5.1282%</r></td><td><r>53.5858%</r></td><td><r>+0.37%</r></td><td><r>0.3048</r></td></tr><tr><td>10 日</td><td><r>39</r></td><td><r>53.8462%</r></td><td><r>46.1538%</r></td><td><r>12.8205%</r></td><td><r>53.5988%</r></td><td><r>+0.42%</r></td><td><r>0.5529</r></td></tr><tr><td>20 日</td><td><r>38</r></td><td><r>36.8421%</r></td><td><r>63.1579%</r></td><td><r>23.6842%</r></td><td><r>53.1454%</r></td><td><r>+0.12%</r></td><td><r>0.9854</r></td></tr><tr><td>60 日</td><td><r>38</r></td><td><r>50.0%</r></td><td><r>50.0%</r></td><td><r>39.4737%</r></td><td><r>52.9184%</r></td><td><r>+3.80%</r></td><td><r>0.7000</r></td></tr><tr><td>120 日</td><td><r>38</r></td><td><r>68.4211%</r></td><td><r>31.5789%</r></td><td><r>57.8947%</r></td><td><r>54.3997%</r></td><td><r>+6.00%</r></td><td><r>0.0565</r></td></tr><tr><td>250 日</td><td><r>38</r></td><td><r>65.7895%</r></td><td><r>34.2105%</r></td><td><r>63.1579%</r></td><td><r>54.9759%</r></td><td><r>+8.49%</r></td><td><r>0.1190</r></td></tr></tbody></table>
+<h2>五、页面数字为什么是 67.4%：样本重叠口径</h2>
+<div class="note warn"><b>口径 D</b>：每个达标日都算样本，连续区间高度重叠；这是页面 condProb 的采样方式，不可作为策略证据。1309 个达标日全部计入，120 日上涨 67.3981% —— 与工作台页面 condProb 的 67.4% 一致，实现复现无误。但同一段连续低估期被重复计数，p 值完全失真，不可作策略证据。</div>
+<table><thead><tr><th>持有期</th><th>样本</th><th>上涨<br>占比</th><th>下跌<br>占比</th><th>明显反弹<br>&gt;5%</th><th>基准上涨<br>占比</th><th>平均<br>收益</th><th>p 值</th></tr></thead><tbody><tr><td>5 日</td><td><r>1304</r></td><td><r>53.4509%</r></td><td><r>46.5491%</r></td><td><r>4.5245%</r></td><td><r>53.5858%</r></td><td><r>+0.35%</r></td><td><r>0.5502</r></td></tr><tr><td>10 日</td><td><r>1299</r></td><td><r>53.5027%</r></td><td><r>46.4203%</r></td><td><r>10.0847%</r></td><td><r>53.5988%</r></td><td><r>+0.66%</r></td><td><r>0.5390</r></td></tr><tr class="sig"><td>20 日</td><td><r>1289</r></td><td><r>56.5555%</r></td><td><r>43.4445%</r></td><td><r>22.0326%</r></td><td><r>53.1454%</r></td><td><r>+1.49%</r></td><td><r>0.0076</r> <b>显著</b></td></tr><tr class="sig"><td>60 日</td><td><r>1276</r></td><td><r>58.4639%</r></td><td><r>41.5361%</r></td><td><r>44.906%</r></td><td><r>52.9184%</r></td><td><r>+5.20%</r></td><td><r>&lt;0.0001</r> <b>显著</b></td></tr><tr class="sig"><td>120 日</td><td><r>1276</r></td><td><r>67.3981%</r></td><td><r>32.6019%</r></td><td><r>55.2508%</r></td><td><r>54.3997%</r></td><td><r>+10.83%</r></td><td><r>&lt;0.0001</r> <b>显著</b></td></tr><tr class="sig"><td>250 日</td><td><r>1276</r></td><td><r>74.8433%</r></td><td><r>25.1567%</r></td><td><r>67.3197%</r></td><td><r>54.9759%</r></td><td><r>+20.59%</r></td><td><r>&lt;0.0001</r> <b>显著</b></td></tr></tbody></table>
+<h2>六、稳健性：样本起点敏感性</h2>
+<div class="note warn">B 口径起点从 500 推到 1250（剔除 2008 年 5 次事件）后，120 日胜率 p 值从 0.027 升到 0.092 不再显著；250 日仍显著但样本仅 46。C 口径（2010 年起）120/250 日均不显著。说明中长期反弹倾向存在，但高度依赖 2008/2009 等少数历史大底，结论对样本起点敏感，不能当作稳定规律。</div>
+<table><thead><tr><th>扩展窗口起点</th><th>事件数</th><th>120 日胜率</th><th>120 日 p</th><th>250 日胜率</th><th>250 日 p</th></tr></thead><tbody>
+<tr><td>500</td><td><r>54</r></td><td><r>68.6275%</r></td><td><r>0.0275</r></td><td><r>74.5098%</r></td><td><r>0.0032</r></td></tr>
+<tr><td>800</td><td><r>54</r></td><td><r>68.6275%</r></td><td><r>0.0275</r></td><td><r>74.5098%</r></td><td><r>0.0032</r></td></tr>
+<tr><td>1250</td><td><r>49</r></td><td><r>65.2174%</r></td><td><r>0.0917</r></td><td><r>71.7391%</r></td><td><r>0.015</r></td></tr>
+<tr><td>1500</td><td><r>41</r></td><td><r>63.1579%</r></td><td><r>0.1788</r></td><td><r>81.5789%</r></td><td><r>0.0006</r></td></tr>
+<tr><td>2000</td><td><r>39</r></td><td><r>69.4444%</r></td><td><r>0.0484</r></td><td><r>88.8889%</r></td><td><r>0.0</r></td></tr>
+</tbody></table>
+<div class="sub" style="border:0;padding:2px 0">C 滚动口径事件年份：2010(5)、2011(4)、2013(1)、2018(4)、2019(1)、2020(4)、2021(1)、2022(3)、2023(3)、2024(8)、2025(4)、2026(1)</div>
+<h2>七、边界与免责</h2><ul>
+<li>ERP 高位是估值性价比，不是指数上涨的择时信号。</li>
+<li>日频 PE 由月末官方锚点重构，非官方日频发布值。</li>
+<li>事件按区间首次进入去重，但跨区间仍可能重叠，二项检验 p 值偏乐观。</li>
+<li>75 分位达标日约占全样本 25%，样本重叠比 90 分位更严重。</li>
+<li>本报告由 erp_q75_study.py 基于 erp.json 锁定序列计算，未修改任何 ERP 锁定数字；ERP 衡量股债性价比，不是择时信号，所有结论为统计描述，不构成投资建议。</li>
+</ul>
+<div class="foot">EdsonStock · 生成脚本 erp_q75_study.py / build_erp_q75_report.py · 可离线打开与打印 · 工作台第 12 栏「股债利差(ERP)区间」</div>
+</div></body></html>

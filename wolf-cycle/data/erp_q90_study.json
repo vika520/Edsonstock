@@ -1,0 +1,545 @@
+{
+  "meta": {
+    "asof": "20261116",
+    "source": "data/erp.json → series（ERP 与沪深300收盘同源，日频 PE 为月末锚点重构）",
+    "sampleDays": 5234,
+    "from": "20050429",
+    "to": "20261116",
+    "horizons": [
+      5,
+      10,
+      20,
+      60,
+      120,
+      250
+    ],
+    "warmup": 500,
+    "lookahead": {
+      "A": "全样本 90 分位阈值，用了未来数据，仅描述性，不可交易",
+      "B": "扩展窗口分位，信号只用当日及之前数据，严格无未来函数",
+      "C": "1250 日滚动窗口分位（不含当日），严格无未来函数，样本量恒定"
+    },
+    "caveat": [
+      "ERP 低位不等于指数马上上涨，估值性价比不是择时信号。",
+      "日频 PE 由月末官方锚点重构，跨季度盈利跳变被平滑。",
+      "同一区间内每日样本高度重叠，按「区间首次进入日」去重后仍可能有跨区间重叠。",
+      "单尾二项检验假设样本独立，重叠样本会使 p 值偏乐观（更显著），需保守解读。",
+      "全样本 q90 阈值口径（A）含未来函数，仅用于复现页面 34 次与横截面描述。"
+    ]
+  },
+  "A_fullSampleQ90": {
+    "definition": "ERP ≥ 全样本 90 分位阈值的连续区间（页面口径）",
+    "thresholdErp": 6.8877,
+    "hitDays": 524,
+    "hitRatio": 10.0115,
+    "events": 34,
+    "medianSpan": 2.0,
+    "maxSpan": 232,
+    "currentInEvent": false,
+    "currentErp": 6.3843,
+    "gapToLine": 0.5034,
+    "forward": {
+      "5": {
+        "horizon": 5,
+        "samples": 34,
+        "wins": 21,
+        "winRate": 61.7647,
+        "avgRet": 1.064,
+        "medianRet": 1.1046,
+        "baselineWinRate": 53.5858,
+        "baselineSamples": 5229,
+        "excess": 8.1789,
+        "pOneSided": 0.2171,
+        "sig95": false
+      },
+      "10": {
+        "horizon": 10,
+        "samples": 34,
+        "wins": 22,
+        "winRate": 64.7059,
+        "avgRet": 1.3969,
+        "medianRet": 1.6518,
+        "baselineWinRate": 53.5988,
+        "baselineSamples": 5224,
+        "excess": 11.1071,
+        "pOneSided": 0.1295,
+        "sig95": false
+      },
+      "20": {
+        "horizon": 20,
+        "samples": 34,
+        "wins": 20,
+        "winRate": 58.8235,
+        "avgRet": 1.1777,
+        "medianRet": 1.4917,
+        "baselineWinRate": 53.1454,
+        "baselineSamples": 5214,
+        "excess": 5.6782,
+        "pOneSided": 0.3128,
+        "sig95": false
+      },
+      "60": {
+        "horizon": 60,
+        "samples": 34,
+        "wins": 20,
+        "winRate": 58.8235,
+        "avgRet": 4.3426,
+        "medianRet": 5.0061,
+        "baselineWinRate": 52.9184,
+        "baselineSamples": 5174,
+        "excess": 5.9051,
+        "pOneSided": 0.3034,
+        "sig95": false
+      },
+      "120": {
+        "horizon": 120,
+        "samples": 34,
+        "wins": 24,
+        "winRate": 70.5882,
+        "avgRet": 6.3191,
+        "medianRet": 7.3176,
+        "baselineWinRate": 54.3997,
+        "baselineSamples": 5114,
+        "excess": 16.1885,
+        "pOneSided": 0.0407,
+        "sig95": true
+      },
+      "250": {
+        "horizon": 250,
+        "samples": 34,
+        "wins": 27,
+        "winRate": 79.4118,
+        "avgRet": 11.9645,
+        "medianRet": 10.6221,
+        "baselineWinRate": 54.9759,
+        "baselineSamples": 4984,
+        "excess": 24.4358,
+        "pOneSided": 0.0027,
+        "sig95": true
+      }
+    },
+    "last6": [
+      {
+        "start": "20250103",
+        "end": "20250113",
+        "days": 7
+      },
+      {
+        "start": "20250115",
+        "end": "20250116",
+        "days": 2
+      },
+      {
+        "start": "20250122",
+        "end": "20250122",
+        "days": 1
+      },
+      {
+        "start": "20250127",
+        "end": "20250205",
+        "days": 2
+      },
+      {
+        "start": "20250407",
+        "end": "20250507",
+        "days": 20
+      },
+      {
+        "start": "20250509",
+        "end": "20250509",
+        "days": 1
+      }
+    ]
+  },
+  "B_expandingQ90": {
+    "definition": "ERP ≥ 截至当日扩展窗口 90 分位，且前一日未达标（首次进入），预热 500 日",
+    "evalFrom": "20070529",
+    "hitDays": 915,
+    "hitRatio": 19.3283,
+    "events": 33,
+    "eventDates": [
+      "20081027",
+      "20081128",
+      "20081223",
+      "20110822",
+      "20110905",
+      "20110922",
+      "20130226",
+      "20130304",
+      "20130311",
+      "20130326",
+      "20130913",
+      "20131121",
+      "20131211",
+      "20140806",
+      "20140916",
+      "20200323",
+      "20220922",
+      "20220928",
+      "20220930",
+      "20221018",
+      "20221121",
+      "20230823",
+      "20231019",
+      "20231102",
+      "20231127",
+      "20240226",
+      "20240228",
+      "20240730",
+      "20240805",
+      "20250103",
+      "20250108",
+      "20250205",
+      "20250407"
+    ],
+    "forward": {
+      "5": {
+        "horizon": 5,
+        "samples": 33,
+        "wins": 15,
+        "winRate": 45.4545,
+        "avgRet": 0.2378,
+        "medianRet": -0.1828,
+        "baselineWinRate": 53.5858,
+        "baselineSamples": 5229,
+        "excess": -8.1312,
+        "pOneSided": 0.8667,
+        "sig95": false
+      },
+      "10": {
+        "horizon": 10,
+        "samples": 33,
+        "wins": 18,
+        "winRate": 54.5455,
+        "avgRet": 0.7231,
+        "medianRet": 0.2058,
+        "baselineWinRate": 53.5988,
+        "baselineSamples": 5224,
+        "excess": 0.9467,
+        "pOneSided": 0.5277,
+        "sig95": false
+      },
+      "20": {
+        "horizon": 20,
+        "samples": 33,
+        "wins": 17,
+        "winRate": 51.5152,
+        "avgRet": 0.0244,
+        "medianRet": 0.2451,
+        "baselineWinRate": 53.1454,
+        "baselineSamples": 5214,
+        "excess": -1.6302,
+        "pOneSided": 0.6423,
+        "sig95": false
+      },
+      "60": {
+        "horizon": 60,
+        "samples": 33,
+        "wins": 18,
+        "winRate": 54.5455,
+        "avgRet": 3.4225,
+        "medianRet": 1.1113,
+        "baselineWinRate": 52.9184,
+        "baselineSamples": 5174,
+        "excess": 1.627,
+        "pOneSided": 0.4962,
+        "sig95": false
+      },
+      "120": {
+        "horizon": 120,
+        "samples": 33,
+        "wins": 20,
+        "winRate": 60.6061,
+        "avgRet": 9.7907,
+        "medianRet": 4.0759,
+        "baselineWinRate": 54.3997,
+        "baselineSamples": 5114,
+        "excess": 6.2064,
+        "pOneSided": 0.2959,
+        "sig95": false
+      },
+      "250": {
+        "horizon": 250,
+        "samples": 33,
+        "wins": 19,
+        "winRate": 57.5758,
+        "avgRet": 17.1801,
+        "medianRet": 13.658,
+        "baselineWinRate": 54.9759,
+        "baselineSamples": 4984,
+        "excess": 2.5998,
+        "pOneSided": 0.4526,
+        "sig95": false
+      }
+    },
+    "last6": [
+      {
+        "date": "20240730",
+        "erp": 6.8732
+      },
+      {
+        "date": "20240805",
+        "erp": 6.9645
+      },
+      {
+        "date": "20250103",
+        "erp": 6.9533
+      },
+      {
+        "date": "20250108",
+        "erp": 6.929
+      },
+      {
+        "date": "20250205",
+        "erp": 6.9523
+      },
+      {
+        "date": "20250407",
+        "erp": 7.5519
+      }
+    ]
+  },
+  "C_rolling1250Q90": {
+    "definition": "ERP ≥ 过去 1250 交易日 90 分位，且前一日未达标（首次进入），窗口不含当日",
+    "window": 1250,
+    "evalFrom": "20100622",
+    "hitDays": 1048,
+    "hitRatio": 26.3052,
+    "events": 54,
+    "eventDates": [
+      "20110523",
+      "20110629",
+      "20110802",
+      "20110804",
+      "20120509",
+      "20121221",
+      "20130402",
+      "20130423",
+      "20130604",
+      "20130917",
+      "20130924",
+      "20131015",
+      "20131217",
+      "20131219",
+      "20140103",
+      "20140218",
+      "20140221",
+      "20140827",
+      "20140922",
+      "20141016",
+      "20141104",
+      "20200203",
+      "20200313",
+      "20200421",
+      "20220314",
+      "20220325",
+      "20220411",
+      "20220413",
+      "20220419",
+      "20220729",
+      "20221207",
+      "20221212",
+      "20230529",
+      "20230606",
+      "20230626",
+      "20230705",
+      "20230717",
+      "20230815",
+      "20230908",
+      "20230913",
+      "20230920",
+      "20230926",
+      "20230928",
+      "20231013",
+      "20240306",
+      "20240327",
+      "20240412",
+      "20240729",
+      "20240801",
+      "20250103",
+      "20250115",
+      "20250122",
+      "20250205",
+      "20250407"
+    ],
+    "forward": {
+      "5": {
+        "horizon": 5,
+        "samples": 54,
+        "wins": 21,
+        "winRate": 38.8889,
+        "avgRet": -0.5426,
+        "medianRet": -0.671,
+        "baselineWinRate": 53.5858,
+        "baselineSamples": 5229,
+        "excess": -14.6969,
+        "pOneSided": 0.9894,
+        "sig95": false
+      },
+      "10": {
+        "horizon": 10,
+        "samples": 54,
+        "wins": 24,
+        "winRate": 44.4444,
+        "avgRet": -0.383,
+        "medianRet": -0.5415,
+        "baselineWinRate": 53.5988,
+        "baselineSamples": 5224,
+        "excess": -9.1543,
+        "pOneSided": 0.9311,
+        "sig95": false
+      },
+      "20": {
+        "horizon": 20,
+        "samples": 54,
+        "wins": 21,
+        "winRate": 38.8889,
+        "avgRet": -0.5878,
+        "medianRet": -1.2451,
+        "baselineWinRate": 53.1454,
+        "baselineSamples": 5214,
+        "excess": -14.2565,
+        "pOneSided": 0.9874,
+        "sig95": false
+      },
+      "60": {
+        "horizon": 60,
+        "samples": 54,
+        "wins": 20,
+        "winRate": 37.037,
+        "avgRet": 0.5156,
+        "medianRet": -3.4383,
+        "baselineWinRate": 52.9184,
+        "baselineSamples": 5174,
+        "excess": -15.8814,
+        "pOneSided": 0.9934,
+        "sig95": false
+      },
+      "120": {
+        "horizon": 120,
+        "samples": 54,
+        "wins": 17,
+        "winRate": 31.4815,
+        "avgRet": 3.0739,
+        "medianRet": -4.4135,
+        "baselineWinRate": 54.3997,
+        "baselineSamples": 5114,
+        "excess": -22.9182,
+        "pOneSided": 0.9998,
+        "sig95": false
+      },
+      "250": {
+        "horizon": 250,
+        "samples": 54,
+        "wins": 29,
+        "winRate": 53.7037,
+        "avgRet": 9.4425,
+        "medianRet": 1.0043,
+        "baselineWinRate": 54.9759,
+        "baselineSamples": 4984,
+        "excess": -1.2722,
+        "pOneSided": 0.6287,
+        "sig95": false
+      }
+    },
+    "last6": [
+      {
+        "date": "20240801",
+        "erp": 6.7655
+      },
+      {
+        "date": "20250103",
+        "erp": 6.9533
+      },
+      {
+        "date": "20250115",
+        "erp": 6.9047
+      },
+      {
+        "date": "20250122",
+        "erp": 6.8924
+      },
+      {
+        "date": "20250205",
+        "erp": 6.9523
+      },
+      {
+        "date": "20250407",
+        "erp": 7.5519
+      }
+    ]
+  },
+  "D_everyDayHit_fullQ90": {
+    "definition": "全样本 q90 阈值下，每个达标日都算一个样本（连续区间内重复计数，高度重叠，仅说明口径差异）",
+    "samples": 524,
+    "forward": {
+      "5": {
+        "samples": 524,
+        "wins": 304,
+        "winRate": 58.0153,
+        "baselineWinRate": 53.5858,
+        "avgRet": 0.762,
+        "pOneSided": 0.023108,
+        "excess": 4.4295,
+        "sig95": true,
+        "medianRet": 0.4812,
+        "pDisplay": "0.0231"
+      },
+      "20": {
+        "samples": 524,
+        "wins": 370,
+        "winRate": 70.6107,
+        "baselineWinRate": 53.1454,
+        "avgRet": 3.5143,
+        "pOneSided": 0.0,
+        "excess": 17.4653,
+        "sig95": true,
+        "medianRet": 2.1803,
+        "pDisplay": "<0.0001"
+      },
+      "60": {
+        "samples": 524,
+        "wins": 404,
+        "winRate": 77.0992,
+        "baselineWinRate": 52.9184,
+        "avgRet": 10.0162,
+        "pOneSided": 0.0,
+        "excess": 24.1808,
+        "sig95": true,
+        "medianRet": 7.9919,
+        "pDisplay": "<0.0001"
+      },
+      "120": {
+        "samples": 524,
+        "wins": 424,
+        "winRate": 80.916,
+        "baselineWinRate": 54.3997,
+        "avgRet": 20.068,
+        "pOneSided": 0.0,
+        "excess": 26.5163,
+        "sig95": true,
+        "medianRet": 11.3805,
+        "pDisplay": "<0.0001"
+      },
+      "250": {
+        "samples": 524,
+        "wins": 475,
+        "winRate": 90.6489,
+        "baselineWinRate": 54.9759,
+        "avgRet": 39.9107,
+        "pOneSided": 0.0,
+        "excess": 35.673,
+        "sig95": true,
+        "medianRet": 31.2214,
+        "pDisplay": "<0.0001"
+      }
+    },
+    "warning": "样本高度重叠且用全样本阈值，胜率被系统性夸大，不可作为策略证据"
+  },
+  "robustness": {
+    "shuffledRollingHitRate": 10.4669,
+    "realRollingHitRate": 26.3052,
+    "erpAutocorrLag1": 0.9986,
+    "note": "随机打乱后滚动达标率≈10.5%（理论10%），真实序列26.3%，差异来自ERP极强自相关，非代码错误；但这也说明滚动分位阈值本身被趋势带偏。"
+  }
+}

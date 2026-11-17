@@ -1,0 +1,87 @@
+{
+  "order": [
+    "wave",
+    "breadth",
+    "rotate",
+    "volume",
+    "etf",
+    "daily",
+    "wyckoff",
+    "flow",
+    "erp",
+    "derivatives",
+    "leverage",
+    "sentiment",
+    "valuation",
+    "events",
+    "cross",
+    "review"
+  ],
+  "fixedNo": {
+    "wave": "01",
+    "wyckoff": "02",
+    "breadth": "03",
+    "flow": "04",
+    "sentiment": "05",
+    "volume": "06",
+    "etf": "07",
+    "daily": "08",
+    "derivatives": "09",
+    "leverage": "10",
+    "rotate": "11",
+    "erp": "12",
+    "valuation": "13",
+    "events": "14",
+    "cross": "15",
+    "review": "16"
+  },
+  "groups": [
+    {
+      "name": "趋势与结构",
+      "hint": "相位判读 · 吸筹结构",
+      "views": [
+        "wave",
+        "wyckoff"
+      ]
+    },
+    {
+      "name": "情绪与广度",
+      "hint": "广度极值 · 宽度 · 封板",
+      "views": [
+        "breadth",
+        "flow",
+        "sentiment"
+      ]
+    },
+    {
+      "name": "资金与杠杆",
+      "hint": "量能 · ETF · 两融 · 对冲",
+      "views": [
+        "volume",
+        "etf",
+        "daily",
+        "derivatives",
+        "leverage"
+      ]
+    },
+    {
+      "name": "估值与宏观",
+      "hint": "轮动 · 股债 · 事件 · 外盘",
+      "views": [
+        "rotate",
+        "erp",
+        "valuation",
+        "events",
+        "cross"
+      ]
+    },
+    {
+      "name": "每日复盘",
+      "hint": "全栏汇总 · 永远末尾",
+      "views": [
+        "review"
+      ]
+    }
+  ],
+  "note": "order 是栏目清单与复盘栏数的权威来源；fixedNo 是固定编号表，按 groups 的显示顺序连续编号 01~16，菜单分组重排时编号随之连续；groups 只用于左侧菜单插入分组标题。每日复盘 review 必须永远最后；新增数据栏目要插在 review 之前，并同步 fixedNo 与 groups。"
+}
