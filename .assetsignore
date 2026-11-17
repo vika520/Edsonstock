@@ -11,3 +11,5 @@ hosts.py
 flow_state.json
 cffex_probe.xml
 *.toml
+.wrangler
+node_modules
