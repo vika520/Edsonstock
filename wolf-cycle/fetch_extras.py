@@ -157,18 +157,27 @@ def expiry_of(contract):
 
 # ---------------------------------------------------------------- 现货指数
 def fetch_spot():
+    """现货指数日线收盘（衍生品基差的现货端）。
+
+    2026-11-17 根治：原固定区间 + qfq 通道 web.ifzq.gtimg.cn/.../fqkline/get
+    实测对 4 个指数全部返回 0 根（16:00 主任务因此每天写空基差并告警）。
+    改用与主任务同源的 tx_kline（腾讯双域名 + 新浪日线降级），已实测当日
+    4 指数均可取到收盘。函数内延迟 import 避免模块顶层循环依赖。
+    """
+    import daily_update as du
     out = {}
     for code in SPOT_CODES:
-        u = ("https://web.ifzq.gtimg.cn/appstock/app/fqkline/get"
-             "?param=%s,day,2024-01-01,2026-12-31,800,qfq" % code)
-        d = jget(u)
-        arr = ((d.get("data") or {}).get(code) or {}).get("day") or []
-        for r in arr:
+        try:
+            rows = du.tx_kline(code, 260, allow_sina=True)
+        except Exception as e:
+            print("  现货", code, "日线失败:", str(e)[:100])
+            rows = []
+        for r in rows:
             try:
                 out.setdefault(r[0].replace("-", ""), {})[code] = float(r[2])
             except Exception:
                 continue
-        print("  现货", code, len(arr), "根")
+        print("  现货", code, len(rows), "根")
     if not out:
         warn("现货指数日线抓取失败，基差将缺现货端")
     return out

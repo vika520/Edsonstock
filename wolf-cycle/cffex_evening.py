@@ -35,6 +35,7 @@ import datetime as dt
 import json
 import os
 import subprocess
+import time
 
 import daily_update as du
 import fetch_extras as fe
@@ -89,15 +90,26 @@ def resolve_asof():
     if latest != today:
         log("非交易日或当日指数尚未出，跳过（NAS 保留 16:00 版本）")
         return ""
-    try:
-        rows = (du.jload(WORKBENCH) or {}).get("market") or []
-    except Exception as e:
-        log("workbench.json 读取失败（跳过）：%s" % str(e)[:120])
-        return ""
-    if not rows or rows[-1][0] != today:
-        log("主盘后任务尚未写入 %s，跳过（避免半成品数据）" % today)
-        return ""
-    return today
+    # 主任务可能延迟（实测 11-16 为 16:03、11-17 拖到 18:39），17:20 触发时
+    # workbench 末日可能还不是今天。做有限等待重试（最多 40 分钟 / 每 2 分钟一次），
+    # 覆盖常见延迟；仍不无限等，避免任务挂死。源头 fetch_spot 已修，主任务一旦
+    # 跑完当天即自带基差，这里只是让傍晚补齐不至于白跑一次。
+    for attempt in range(21):
+        try:
+            rows = (du.jload(WORKBENCH) or {}).get("market") or []
+        except Exception as e:
+            log("workbench.json 读取失败（跳过）：%s" % str(e)[:120])
+            return ""
+        if rows and rows[-1][0] == today:
+            if attempt:
+                log("等待后主任务已写入 %s（第 %d 次检查）" % (today, attempt + 1))
+            return today
+        if attempt == 0:
+            log("主盘后任务尚未写入 %s，最多等待 40 分钟（每 2 分钟复查）" % today)
+        if attempt < 20:
+            time.sleep(120)
+    log("等待 40 分钟后主任务仍未写入 %s，跳过（避免半成品数据，NAS 保留上一版）" % today)
+    return ""
 
 
 def fetch_spot(asof):
