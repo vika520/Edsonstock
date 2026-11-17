@@ -127,6 +127,15 @@ def fetch_spot(asof):
     return spot
 
 
+def snap_basis_ok(der):
+    """快照是否已有有效现货/基差。16:00 现货通道失效会写入 spot=None/basis=None
+    的半成品快照，此时必须当作未补齐重算，否则空基差会一直留在站点上。"""
+    snap = der.get("snapshot") or {}
+    vals = [snap.get(p) for p in fe.FUT_SPOT if snap.get(p)]
+    return bool(vals) and any(v.get("basis") is not None and v.get("spot") is not None
+                              for v in vals)
+
+
 def refresh(asof, dry_run=False):
     """只补 CFFEX 段。返回 filled / skip / unavailable / dry。"""
     old = fe.jload(EXTRAS, {})
@@ -141,16 +150,17 @@ def refresh(asof, dry_run=False):
     want = dates[-5:]
     todo = [d for d in want if d not in have]
     snap_empty = not (der.get("snapshot") or {})
-    log("CFFEX 已有 %d 日（末日 %s）| 待补 %s | 当日快照 %s" %
+    basis_ok = snap_basis_ok(der)
+    log("CFFEX 已有 %d 日（末日 %s）| 待补 %s | 当日快照 %s | 当日基差 %s" %
         (len(have), max(have) if have else "-", ",".join(todo) or "无",
-         "空" if snap_empty else "已有"))
-    if not todo and not snap_empty:
-        log("当日 CFFEX 日行情已补齐且快照非空，跳过（幂等）")
+         "空" if snap_empty else "已有", "有效" if basis_ok else "缺失(需重算)"))
+    if not todo and not snap_empty and basis_ok:
+        log("当日 CFFEX 日行情、快照与基差均已补齐，跳过（幂等）")
         return "skip"
 
     spot = fetch_spot(asof)
     raw_by_date = fe.fetch_cffex_history(todo) if todo else {}
-    # 当日单独再取一次：todo 可能不含当日（dates 已有但快照为空的情形）
+    # 当日单独再取一次：todo 可能不含当日（dates 已有但基差为空的情形）
     raw_today = raw_by_date.get(asof) or fe.curl(fe.cffex_daily_url(asof), retries=3, timeout=25)
     today_parsed = fe.parse_cffex_day(raw_today, asof, spot)
 
@@ -171,6 +181,12 @@ def refresh(asof, dry_run=False):
         return "unavailable"
 
     missing = [d for d in todo if "<dailydata>" not in (raw_by_date.get(d) or "")]
+    # 当日即便已在 dates 里，若基差缺失也要用正确现货重算并覆盖当日序列行。
+    # 复用上面已解析的 today_parsed，避免重复拉取当日 XML。
+    reparse = list(todo)
+    if asof not in reparse:
+        reparse.append(asof)
+    parsed_cache = {asof: today_parsed}
     fseries = {p: list(v) for p, v in (der.get("futures") or {}).items()}
     oseries = {p: list(v) for p, v in (der.get("options") or {}).items()}
     for p in fe.FUT_SPOT:
@@ -180,8 +196,8 @@ def refresh(asof, dry_run=False):
     dlist = list(der.get("dates") or [])
     before_days = len(dlist)
     filled = []
-    for d in todo:
-        parsed = fe.parse_cffex_day(raw_by_date.get(d, ""), d, spot)
+    for d in reparse:
+        parsed = parsed_cache.get(d) or fe.parse_cffex_day(raw_by_date.get(d, ""), d, spot)
         if not parsed:
             continue
         fr, op, _ = parsed
@@ -216,7 +232,8 @@ def refresh(asof, dry_run=False):
     meta = old.get("meta") or {}
     # 只清理与 CFFEX 相关的旧警告，其它 6 类补充数据的警告原样保留
     keep = [w for w in (meta.get("warnings") or [])
-            if not any(k in w for k in ("CFFEX", "中金所", "衍生品快照"))]
+            if not any(k in w for k in ("CFFEX", "中金所", "衍生品快照",
+                                        "现货指数日线抓取失败", "基差将缺现货端"))]
     warns = list(keep)
     if missing:
         warns.append("CFFEX 日行情仍缺 %d 个交易日（%s），图中留空不插值" %
