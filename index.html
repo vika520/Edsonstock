@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EdsonStock · A股市场结构工作台</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<style>
+:root{--ink:#1f2430;--dim:#5d6675;--line:#e3e7ed;--up:#c0392b;--down:#178a5a;--acc:#b7791f}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f5f7;color:var(--ink);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+ font-size:14px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:28px auto;background:#fff;padding:40px 46px 46px;
+ border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 28px #1f24300d}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.brand img{width:34px;height:34px}
+.brand b{font-size:19px;letter-spacing:.5px}
+.eyebrow{font:600 11px "JetBrains Mono",Consolas,monospace;color:var(--acc);letter-spacing:2px;margin-top:14px}
+h1{font-size:22px;line-height:1.65;margin:10px 0 8px;font-weight:700}
+.meta{font-size:12px;color:var(--dim);border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+h2{font-size:15px;margin:26px 0 12px;padding-left:10px;border-left:4px solid var(--acc)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);
+ border-radius:8px;padding:15px 17px;background:#fbfcfd;transition:.15s}
+.card:hover{border-color:var(--acc);background:#fdf9ee;transform:translateY(-1px)}
+.card .n{font:600 10px "JetBrains Mono",Consolas,monospace;color:var(--acc);letter-spacing:1px}
+.card .t{font-size:14px;font-weight:700;margin:4px 0 3px}
+.card .d{font-size:11.5px;color:var(--dim);line-height:1.7}
+.card.primary{grid-column:1/-1;background:#0d1117;border-color:#0d1117;color:#e8ecf3}
+.card.primary .n{color:#f0b429}
+.card.primary .t{font-size:16px}
+.card.primary .d{color:#aab3c2}
+.note{background:#fdf9ee;border-left:4px solid var(--acc);padding:12px 15px;border-radius:0 6px 6px 0;
+ font-size:11.5px;line-height:1.9;color:#4a463c;margin-top:22px}
+.foot{margin-top:24px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--dim)}
+.foot a{color:var(--acc);text-decoration:none}
+@media(max-width:760px){.wrap{margin:0;padding:22px 18px;border:0;border-radius:0}.grid{grid-template-columns:1fr}h1{font-size:18px}}
+</style></head>
+<body><div class="wrap">
+<div class="brand"><img src="./favicon.svg" alt="EdsonStock"><b>EdsonStock</b></div>
+<div class="eyebrow">A-SHARE MARKET STRUCTURE · PUBLIC MIRROR</div>
+<h1>A股市场结构工作台</h1>
+<div class="meta">16 个栏目 · 单文件离线 · 公开数据源 · 每交易日盘后更新 · 口径分级标注（真实 / 代理 / 不可得）</div>
+
+<div class="grid">
+  <a class="card primary" href="./A股市场结构工作台.html">
+    <div class="n">MAIN · 16 COLUMNS</div>
+    <div class="t">打开完整工作台 →</div>
+    <div class="d">狼波周期 / 威科夫 / 双冰点 / 宽度与拥挤度 / 短线情绪 / 放量 / ETF 日度申赎 / 日度全景 / 衍生品 / 杠杆 / 板块轮动 / ERP / 行业估值 / 筹码供给 / 跨市场 / 每日复盘。</div>
+  </a>
+  <a class="card" href="./每日复盘_20261117.html" id="review-link">
+    <div class="n">16 · DAILY REVIEW</div>
+    <div class="t">最新每日复盘</div>
+    <div class="d" id="review-desc">15 栏同源汇总，条件 + 触发 + 证伪，固定规则生成，非投资建议。</div>
+  </a>
+  <a class="card" href="./A股狼波周期指数走势图.html">
+    <div class="n">01 · CYCLE</div>
+    <div class="t">狼波周期指数走势</div>
+    <div class="d">大盘周期相位，因果确认与事后重绘对照。</div>
+  </a>
+  <a class="card" href="./A股双冰点情绪指标.html">
+    <div class="n">03 · SENTIMENT</div>
+    <div class="t">双冰点情绪指标</div>
+    <div class="d">极值事件与次日收益分布；严格因果检验不显著。</div>
+  </a>
+  <a class="card" href="./威科夫吸筹结构_近三年回测.html">
+    <div class="n">02 · BACKTEST</div>
+    <div class="t">威科夫吸筹结构回测</div>
+    <div class="d">事件为算法等价标注；Phase C 兑现率 25%、p=0.256，不显著。</div>
+  </a>
+  <a class="card" href="./ERP_90分位事件研究.html">
+    <div class="n">12 · ERP 90</div>
+    <div class="t">ERP 90 分位事件研究</div>
+    <div class="d">股债利差区间事件的条件概率研究。</div>
+  </a>
+  <a class="card" href="./ERP_75分位事件研究.html">
+    <div class="n">12 · ERP 75</div>
+    <div class="t">ERP 75 分位事件研究</div>
+    <div class="d">本栏与 ERP 周报主读数同源同公式，但区间事件定义不同，不可直接比较。</div>
+  </a>
+</div>
+
+<div class="note">
+<b>数据边界</b>：全市场涨跌家数与成交额自 2026-11-14 起用新浪全 A 快照统计；ETF 成交额除前 5 只外为量价估算；「净流入 / 方向代理 / TMT 成交占比」是量价代理不是真实资金流；两融 / 中金所 / 涨跌停池 / 行业 PE / 解禁 / 龙虎榜 / 外盘为盘后 T 或 T+1 公开数据。确认拿不到历史的三项（ETF 日度官方份额、TMT 同口径占比、炸板率/跌停家数）已逐条写明原因，不补齐、不伪造。复盘由固定规则生成，建议只给「条件 + 触发 + 证伪」，不构成投资建议。
+</div>
+<div class="foot">本页为公开镜像导航页，所有报告均为静态单文件，可离线打开 / 打印。源码与数据口径见 <a href="https://github.com/vika520/Edsonstock">GitHub 仓库</a>。</div>
+</div>
+<script>
+// 在线环境下动态指向最新一篇复盘；本地 file:// 或数据缺失时保留上面的静态回退链接。
+fetch('./wolf-cycle/data/reviews.json').then(function(r){return r.ok?r.json():null}).then(function(d){
+  try{
+    var date=(d.reviews&&d.reviews[0]&&d.reviews[0].date)||d.asof;
+    if(!date) return;
+    var a=document.getElementById('review-link');
+    var desc=document.getElementById('review-desc');
+    if(a) a.href='./每日复盘_'+date+'.html';
+    if(desc&&d.reviews&&d.reviews[0]&&d.reviews[0].digest){
+      desc.textContent=d.reviews[0].digest.slice(0,80)+'…';
+    }
+  }catch(e){}
+}).catch(function(){});
+</script>
+</body></html>

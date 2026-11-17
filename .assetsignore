@@ -1,0 +1,13 @@
+# Cloudflare Workers Assets 发布白名单的排除项
+# 仅发布根目录公开 HTML / favicon / 公开 data JSON，其余一律不作为静态资源
+.git
+.workbuddy
+deploy
+__pycache__
+*.pyc
+*.pyo
+*.log
+hosts.py
+flow_state.json
+cffex_probe.xml
+*.toml
