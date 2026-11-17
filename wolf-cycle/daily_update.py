@@ -9,7 +9,7 @@
 3. 幂等：同一交易日重复执行只覆盖当日记录，不会重复追加。
 4. 失败不部署：任何关键校验不过就抛错退出，NAS 保留上一版完整可用页面。
 5. 因果安全：只追加当日及之前的已收盘日线，不使用任何未来数据。
-6. NAS 部署成功后，把当日新增/变更文件提交并推送到 GitHub 私有仓库
+6. NAS 部署成功后，把当日新增/变更文件提交并推送到 GitHub 公开仓库
    Edsonstock（尽力而为，失败只警告，不影响 NAS 站点）。
 
 用法
@@ -42,7 +42,7 @@ NAS_PROJECT = hosts.nas_project()
 SITE_URL = hosts.site_url()
 PY = sys.executable
 
-# GitHub 私有仓库同步（盘后最后一步，见 git_sync）
+# GitHub 公开仓库同步（盘后最后一步，见 git_sync）
 GIT_REMOTE = "origin"
 GIT_BRANCH = "main"
 GIT_EXPECT = "Edsonstock"
@@ -749,7 +749,7 @@ def git_run(args, timeout=120):
 
 
 def git_sync(asof):
-    """把当日新增/变更文件提交并推送到 GitHub 私有仓库。
+    """把当日新增/变更文件提交并推送到 GitHub 公开仓库。
 
     必须在 deploy() 成功后调用（保证 NAS 已是最新）。属于「尽力而为」步骤：
     失败只写警告与 last_run.json 的 github 字段，不抛错、不让定时任务整体失败。
