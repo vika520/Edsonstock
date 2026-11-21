@@ -88,14 +88,20 @@ function drawMain(){
   const t=T(), d=inRange(t.dates);
   const i0=t.dates.length-d.length;
   const ch=t.ch||{}, c250=ch['250']||{};
-  const off=k=>inRange((c250[k]||[]).slice(i0));
+  const cost=inRange(((t.sth||{})['80']||[]).slice(i0));
+  // BTC STH 图的正确复刻：通道轨 = 成本 + (价差通道 mean±kσ)，回到价格量纲，
+  // 价格在成本线与上下轨之间穿插（而非价差通道贴底脱节）。
+  const rail=k=>{
+    const chg=(c250[k]||[]).slice(i0);
+    return cost.map((c,j)=> (c!=null && chg[j]!=null) ? c+chg[j] : null);
+  };
   XTS('sx-main',d,[
     {name:'收盘',data:inRange((t.close||[]).slice(i0)),color:C.white,width:1.6},
-    {name:'STH80 成本',data:inRange(((t.sth||{})['80']||[]).slice(i0)),color:C.accent,width:1.8},
-    {name:'+2σ',data:off('m2'),color:C.down,dash:[4,4]},
-    {name:'+1σ',data:off('m1'),color:C.down,dash:[2,4]},
-    {name:'−1σ',data:off('p1'),color:C.blue,dash:[2,4]},
-    {name:'−2σ',data:off('p2'),color:C.blue,dash:[4,4]}
+    {name:'STH80 成本',data:cost,color:C.accent,width:1.8},
+    {name:'上轨 +2σ',data:rail('m2'),color:C.down,dash:[4,4]},
+    {name:'+1σ',data:rail('m1'),color:C.down,dash:[2,4]},
+    {name:'−1σ',data:rail('p1'),color:C.blue,dash:[2,4]},
+    {name:'下轨 −2σ',data:rail('p2'),color:C.blue,dash:[4,4]}
   ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:20,b:24}});
 }
 function drawN(){
