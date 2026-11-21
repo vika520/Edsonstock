@@ -130,6 +130,20 @@ function XTS(id, dates, series, opts) {
   const step = Math.max(1, Math.round(n / 7));
   for (let i = 0; i < n; i += step) txt(x, dateFmt(dates[i]), X(i), g.B + 12, C.dim2, 'center');
   if (opts.note) txt(x, opts.note, g.L + 5, g.T + 8, C.dim2, 'left');
+  // 事件标记：opts.markers = [{i|date, label, color, dy}]，画在对应 x 位置的顶部
+  (opts.markers||[]).forEach(m=>{
+    let mi = (m.i!=null) ? m.i : dates.indexOf(m.date);
+    if (mi<0 || mi>=n) return;
+    const mx=X(mi);
+    // 找该位置 series 最高值作为文字基准
+    let top=null;
+    series.forEach(s=>{ const v=(s.data||[])[mi]; if(v!=null&&isFinite(v)){ const y=Y(v, s.axis==='right'); if(top==null||y<top) top=y; }});
+    if(top==null) top=g.T+12;
+    const col=m.color||C.purple;
+    txt(x, m.label||'▼', mx, Math.max(g.T+14, top-14), col, 'center');
+    x.beginPath(); x.arc(mx, Math.max(g.T+14, top-14)+11, 2.2, 0, Math.PI*2);
+    x.fillStyle=col; x.fill();
+  });
   const legend = series.filter(s => s.name).map((s, i) =>
     [s.name, s.color || CAT_COLOR[i % CAT_COLOR.length]]);
   legend.forEach((z, i) => {

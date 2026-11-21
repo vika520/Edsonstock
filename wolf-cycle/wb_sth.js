@@ -99,6 +99,18 @@ function drawMain(){
     const chg=(c250[k]||[]).slice(i0);
     return cost.map((c,j)=> (c!=null && chg[j]!=null) ? c+chg[j] : null);
   };
+  // 极端信号标记（首次进入去重）：z≤−2 冷却▼ / z≥+2 过热▲
+  const allDates=t.dates||[], allSp=t.spread||[], cm=(c250['mean']||[]), cs=(c250['sd']||[]);
+  const zAll=allSp.map((v,j)=> (v!=null&&cm[j]!=null&&cs[j]) ? (v-cm[j])/cs[j] : null);
+  const markers=[];
+  let prevC=false, prevH=false;
+  for(let j=0;j<allDates.length;j++){
+    const z=zAll[j];
+    const cold = z!=null && z<=-2, hot = z!=null && z>=2;
+    if(cold&&!prevC) markers.push({date:allDates[j], label:'▼冷', color:C.blue});
+    if(hot&&!prevH) markers.push({date:allDates[j], label:'▲热', color:C.down});
+    prevC=cold; prevH=hot;
+  }
   XTS('sx-main',d,[
     {name:'收盘',data:inRange((t.close||[]).slice(i0)),color:C.white,width:1.6},
     {name:'STH80 成本',data:cost,color:C.accent,width:1.8},
@@ -106,7 +118,7 @@ function drawMain(){
     {name:'+1σ',data:rail('m1'),color:C.down,dash:[2,4]},
     {name:'−1σ',data:rail('p1'),color:C.blue,dash:[2,4]},
     {name:'下轨 −2σ',data:rail('p2'),color:C.blue,dash:[4,4]}
-  ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:20,b:24}});
+  ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:24,b:24},markers});
 }
 function drawN(){
   const t=T(), d=inRange(t.dates);
@@ -136,14 +148,27 @@ function table(){
   const tb=document.querySelector('#sx-tab tbody'); if(!tb) return;
   const t=T();
   const rows=(t.dates||[]).slice(-20).reverse();
-  const i0=t.dates.length-((t.dates||[]).length);
   const ch=t.ch&&t.ch['250']||{};
+  const cm=ch['mean']||[], cs=ch['sd']||[];
+  // 档位与判读卡同口径：±0.5 中性界
+  const zoneOf=z=>{
+    if(z==null) return ['—',C.dim];
+    if(z>=2)  return ['▲极端过热',C.down];
+    if(z>=1)  return ['▲过热',C.down];
+    if(z>=0.5) return ['△偏热',C.accent];
+    if(z>-0.5) return ['—中性',C.dim];
+    if(z>-1)  return ['▽偏冷','#4b9fea'];
+    if(z>-2)  return ['▼冷却','#4b9fea'];
+    return ['▼▼极端冷却',C.blue];
+  };
   tb.innerHTML=rows.map(dd=>{
     const j=t.dates.indexOf(dd);
-    const sp=t.spread[j], m=ch['mean']?ch['mean'][j]:null, sd=ch['sd']?ch['sd'][j]:null;
+    const sp=t.spread[j], m=cm[j], sd=cs[j];
     const z=(sp!=null&&m!=null&&sd)?(sp-m)/sd:null;
+    const [zt,zc]=zoneOf(z);
     return '<tr><td class="l">'+esc(dd)+'</td><td>'+xf(t.close[j],2)+'</td>'+
-      '<td>'+xf((t.sth['80']||[])[j],2)+'</td><td>'+xf(sp,2)+'</td><td>'+xf(z,2)+'</td></tr>';
+      '<td>'+xf((t.sth['80']||[])[j],2)+'</td><td>'+xf(sp,2)+'</td><td>'+xf(z,2)+'</td>'+
+      '<td style="color:'+zc+';font-weight:600">'+zt+'</td></tr>';
   }).join('');
 }
 function cover(){
