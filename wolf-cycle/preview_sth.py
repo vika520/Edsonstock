@@ -49,7 +49,14 @@ with sync_playwright() as p:
     assert rows == 20, rows
     cav = pg.locator("#SX_CAVEAT").inner_text()
     assert "三角分布" in cav and "逆势信号" in cav and "不构成投资建议" in cav
-    # 切换标的
+    # 切换双创篮子
+    for tt in ('cybtop','kcbtop'):
+        pg.locator('#sx-target button[data-t="%s"]' % tt).click()
+        pg.wait_for_timeout(400)
+        dec_t = pg.locator("#SX_DEC").inner_text()
+        print("切换 %s 判读: %s" % (tt, dec_t[:60].replace("\n"," ")))
+        assert pg.evaluate("__ink('sx-main')") > 50, tt + " 主图未绘制"
+    # 切换单股
     pg.locator('#sx-target button[data-t="300750"]').click()
     pg.wait_for_timeout(400)
     assert pg.evaluate("__ink('sx-main')") > 50

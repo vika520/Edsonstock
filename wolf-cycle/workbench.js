@@ -2946,7 +2946,8 @@ let RANGE = 0;
   const ks = Object.keys(ST.targets||{});
   if(ks.length){
     // 优先篮子，否则第一个
-    CUR = ks.includes('hs300top') ? 'hs300top' : ks[0];
+    const pref=['hs300top','cybtop','kcbtop','300750'];
+    CUR = pref.find(k=>ks.includes(k)) || ks[0];
     // 同步按钮高亮
     document.querySelectorAll('#sx-target button').forEach(b=>{
       b.classList.toggle('on', b.dataset.t===CUR);

@@ -56,16 +56,26 @@ WINDOWS = (250, 500)
 CHANNELS = (0.5, 1.0, 1.5, 2.0)
 SPLIT_RATIO = 1.10  # 股本单日 +10% 视为送转除权
 TARGETS = [("300750", "宁德时代"), ("600519", "贵州茅台"),
-           ("hs300top", "沪深300篮子·等权30只（代理）")]
+           ("hs300top", "沪深300篮子·等权15只（代理）"),
+           ("cybtop", "创业板篮子·等权15只（代理 399006）"),
+           ("kcbtop", "科创板篮子·等权15只（代理 科创50）")]
 BASKET_HS300 = ["600519", "300750", "601318", "600036", "000858", "601888", "000333",
                 "600900", "603288", "300760", "600276", "601012", "000568", "600030",
                 "601166"]  # 前 15 只流动性样本；扩到 30 只需模拟耗时等比增长
+BASKET_CYB = ["300750", "300059", "300760", "300124", "300015", "300274", "300122",
+              "300014", "300003", "300347", "300413", "300433", "300529", "300628",
+              "300896"]  # 创业板权重代表 15 只（等权代理，非官方 399006 加权）
+BASKET_KCB = ["688981", "688041", "688256", "688111", "688008", "688012", "688036",
+              "688185", "688111", "688202", "688363", "688599", "688772", "688082",
+              "688396"]  # 科创板权重代表（等权代理，非官方科创50 加权）
 
 
-def process_basket():
+def process_basket(basket_key="hs300top", members=None, label="沪深300篮子"):
     """等权篮子：逐成员计算 STH80，按日期对齐取均值。"""
+    members = members or (BASKET_HS300 if basket_key == "hs300top" else
+                          (BASKET_CYB if basket_key == "cybtop" else BASKET_KCB))
     per = {}
-    for mc in BASKET_HS300:
+    for mc in members:
         sina = sina_daily(mc)
         if len(sina) < BURN_IN + 150:
             log("  成员 %s 数据不足（%d），跳过" % (mc, len(sina)))
@@ -118,9 +128,9 @@ def process_basket():
     r = {"dates": dates_b, "close": closes_b,
          "sth": {"80": sth_b}, "spread": spread_b, "ch": ch,
          "entries": entries, "fwd": fwd, "splits": [], "startIdx": 0,
-         "code": "hs300top",
-         "name": "沪深300篮子·等权15只（代理）",
-         "members": sorted(per.keys()), "nMembers": len(per)}
+         "code": basket_key,
+         "name": label,
+         "members": sorted(set(per.keys())), "nMembers": len(per)}
     log("篮子完成：%d 成员 / %d 日 / -2σ %d 次 / 60日 p=%s" %
         (len(per), len(r["dates"]), len(r["entries"]),
          (r["fwd"].get("60") or {}).get("p")))
@@ -379,17 +389,21 @@ def main():
             old_targets = json.load(open(OUT, encoding="utf-8")).get("targets") or {}
         except Exception:
             pass
+    LABELS = {"hs300top": "沪深300篮子·等权15只（代理）",
+              "cybtop": "创业板篮子·等权15只（代理 399006）",
+              "kcbtop": "科创板篮子·等权15只（代理 科创50）"}
     for code, name in TARGETS:
-        if code == "hs300top":
+        if code in ("hs300top", "cybtop", "kcbtop"):
             if a.incremental:
-                # 增量模式：沿用上一版篮子数据
-                prev = (old_targets or {}).get("hs300top")
+                prev = (old_targets or {}).get(code)
                 if prev:
                     out["targets"][code] = prev
-                    log("篮子沿用上一版（%d 日），--full 可全量重算" % len(prev.get("dates") or []))
+                else:
+                    log("篮子 %s 无上一版，增量模式下跳过" % code)
                 continue
-            log("计算 hs300top 篮子（等权 %d 只）..." % len(BASKET_HS300))
-            r = process_basket()
+            members = BASKET_HS300 if code == "hs300top" else (BASKET_CYB if code == "cybtop" else BASKET_KCB)
+            log("计算 %s 篮子（等权 %d 只）..." % (code, len(members)))
+            r = process_basket(code, members, LABELS[code])
             if r:
                 out["targets"][code] = r
             continue
