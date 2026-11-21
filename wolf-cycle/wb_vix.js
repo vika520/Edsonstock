@@ -9,7 +9,7 @@ const META = V.meta || {};
 const UNDER_NAME = {IO:'沪深300', HO:'上证50', MO:'中证1000'};
 let RANGE = 0; // 0=全部
 
-function dates(){ return rows.map(r=>r[0]); }
+function dates(){ return rows.map(r=>r.date); }
 function inRange(arr){
   if(!RANGE || arr.length<=RANGE) return arr;
   return arr.slice(-RANGE);
