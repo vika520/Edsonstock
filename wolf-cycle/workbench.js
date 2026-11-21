@@ -3053,14 +3053,13 @@ function kpi(){
   ]);
 }
 function drawMain(){
-  const t=T(), d=inRange(t.dates);
-  const i0=t.dates.length-d.length;
+  const t=T(), d=winSlice(t.dates||[]);
   const ch=t.ch||{}, c250=ch['250']||{};
-  const cost=inRange(((t.sth||{})['80']||[]).slice(i0));
+  const cost=winSlice((t.sth||{})['80']||[]);
   // BTC STH 图的正确复刻：通道轨 = 成本 + (价差通道 mean±kσ)，回到价格量纲，
-  // 价格在成本线与上下轨之间穿插（而非价差通道贴底脱节）。
+  // 价格在成本线与上下轨之间穿插。窗口切片统一 winSlice（勿用 slice(i0) 双切——会钉死末尾）。
   const rail=k=>{
-    const chg=(c250[k]||[]).slice(i0);
+    const chg=winSlice(c250[k]||[]);
     return cost.map((c,j)=> (c!=null && chg[j]!=null) ? c+chg[j] : null);
   };
   // 极端信号标记（首次进入去重）：z≤−2 冷却▼ / z≥+2 过热▲
@@ -3076,7 +3075,7 @@ function drawMain(){
     prevC=cold; prevH=hot;
   }
   XTS('sx-main',d,[
-    {name:'收盘',data:inRange((t.close||[]).slice(i0)),color:C.white,width:1.6},
+    {name:'收盘',data:winSlice(t.close||[]),color:C.white,width:1.6},
     {name:'STH80 成本',data:cost,color:C.accent,width:1.8},
     {name:'上轨 +2σ',data:rail('m2'),color:C.down,dash:[4,4]},
     {name:'+1σ',data:rail('m1'),color:C.down,dash:[2,4]},
@@ -3085,22 +3084,20 @@ function drawMain(){
   ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:24,b:24},markers,_sxgeo:true});
 }
 function drawN(){
-  const t=T(), d=inRange(t.dates);
-  const i0=t.dates.length-d.length;
+  const t=T(), d=winSlice(t.dates||[]);
   const sth=t.sth||{};
   XTS('sx-n',d,[
-    {name:'收盘',data:inRange((t.close||[]).slice(i0)),color:C.white,width:1.4},
-    {name:'N=60',data:inRange(((sth['60'])||[]).slice(i0)),color:C.up},
-    {name:'N=80',data:inRange(((sth['80'])||[]).slice(i0)),color:C.accent},
-    {name:'N=100',data:inRange(((sth['100'])||[]).slice(i0)),color:C.purple}
+    {name:'收盘',data:winSlice(t.close||[]),color:C.white,width:1.4},
+    {name:'N=60',data:winSlice(sth['60']||[]),color:C.up},
+    {name:'N=80',data:winSlice(sth['80']||[]),color:C.accent},
+    {name:'N=100',data:winSlice(sth['100']||[]),color:C.purple}
   ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:20,b:24},_sxgeo:true});
 }
 function drawZ(){
-  const t=T(); const d=inRange(t.dates);
-  const i0=t.dates.length-d.length;
+  const t=T(); const d=winSlice(t.dates||[]);
   const ch=t.ch||{}, c250=ch['250']||{};
-  const mean=c250['mean']||[], sd=c250['sd']||[], sp=(t.spread||[]).slice(i0);
-  const m2=mean.slice(i0), s2=sd.slice(i0);
+  const m2=winSlice(c250['mean']||[]), s2=winSlice(c250['sd']||[]);
+  const sp=winSlice(t.spread||[]);
   const z=m2.map((m,j)=> (m!=null&&s2[j]&&sp[j]!=null) ? (sp[j]-m)/s2[j] : null);
   XTS('sx-z',d,[
     {name:'价差 z 值',data:z,color:C.accent,type:'bar'},
