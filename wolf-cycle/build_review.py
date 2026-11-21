@@ -495,13 +495,18 @@ def read_sth(sth):
     z = s.get("z")
     tier = "—"
     if z is not None:
+        # 与工作台 wb_sth.js 判读口径完全一致：±0.5 为中性界
         if z >= 2:
             tier = "极端过热（≥+2σ）"
         elif z >= 1:
-            tier = "偏热（+1σ 上方）"
+            tier = "过热（+1σ 以上）"
+        elif z >= 0.5:
+            tier = "偏热（+0.5σ）"
         elif z <= -2:
             tier = "极端冷却（≤−2σ）"
         elif z <= -1:
+            tier = "冷却（−1σ 以下）"
+        elif z <= -0.5:
             tier = "偏冷（跌破成本）"
         else:
             tier = "中性"

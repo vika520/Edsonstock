@@ -2987,10 +2987,13 @@ function dec(){
   const f20=f['20'], f60=f['60'];
   let level='STH 成本：中性', tone=C.dim;
   if(z!=null){
+    // 档位与 pctLabel/ztone 完全同口径：±0.5 为中性界
     if(z>=2){level='极端过热：价格远高于短持成本（≥+2σ）';tone=C.down;}
     else if(z<=-2){level='极端冷却：价格深贴/跌破短持成本（≤−2σ）';tone=C.blue;}
-    else if(z>=1){level='偏热：脱离成本上方（+1σ）';tone=C.accent;}
-    else if(z<=-1){level='偏冷：跌破成本（−1σ）';tone='#4b9fea';}
+    else if(z>=1){level='过热：脱离成本上方（+1σ 以上）';tone=C.down;}
+    else if(z>=0.5){level='偏热：成本上方（+0.5σ）';tone=C.accent;}
+    else if(z<=-1){level='冷却：跌破成本（−1σ 以下）';tone='#4b9fea';}
+    else if(z<=-0.5){level='偏冷：价格跌破短持成本（−0.5σ）';tone='#4b9fea';}
   }
   const mem=(t.members?('<br>篮子成员 '+t.nMembers+' 只等权（代理口径，非官方成分加权）'):'');
   const body=
