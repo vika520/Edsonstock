@@ -486,6 +486,52 @@ def read_erp(erp):
                      {"k": "90分位点位", "v": locked(th[0].get("point")) if th else "—"}]}
 
 
+def read_vix(vix):
+    """06 波动率与恐慌指数：只读 vix.json 锁定快照，不做二次计算。"""
+    s = vix.get("snapshot") or {}
+    rows = vix.get("rows") or []
+    last = rows[-1] if rows else {}
+    io = last.get("IO") or {}
+    v = s.get("vix")
+    pct = s.get("percentile")
+    hv30 = last.get("hv30")
+    prem = (v - hv30) if (v is not None and hv30 is not None) else None
+    cau = (vix.get("causal") or {})
+    f20 = (cau.get("fwd") or {}).get("20")
+    tier = "—"
+    if pct is not None:
+        if pct >= 90:
+            tier = "恐慌高温"
+        elif pct >= 75:
+            tier = "波动偏高"
+        elif pct <= 25:
+            tier = "波动低温（自满风险）"
+        else:
+            tier = "中性"
+    text = ("EdsonVIX（IO 沪深300，近月+次月 30 日口径）%s，全样本分位 %s%%（%s）；"
+            "HV30 已实现 %s，恐慌溢价 %s；Skew %s。"
+            "对照 HO 上证50 %s / MO 中证1000 %s。自编指数，方法同 CBOE 方差互换、"
+            "结算价与行权价来自中金所真实披露；官方 iVIX 2018-02 起停发。"
+            "VIX 只标价波动不含方向；expanding 90 分位触发后 20 日胜率 %s（p=%s，%s），"
+            "不构成「恐慌见底即反弹」的依据。" %
+            (fmt(v, 2), fmt(pct, 1), tier, fmt(hv30, 2),
+             sgn(prem, 2), fmt(io.get("skew"), 2),
+             fmt((last.get("HO") or {}).get("vix"), 2),
+             fmt((last.get("MO") or {}).get("vix"), 2),
+             fmt(f20.get("winRate"), 1, "%") if f20 else "样本不足",
+             fmt(f20.get("p"), 3) if f20 else "—",
+             "显著" if (f20 or {}).get("sig") else "不显著"))
+    return {
+        "kpis": [{"k": "EdsonVIX", "v": fmt(v, 2)},
+                 {"k": "全样本分位", "v": fmt(pct, 1, "%")},
+                 {"k": "恐慌溢价 VIX−HV30", "v": sgn(prem, 2)},
+                 {"k": "Skew", "v": fmt(io.get("skew"), 2)},
+                 {"k": "HO / MO", "v": fmt((last.get("HO") or {}).get("vix"), 1) +
+                   " / " + fmt((last.get("MO") or {}).get("vix"), 1)}],
+        "text": text,
+    }
+
+
 def read_tmt(tmt, w):
     """08 扩展 TMT 交易拥挤度：只读 tmt.json，占比不做二次计算。"""
     s = tmt.get("snapshot") or {}
@@ -712,6 +758,7 @@ def build(asof):
         "etf": read_etf(w, idx), "daily": read_daily(w),
         "wyckoff": read_wyckoff(wy, bt), "flow": read_flow(flow, w),
         "tmt": read_tmt(tmt, w), "erp": read_erp(erp),
+        "vix": read_vix(jload("vix.json")),
     }
     s.update(read_extras(ex))
 
@@ -732,7 +779,8 @@ def build(asof):
              "wyckoff": "威科夫吸筹", "flow": "市场宽度与拥挤度",
              "tmt": "TMT 交易拥挤度（第 04 栏扩展）", "erp": "股债利差(ERP)区间",
              "derivatives": "衍生品 / 对冲压力", "leverage": "杠杆与真实资金",
-             "sentiment": "短线情绪与连板", "valuation": "行业估值与预期修正",
+             "sentiment": "短线情绪与连板", "vix": "波动率与恐慌指数",
+             "valuation": "行业估值与预期修正",
              "events": "筹码供给与事件", "cross": "跨市场与宏观"}
 
     # 一句话标题：当日大盘 + 原有栏目各一个短语 + 新增 6 栏摘要（栏数由 views.json 驱动）
@@ -757,9 +805,12 @@ def build(asof):
                _k("cross", 3)))
     summary_word = summary_word + _exsum
     eps = s["erp"]["snapshot"]
+    _vlast = (jload("vix.json").get("rows") or [{}])[-1]
+    _vsnaps = jload("vix.json").get("snapshot") or {}
+    _vio = _vlast.get("IO") or {}
     title = ("上证 %s 收 %s，%d/%d 家涨跌、成交 %s（环比 %s）；"
              "%d栏速览：狼波%s、%s、主线「%s」、量比 %.2f×（%s）、宽基 ETF %.2f×·%s、"
-             "方向代理 %s、威科夫 %s、拥挤度 %s·%s、TMT 占比 %s%%、"
+             "方向代理 %s、威科夫 %s、拥挤度 %s·%s、TMT 占比 %s%%、VIX %s（%s%% 分位）、"
              "ERP %s·%s（%s%% 分位） —— %s" %
              (sgn(chg), fmt(close, 2), up, dn, fmt(amount, 0, " 亿"), sgn(amtchg, 1),
               NCOL,
@@ -769,15 +820,17 @@ def build(asof):
               sgn(s["daily"]["net"], 0, " 亿"), wy_word,
               fmt(s["flow"]["crowd"], 1), s["flow"]["crowdState"],
               locked(s["tmt"]["ratio"]),
+              fmt(_vsnaps.get("vix"), 1), fmt(_vsnaps.get("percentile"), 1),
               locked(eps.get("erp")), locked(eps.get("tier")),
               locked(eps.get("historyPercentile")), summary_word))
 
     digest = ("全市场 %d 只标的、成交 %.0f 亿、涨跌 %d/%d/%d。%d 个数据栏目一致指向：%s；"
               "第 12 栏 ERP 为 %s（历史分位 %s%%），属估值性价比而非择时信号；"
-              "新增 6 栏中，两融 / 中金所行情 / 涨跌停池 / 行业 PE / 解禁 / 跨市场均为公开真实数据，"
-              "其中三类长历史已按日回补；ETF 日度份额仍是量价反推估计、期权 IV 未接入，"
+              "新增栏目中，两融 / 中金所行情 / 涨跌停池 / 行业 PE / 解禁 / 跨市场均为公开真实数据，"
+              "其中三类长历史已按日回补；第 06 栏 EdsonVIX 用中金所期权结算价自编（方法同 CBOE），"
+              "非官方 iVIX 复刻；ETF 日度份额仍是量价反推估计，"
               "另有 TMT 同口径占比历史、炸板率/跌停家数历史确认不可回补；"
-              "本页已有两项信号经过严格因果检验并不显著（双冰点次日、威科夫 Phase C），"
+              "本页多项信号经严格因果检验并不显著（双冰点次日、威科夫 Phase C、ERP 分位反弹、VIX 高位后 20 日），"
               "因此结论以「观察与条件」为主，不作为买卖依据。" %
               (tt, amount, up, dn, fl, NCOL,
                "广度急冻且量能收缩，趋势结构尚未获得确认" if dn > up else "广度修复，量能配合度需继续观察",
@@ -792,7 +845,7 @@ def build(asof):
 
     sections = []
     for k in ["wave", "breadth", "rotate", "volume", "etf", "daily", "wyckoff", "flow",
-              "tmt", "erp", "derivatives", "leverage", "sentiment", "valuation",
+              "tmt", "erp", "derivatives", "leverage", "sentiment", "vix", "valuation",
               "events", "cross"]:
         sections.append({"id": k, "name": names[k], "kpis": s[k]["kpis"],
                          "text": s[k]["text"],

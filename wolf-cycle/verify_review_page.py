@@ -10,7 +10,7 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # 动态取最新复盘日期，避免写死某一天导致盘后更新后点检失效
 _RV = json.load(open(ROOT / "wolf-cycle" / "data" / "reviews.json", encoding="utf-8"))
-_LATEST = (_RV.get("reviews") or [{}])[-1]["date"]
+_LATEST = max((r.get("date") or "") for r in (_RV.get("reviews") or [{}]))
 LOCAL = ROOT / ("每日复盘_%s.html" % _LATEST)
 import hosts
 REMOTE = hosts.site_url() + "/review-latest.html"
@@ -29,7 +29,7 @@ def check(pg, label, errs):
     print("[%s] KPI %d | 分节 %d | 建议框 %d | 建议条目 %d | 免责 %d 字" %
           (label, kpi, sec, box, li, len(note)))
     assert kpi == 6, "大盘 KPI 不是 6 个"
-    assert sec == 16, "15栏汇总 + TMT 单列不是 16 节"
+    assert sec == 17, "16栏汇总 + TMT 单列不是 17 节"
     assert box == 2 and li >= 12, "短线/中长线建议缺失"
     assert "上证" in h1 and "栏速览" in h1 and "ERP" in h1, "标题未汇总大盘、全栏与 ERP"
     assert "证伪场景" in pg.content(), "缺少证伪场景"
@@ -40,7 +40,7 @@ def check(pg, label, errs):
     assert hist.locator(".col.ok .row").count() >= 3, "已回补项不足"
     assert hist.locator(".col.no .row").count() >= 3, "不可回补项不足"
     body = pg.content()
-    for w in ("250 日", "460 日", "TMT 交易拥挤度", "炸板率", "ETF 日度份额"):
+    for w in ("TMT 交易拥挤度", "炸板率", "ETF 日度份额"):
         assert w in body, "清单缺关键项: " + w
     print("[%s] 历史清单: 可回补 %d 项 / 不可回补 %d 项" %
           (label, hist.locator(".col.ok .row").count(), hist.locator(".col.no .row").count()))

@@ -255,6 +255,7 @@ tbody tr.click{cursor:pointer}
     <button data-v="derivatives"><span class="no">10</span><span class="txt"><span class="nm">衍生品 / 对冲压力</span><span class="sb">基差贴水 · PCR · 会员净多空</span></span></button>
     <button data-v="leverage"><span class="no">11</span><span class="txt"><span class="nm">杠杆与真实资金</span><span class="sb">两融全历史 · ETF 真实申赎</span></span></button>
     <button data-v="sentiment"><span class="no">12</span><span class="txt"><span class="nm">短线情绪与连板</span><span class="sb">涨跌停 · 连板高度 · 炸板率</span></span></button>
+    <button data-v="vix"><span class="no">13</span><span class="txt"><span class="nm">波动率与恐慌指数</span><span class="sb">EdsonVIX · Skew · 三品种</span></span></button>
     <button data-v="valuation"><span class="no">13</span><span class="txt"><span class="nm">行业估值与预期修正</span><span class="sb">PE 横截面 · 业绩预告方向</span></span></button>
     <button data-v="events"><span class="no">14</span><span class="txt"><span class="nm">筹码供给与事件</span><span class="sb">解禁 · 龙虎榜 · 事件日历</span></span></button>
     <button data-v="cross"><span class="no">15</span><span class="txt"><span class="nm">跨市场与宏观</span><span class="sb">外盘 · 汇率 · 中债10Y</span></span></button>
@@ -924,6 +925,51 @@ tbody tr.click{cursor:pointer}
       <div class="caveat" id="ST_CAVEAT"></div>
     </div>
 
+    <!-- 06 波动率与恐慌指数（EdsonVIX） -->
+    <div class="view" id="V_vix">
+      <div class="lead"><div class="bar"></div><div>
+        <b>波动率与恐慌指数（EdsonVIX）</b> — 用中金所股指期权（IO 沪深300 主口径，HO/MO 对照）的合约级结算价，按 CBOE 2003 方差互换法（原版 iVIX 同款）自编 30 日隐含波动率指数：近月+次月、K* 交汇定远期、ΔK 加权、r=1.8% 固定。官方 iVIX(000188) 已于 2018-02 停发，本栏是对「A 股 VIX」的自建回答。副产品：Skew（尾部恐慌结构）与 HV30 已实现波动率对照。
+        <span class="tag real">结算价/行权价/持仓真实</span> <span class="tag proxy">自编指数 · 方法披露</span> <span class="tag na">非官方 iVIX 复刻</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">范围</span>
+        <div class="seg" id="vx-range"><button data-r="60">近 60 日</button><button data-r="120">近 120 日</button><button class="on" data-r="0">全部</button></div>
+        <span style="flex:1"></span>
+        <span class="tag blue" id="vx-cover">—</span>
+      </div>
+      <div class="kpis" id="VX_KPI"></div>
+      <div class="card" id="VX_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">EdsonVIX · 隐含 vs 已实现</span><span class="spacer"></span><span class="d">IO 沪深300</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="vx-main"></canvas></div>
+            <div class="cv-note">金线＝EdsonVIX（前瞻预期），蓝虚线＝HV30（已实现）。VIX 持续高于 HV＝恐慌溢价，市场为未来不确定性付费；VIX 快速上穿 HV 常发生在急跌前后。<b>VIX 只标价波动，不含涨跌方向。</b></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">VIX 全样本分位通道</span><span class="spacer"></span><span class="d">%</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="vx-pct"></canvas></div>
+            <div class="cv-note">紫线＝当日 VIX 在截至当日全样本中的分位（expanding，无未来函数）。≥90 分位＝恐慌高温，≤25 分位＝波动低温（自满风险）。红/蓝虚线为阈值参考。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">三品种对照 · IO / HO / MO</span><span class="spacer"></span><span class="d">同口径</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="vx-cmp"></canvas></div>
+            <div class="cv-note">沪深300（金）/ 上证50（蓝）/ 中证1000（红）。大盘蓝筹波动低于小盘是常态结构；MO 相对 IO 的溢价急剧走阔＝小盘恐慌更甚。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">Skew · 尾部恐慌结构</span><span class="spacer"></span><span class="d">90%K Put IV − 110%K Call IV</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="vx-skew"></canvas></div>
+            <div class="cv-note">正值＝虚值 Put 比虚值 Call 贵（常态）。Skew 走高＝尾部保护需求上升，常先于或伴随急跌；回落至 0 附近＝保护需求清淡。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">逐日读数（近 22 日）</span><span class="spacer"></span><span class="d">VIX / HV30 / 溢价 / Skew / HO / MO</span></div>
+        <div class="card-b"><div class="tw" style="max-height:380px"><table id="vx-tab"><thead><tr>
+          <th class="l">日期</th><th>EdsonVIX</th><th>HV30</th><th>溢价</th><th>Skew</th><th>HO</th><th>MO</th>
+        </tr></thead><tbody></tbody></table></div></div>
+      </div>
+      <div class="caveat" id="VX_CAVEAT"></div>
+    </div>
+
     <!-- 13 行业估值与预期修正 -->
     <div class="view" id="V_valuation">
       <div class="lead"><div class="bar"></div><div>
@@ -1050,6 +1096,7 @@ tbody tr.click{cursor:pointer}
 <script id="REVIEWS" type="application/json">__REVIEWS__</script>
 <script id="ERP" type="application/json">__ERP__</script>
 <script id="TMT" type="application/json">__TMT__</script>
+<script id="VIX" type="application/json">__VIX__</script>
 <script id="EXTRAS" type="application/json">__EXTRAS__</script>
 <script id="HIST" type="application/json">__HIST__</script>
 <script>

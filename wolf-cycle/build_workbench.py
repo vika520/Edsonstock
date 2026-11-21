@@ -15,7 +15,7 @@ OUT = os.path.join(ROOT, "A股市场结构工作台.html")
 TPL = os.path.join(HERE, "template_workbench.html")
 MODULES = ["wb_core.js", "wb_extras.js", "wb_rotate.js", "wb_volume.js", "wb_etf.js",
            "wb_daily.js", "wb_wyckoff.js", "wb_flow.js", "wb_review.js", "wb_erp.js",
-           "wb_derivatives.js", "wb_leverage.js", "wb_sentiment.js",
+           "wb_derivatives.js", "wb_leverage.js", "wb_sentiment.js", "wb_vix.js",
            "wb_valuation.js", "wb_events.js", "wb_cross.js"]
 
 
@@ -98,6 +98,9 @@ def main():
     tmt = open(os.path.join(HERE, "data", "tmt.json"), encoding="utf-8").read()
     if "</script" in tmt.lower():
         raise RuntimeError("TMT 数据中含 </script，需转义")
+    vix = open(os.path.join(HERE, "data", "vix.json"), encoding="utf-8").read()
+    if "</script" in vix.lower():
+        raise RuntimeError("VIX 数据中含 </script，需转义")
     extras = open(os.path.join(HERE, "data", "extras.json"), encoding="utf-8").read()
     if "</script" in extras.lower():
         raise RuntimeError("补充数据中含 </script，需转义")
@@ -112,6 +115,7 @@ def main():
     html = html.replace("__REVIEWS__", reviews)
     html = html.replace("__ERP__", erp)
     html = html.replace("__TMT__", tmt)
+    html = html.replace("__VIX__", vix)
     html = html.replace("__EXTRAS__", extras)
     html = html.replace("__HIST__", hist)
     html = html.replace("__PAGE1__", p1).replace("__PAGE2__", p2)

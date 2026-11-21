@@ -248,6 +248,7 @@ const HEAD={
   derivatives:['VIEW 09','衍生品 / 对冲压力',['<span class="tag real">中金所行情真实</span>','<span class="tag real">会员持仓真实</span>','<span class="tag na">IV / skew 未接入</span>']],
   leverage:['VIEW 10','杠杆与真实资金',['<span class="tag real">两融全历史真实</span>','<span class="tag real">ETF 季度申赎真实</span>','<span class="tag proxy">T+1 披露</span>']],
   sentiment:['VIEW 05','短线情绪与连板',['<span class="tag real">涨跌停池真实</span>','<span class="tag real">涨停/连板已回补 250 日</span>','<span class="tag na">炸板率历史不可得</span>']],
+  vix:['VIEW 06','波动率与恐慌指数',['<span class="tag real">中金所结算价真实</span>','<span class="tag proxy">自编 EdsonVIX · 方法同 CBOE</span>','<span class="tag na">非官方复刻</span>']],
   valuation:['VIEW 13','行业估值与预期修正',['<span class="tag real">行业 PE 真实</span>','<span class="tag proxy">预期修正为业绩预告代理</span>']],
   events:['VIEW 14','筹码供给与事件',['<span class="tag real">解禁 / 龙虎榜真实</span>','<span class="tag na">无 Level-2 委托</span>']],
   cross:['VIEW 15','跨市场与宏观',['<span class="tag real">外盘 / 汇率 / 中债真实</span>','<span class="tag proxy">非盘中实时</span>']],

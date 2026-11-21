@@ -413,6 +413,19 @@ def fetch_tmt_snapshot():
         log("警告：TMT 更新失败，第 04 栏沿用上一版数据：%s" % str(e)[:160])
 
 
+def fetch_vix_snapshot():
+    """第 06 栏 EdsonVIX：中金所期权 XML → 方差互换自编 VIX，按日期幂等累积。"""
+    try:
+        r = subprocess.run([PY, os.path.join(HERE, "fetch_vix.py"), "--incremental"],
+                           cwd=HERE, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=300)
+        if r.returncode != 0:
+            raise RuntimeError((r.stderr or r.stdout)[-300:])
+        log("EdsonVIX 更新完成：" + (r.stdout or "").strip().splitlines()[-1])
+    except Exception as e:
+        log("警告：VIX 更新失败，第 06 栏沿用上一版数据：%s" % str(e)[:160])
+
+
 def fetch_extras_snapshot():
     """6 类补充数据：中金所 / 两融 / ETF 申赎 / 涨跌停 / 行业 PE / 事件 / 跨市场。
 
@@ -706,15 +719,15 @@ def sync_project():
                "build_workbench.py", "build_html.py", "build_breadth.py", "build_review.py",
                "build_review_page.py", "build_wyckoff_backtest_report.py", "brand.py",
                "fetch_wyckoff.py", "fetch_flow.py", "fetch_extras.py",
-               "fetch_erp.py", "fetch_tmt.py", "erp_q90_study.py", "build_erp_q90_report.py",
+               "fetch_erp.py", "fetch_tmt.py", "fetch_vix.py", "erp_q90_study.py", "build_erp_q90_report.py",
                "erp_q75_study.py", "build_erp_q75_report.py",
                "backfill_history.py", "daily_update.py",
                "preview_wyckoff_long.py", "preview_flow.py", "preview_review.py",
-               "preview_erp_tmt.py", "preview_extras.py", "preview_groups.py",
+               "preview_erp_tmt.py", "preview_extras.py", "preview_groups.py", "preview_vix.py",
                "verify_review_page.py", "verify_nas_wyckoff.py",
                "verify_nas_flow.py", "verify_nas_review.py", "verify_nas_erp_tmt.py",
                "probe_flow.py"]
-    datafiles = ["flow.json", "wyckoff.json", "reviews.json", "erp.json", "erp_q90_study.json", "erp_q75_study.json",
+    datafiles = ["flow.json", "wyckoff.json", "reviews.json", "erp.json", "vix.json", "erp_q90_study.json", "erp_q75_study.json",
                  "tmt.json", "extras.json", "history.json"]
     base = ["-o", "BatchMode=yes", "-o", "ConnectTimeout=10"]
     try:
@@ -849,6 +862,7 @@ def main():
         fetch_erp_snapshot()       # 依赖 merge() 写回的 indices.json（沪深300 日线）
         fetch_tmt_snapshot()       # 依赖 merge() 写回的 workbench.json（两市成交额）
         fetch_extras_snapshot()    # 6 类补充数据，复盘与工作台新增栏目都依赖它
+        fetch_vix_snapshot()       # 第 06 栏 EdsonVIX（中金所期权 XML，盘后可得）
         backfill_history_step()    # 长历史增量回补，工作台 12/13/15 栏的趋势图依赖它
         generate_review(asof)      # 依赖上面全部已更新的数据，顺序不能提前
         build()
