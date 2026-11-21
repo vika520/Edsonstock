@@ -83,6 +83,7 @@ function XTS(id, dates, series, opts) {
   const o = CV(id); if (!o) return;
   if (!dates || !dates.length) { XEMPTY(id, opts.empty || '历史序列自入库首日起累积，当前样本不足'); return; }
   const g = frame(o, opts.pad || {l: 54, r: 54, t: 16, b: 24}), x = o.x;
+  if (opts._sxgeo && o.el) o.el._sxGeo = g;   // STH 栏滚轮缩放锚定用（几何挂 canvas 元素，CV 返回的是临时包装对象）
   const L = series.filter(s => s.axis !== 'right'), R = series.filter(s => s.axis === 'right');
   const flat = a => a.reduce((acc, s) => acc.concat((s.data || []).filter(v => v != null && isFinite(v))), []);
   let lv = flat(L), rv = flat(R);

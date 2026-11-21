@@ -258190,6 +258190,7 @@ function XTS(id, dates, series, opts) {
   const o = CV(id); if (!o) return;
   if (!dates || !dates.length) { XEMPTY(id, opts.empty || '历史序列自入库首日起累积，当前样本不足'); return; }
   const g = frame(o, opts.pad || {l: 54, r: 54, t: 16, b: 24}), x = o.x;
+  if (opts._sxgeo && o.el) o.el._sxGeo = g;   // STH 栏滚轮缩放锚定用（几何挂 canvas 元素，CV 返回的是临时包装对象）
   const L = series.filter(s => s.axis !== 'right'), R = series.filter(s => s.axis === 'right');
   const flat = a => a.reduce((acc, s) => acc.concat((s.data || []).filter(v => v != null && isFinite(v))), []);
   let lv = flat(L), rv = flat(R);
@@ -260699,6 +260700,7 @@ const META = ST.meta || {};
 const SNAP = ST.snapshot || {};
 let CUR = null; // 由首个可用 target 决定
 let RANGE = 0;
+let VIEW = {n:0, end:0}; // 滚轮缩放窗口：n=可见根数(0=全部)，end=右端索引
 (function initCur(){
   const ks = Object.keys(ST.targets||{});
   if(ks.length){
@@ -260713,8 +260715,20 @@ let RANGE = 0;
 })();
 
 function T(){ return (ST.targets||{})[CUR] || {dates:[],close:[],sth:{},spread:[],ch:{}}; }
-function inRange(a){ return (RANGE && a.length>RANGE) ? a.slice(-RANGE) : a; }
-function dates(){ return inRange(T().dates||[]); }
+function winSlice(a){
+  const L=(a||[]).length;
+  if(!L) return [];
+  if(VIEW.n<=0 || VIEW.n>=L) return a.slice();           // 全部
+  const end=clamp(VIEW.end, VIEW.n-1, L-1);
+  return a.slice(end-VIEW.n+1, end+1);
+}
+function inRange(a){ return winSlice(a); }
+function dates(){ return winSlice(T().dates); }
+function resetView(){
+  const L=(T().dates||[]).length;
+  VIEW.n = (RANGE && L>RANGE) ? RANGE : 0;
+  VIEW.end = L-1;
+}
 
 function pctLabel(z){
   if(z==null) return '—';
@@ -260811,7 +260825,7 @@ function drawMain(){
     {name:'+1σ',data:rail('m1'),color:C.down,dash:[2,4]},
     {name:'−1σ',data:rail('p1'),color:C.blue,dash:[2,4]},
     {name:'下轨 −2σ',data:rail('p2'),color:C.blue,dash:[4,4]}
-  ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:24,b:24},markers});
+  ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:24,b:24},markers,_sxgeo:true});
 }
 function drawN(){
   const t=T(), d=inRange(t.dates);
@@ -260822,7 +260836,7 @@ function drawN(){
     {name:'N=60',data:inRange(((sth['60'])||[]).slice(i0)),color:C.up},
     {name:'N=80',data:inRange(((sth['80'])||[]).slice(i0)),color:C.accent},
     {name:'N=100',data:inRange(((sth['100'])||[]).slice(i0)),color:C.purple}
-  ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:20,b:24}});
+  ],{fmt:f2,fmt2:f2,pad:{l:56,r:20,t:20,b:24},_sxgeo:true});
 }
 function drawZ(){
   const t=T(); const d=inRange(t.dates);
@@ -260835,7 +260849,7 @@ function drawZ(){
     {name:'价差 z 值',data:z,color:C.accent,type:'bar'},
     {name:'+2σ',data:z.map(()=>2),color:C.down,dash:[4,4]},
     {name:'−2σ',data:z.map(()=>-2),color:C.blue,dash:[4,4]}
-  ],{zero:true,fmt:f2,fmt2:f2,pad:{l:48,r:20,t:20,b:24}});
+  ],{zero:true,fmt:f2,fmt2:f2,pad:{l:48,r:20,t:20,b:24},_sxgeo:true});
 }
 function table(){
   const tb=document.querySelector('#sx-tab tbody'); if(!tb) return;
@@ -260897,8 +260911,60 @@ document.querySelectorAll('#sx-range button').forEach(b=>{
     document.querySelectorAll('#sx-range button').forEach(x=>x.classList.remove('on'));
     b.classList.add('on');
     RANGE=+b.dataset.r||0;
-    drawMain();drawN();drawZ();
+    resetView();
+    draw();
   });
+});
+/* 滚轮缩放 + 拖拽平移 + 双击重置（锚定鼠标位置），三图联动 */
+let sxDrag=null;
+function sxWheel(e){
+  const L=(T().dates||[]).length; if(L<30) return;
+  e.preventDefault();
+  const c=e.currentTarget;
+  const geo=c._sxGeo; if(!geo) return;
+  const r=c.getBoundingClientRect();
+  const u=clamp((e.clientX-r.left-geo.L)/geo.W,0,1);
+  const baseN = VIEW.n>0 ? VIEW.n : L;
+  const anchor = (VIEW.n>0 ? VIEW.end-VIEW.n+1 : 0) + u*baseN;
+  const factor = e.deltaY>0 ? 1.25 : 0.8;
+  const newN = clamp(Math.round(baseN*factor), 30, L);
+  const newStart = clamp(Math.round(anchor-u*newN), 0, L-newN);
+  VIEW.n=newN; VIEW.end=newStart+newN-1;
+  drawMain();drawN();drawZ();
+}
+function sxDown(e){
+  const c=e.currentTarget;
+  sxDrag={x:e.clientX-c.getBoundingClientRect().left, end:VIEW.end, moved:false};
+  c.style.cursor='grabbing';
+}
+function sxMove(e){
+  if(!sxDrag) return;
+  const L=(T().dates||[]).length; if(!L||VIEW.n<=0){return;}
+  const c=e.currentTarget, geo=c._sxGeo; if(!geo) return;
+  const dx=e.clientX-sxDrag.x;
+  if(!sxDrag.moved && Math.abs(dx)<3) return;
+  sxDrag.moved=true;
+  const delta=Math.round(dx/geo.W*VIEW.n);
+  const end=clamp(sxDrag.end-delta, VIEW.n-1, L-1);
+  if(end!==VIEW.end){ VIEW.end=end; drawMain();drawN();drawZ(); }
+}
+function sxUp(){
+  document.querySelectorAll('#sx-main,#sx-n,#sx-z').forEach(c=>{if(c)c.style.cursor='grab';});
+  sxDrag=null;
+}
+function sxDbl(){
+  RANGE=0;
+  document.querySelectorAll('#sx-range button').forEach(x=>x.classList.toggle('on', x.dataset.r==='0'));
+  resetView(); draw();
+}
+['sx-main','sx-n','sx-z'].forEach(id=>{
+  const el=document.getElementById(id); if(!el) return;
+  el.style.cursor='grab';
+  el.addEventListener('wheel',sxWheel,{passive:false});
+  el.addEventListener('mousedown',sxDown);
+  el.addEventListener('mousemove',sxMove);
+  el.addEventListener('dblclick',sxDbl);
+  window.addEventListener('mouseup',sxUp);
 });
 draw();
 MODS.sth={draw};
