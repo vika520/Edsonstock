@@ -94,21 +94,27 @@ def process_basket(basket_key="hs300top", members=None, label="沪深300篮子")
         time.sleep(0.8)
     if not per:
         return None
+    # 收益率合成（修复等权价格平均失真）：各成员 close 与 sth80 先各自归一到基期=1
+    # （close/close₀、sth/sth₀），再等权平均 → ×100。篮子涨跌 = 成分股等权平均涨跌，
+    # 与真实指数方向一致；STH 的量纲与价格同为净值口径，价差/spread/z 的相对结构不变。
     all_d = sorted({d for v in per.values() for d in v["dates"]})
-    cnt, s80, sc = {}, {}, {}
+    cnt, s80n, scn = {}, {}, {}
     for mc, v in per.items():
         dm = dict(zip(v["dates"], v["sth80"]))
         cm = dict(zip(v["dates"], v["close"]))
+        base = next((cm[d0] for d0 in v["dates"] if cm.get(d0)), None)
+        if not base:
+            continue
         for d in all_d:
-            if d in dm and dm[d] is not None:
-                cnt[d] = cnt.get(d, 0) + 1
-                s80[d] = s80.get(d, 0) + dm[d]
             if d in cm and cm[d] is not None:
-                sc[d] = sc.get(d, 0) + cm[d]
+                cnt[d] = cnt.get(d, 0) + 1
+                scn[d] = scn.get(d, 0) + cm[d] / base
+                if dm.get(d) is not None:
+                    s80n[d] = s80n.get(d, 0) + dm[d] / base
     thr = max(3, int(len(per) * 0.7))
     dates_b = [d for d in all_d if cnt.get(d, 0) >= thr]
-    sth_b = [s80[d] / cnt[d] if cnt.get(d) else None for d in dates_b]
-    closes_b = [sc[d] / cnt[d] if cnt.get(d) else None for d in dates_b]
+    sth_b = [100 * s80n[d] / cnt[d] if s80n.get(d) else None for d in dates_b]
+    closes_b = [100 * scn[d] / cnt[d] if scn.get(d) else None for d in dates_b]
     # 篮子不做二次衰减模拟：成员已各自算过 STH，这里只对等权均值序列求通道与检验
     spread_b = [(closes_b[i] - sth_b[i]) if (closes_b[i] is not None and sth_b[i] is not None)
                 else None for i in range(len(dates_b))]
@@ -378,7 +384,7 @@ def main():
             "纯现金分红缺口不缩放（股息率 1~3% 误差可接受）",
             "VWAP 用收盘价近似（新浪日线无成交额字段）",
             "有效数据自东财报表起点 2018-06 起；burn-in %d 日为初始化期" % BURN_IN,
-            "篮子为等权 30 只流动性样本，非官方指数成分加权",
+            "篮子为等权 15 只抽样股的收益率合成（各股归一后等权平均，基期=100）；等权口径与市值加权指数在分化市可背离（指数跌/等权涨属正常，篮子反映等仓持有的真实损益），非官方指数复刻",
             "因果检验：spread≤mean−2σ 首次进入、其后 20/60 日 vs 全样本基准",
         ],
         "N": list(HORIZONS), "windows": list(WINDOWS), "channels": list(CHANNELS),
