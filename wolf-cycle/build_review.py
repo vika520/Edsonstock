@@ -486,6 +486,51 @@ def read_erp(erp):
                      {"k": "90分位点位", "v": locked(th[0].get("point")) if th else "—"}]}
 
 
+def read_sth(sth):
+    """03 STH 成本基础：只读 sth.json 快照与因果检验结论，不做二次计算。"""
+    s = (sth.get("snapshot") or {}).get("hs300top") or \
+        (sth.get("snapshot") or {}).get("300750") or {}
+    tg = (sth.get("targets") or {}).get("hs300top") or \
+         (sth.get("targets") or {}).get("300750") or {}
+    z = s.get("z")
+    tier = "—"
+    if z is not None:
+        if z >= 2:
+            tier = "极端过热（≥+2σ）"
+        elif z >= 1:
+            tier = "偏热（+1σ 上方）"
+        elif z <= -2:
+            tier = "极端冷却（≤−2σ）"
+        elif z <= -1:
+            tier = "偏冷（跌破成本）"
+        else:
+            tier = "中性"
+    f20 = (tg.get("fwd") or {}).get("20")
+    f60 = (tg.get("fwd") or {}).get("60")
+    text = ("STH80 短持成本 %s vs 收盘 %s，价差 %s → z=%s（%s）。"
+            "−2σ 触发 %s 次；其后 20 日胜率 %s（基准 %s，p=%s）、60 日 %s（p=%s），%s。"
+            "筹码衰减模型（三角分布+自由流通换手），价位未复权、股本跳变检测除权；"
+            "−2σ 为逆势信号，单边阴跌中连续触发连续失效，须与狼波/威科夫趋势合读。"
+            "篮子为等权 15 只流动性样本，代理口径。" %
+            (fmt(s.get("sth80"), 2), fmt(s.get("close"), 2), fmt(s.get("spread"), 2),
+             fmt(z, 2), tier,
+             fmt(f20.get("events"), 0) if f20 else "—",
+             fmt(f20.get("winRate"), 1, "%") if f20 else "—",
+             fmt(f20.get("baseline"), 1, "%") if f20 else "—",
+             fmt(f20.get("p"), 3) if f20 else "—",
+             fmt(f60.get("winRate"), 1, "%") if f60 else "—",
+             fmt(f60.get("p"), 3) if f60 else "—",
+             "60 日显著" if (f60 or {}).get("sig") else "均不显著"))
+    return {
+        "kpis": [{"k": "STH80 成本", "v": fmt(s.get("sth80"), 2)},
+                 {"k": "收盘", "v": fmt(s.get("close"), 2)},
+                 {"k": "价差", "v": fmt(s.get("spread"), 2)},
+                 {"k": "z 值", "v": fmt(z, 2) + "σ"},
+                 {"k": "档位", "v": tier}],
+        "text": text,
+    }
+
+
 def read_vix(vix):
     """06 波动率与恐慌指数：只读 vix.json 锁定快照，不做二次计算。"""
     s = vix.get("snapshot") or {}
@@ -759,6 +804,7 @@ def build(asof):
         "wyckoff": read_wyckoff(wy, bt), "flow": read_flow(flow, w),
         "tmt": read_tmt(tmt, w), "erp": read_erp(erp),
         "vix": read_vix(jload("vix.json")),
+        "sth": read_sth(jload("sth.json")),
     }
     s.update(read_extras(ex))
 
@@ -776,7 +822,7 @@ def build(asof):
 
     names = {"wave": "狼波周期指数", "breadth": "双冰点情绪", "rotate": "板块轮动",
              "volume": "放量信号", "etf": "ETF 日度申赎", "daily": "日度全景",
-             "wyckoff": "威科夫吸筹", "flow": "市场宽度与拥挤度",
+             "wyckoff": "威科夫吸筹", "sth": "STH 成本基础", "flow": "市场宽度与拥挤度",
              "tmt": "TMT 交易拥挤度（第 04 栏扩展）", "erp": "股债利差(ERP)区间",
              "derivatives": "衍生品 / 对冲压力", "leverage": "杠杆与真实资金",
              "sentiment": "短线情绪与连板", "vix": "波动率与恐慌指数",
@@ -844,9 +890,9 @@ def build(asof):
                    (asof, " / ".join("%s %s" % (k, v) for k, v in data_asof.items())))
 
     sections = []
-    for k in ["wave", "breadth", "rotate", "volume", "etf", "daily", "wyckoff", "flow",
-              "tmt", "erp", "derivatives", "leverage", "sentiment", "vix", "valuation",
-              "events", "cross"]:
+    for k in ["wave", "breadth", "rotate", "volume", "etf", "daily", "wyckoff", "sth",
+              "flow", "tmt", "erp", "derivatives", "leverage", "sentiment", "vix",
+              "valuation", "events", "cross"]:
         sections.append({"id": k, "name": names[k], "kpis": s[k]["kpis"],
                          "text": s[k]["text"],
                          "tone": ("down" if k in ("breadth", "daily", "flow") and dn > up else

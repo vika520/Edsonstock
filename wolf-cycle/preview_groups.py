@@ -8,14 +8,14 @@ PNG = ROOT / "A股市场结构工作台_分组菜单.png"
 CHROME = r"C:/Users/Admin/AppData/Local/ms-playwright/chromium-1248/chrome-win64/chrome.exe"
 
 EXPECT_NO = {
-    "wave": "01", "wyckoff": "02", "breadth": "03", "flow": "04", "sentiment": "05",
-    "vix": "06", "volume": "07", "etf": "08", "daily": "09", "derivatives": "10",
-    "leverage": "11", "rotate": "12", "erp": "13", "valuation": "14", "events": "15",
-    "cross": "16", "review": "17",
+    "wave": "01", "wyckoff": "02", "sth": "03", "breadth": "04", "flow": "05",
+    "sentiment": "06", "vix": "07", "volume": "08", "etf": "09", "daily": "10",
+    "derivatives": "11", "leverage": "12", "rotate": "13", "erp": "14", "valuation": "15",
+    "events": "16", "cross": "17", "review": "18",
 }
 GROUPS = ["趋势与结构", "情绪与广度", "资金与杠杆", "估值与宏观", "每日复盘"]
 # 分组后的菜单显示顺序
-DISPLAY = ["wave", "wyckoff", "breadth", "flow", "sentiment", "vix",
+DISPLAY = ["wave", "wyckoff", "sth", "breadth", "flow", "sentiment", "vix",
            "volume", "etf", "daily", "derivatives", "leverage",
            "rotate", "erp", "valuation", "events", "cross", "review"]
 
@@ -31,7 +31,7 @@ with sync_playwright() as p:
     btns = pg.locator("#NAV button")
     n = btns.count()
     print("NAV button count:", n)
-    assert n == 17, "按钮数不是 17（分组标题误用了 button）"
+    assert n == 18, "按钮数不是 18（分组标题误用了 button）"
 
     vs = [btns.nth(i).get_attribute("data-v") for i in range(n)]
     nos = [btns.nth(i).locator(".no").inner_text() for i in range(n)]
@@ -41,11 +41,11 @@ with sync_playwright() as p:
     for v, no in zip(vs, nos):
         assert no == EXPECT_NO[v], "%s 编号变成 %s，应为 %s" % (v, no, EXPECT_NO[v])
     # 核心：菜单从上到下编号必须连续 01~16，不能有跳号
-    want_seq = [str(i).zfill(2) for i in range(1, 18)]
+    want_seq = [str(i).zfill(2) for i in range(1, 19)]
     assert nos == want_seq, "菜单编号不连续: %s（应为 %s）" % (nos, want_seq)
     print("菜单编号连续 01-16: PASS")
     assert btns.last.get_attribute("data-v") == "review", "复盘不在末尾"
-    assert btns.last.locator(".no").inner_text() == "17", "复盘编号不是 17"
+    assert btns.last.locator(".no").inner_text() == "18", "复盘编号不是 18"
     print("固定编号 01-16: ALL PASS")
 
     grps = pg.locator("#NAV .navgrp")
@@ -61,8 +61,8 @@ with sync_playwright() as p:
     print("DOM 序列:", seq[:12], "...")
 
     # 深链 + VIEW 文案：分组重排不应改变任何栏目编号
-    for v, want in [("erp", "VIEW 13"), ("flow", "VIEW 04"), ("wyckoff", "VIEW 02"),
-                    ("derivatives", "VIEW 10"), ("vix", "VIEW 06"), ("review", "VIEW 17")]:
+    for v, want in [("erp", "VIEW 14"), ("flow", "VIEW 05"), ("wyckoff", "VIEW 02"),
+                    ("derivatives", "VIEW 11"), ("vix", "VIEW 07"), ("review", "VIEW 18")]:
         pg.locator('#NAV button[data-v="%s"]' % v).click()
         pg.wait_for_timeout(200)
         eyebrow = pg.locator("#HD_EYEBROW").inner_text()
@@ -84,7 +84,7 @@ with sync_playwright() as p:
     pg.locator("#collapseBtn").click()
     pg.wait_for_timeout(350)
     assert pg.locator(".side.collapsed").count() == 1
-    assert pg.locator("#NAV button").count() == 17
+    assert pg.locator("#NAV button").count() == 18
     vis = pg.locator("#NAV .navgrp .gn").first.is_visible()
     h = pg.locator("#NAV .navgrp").first.bounding_box()
     print("折叠态分组文字可见:", vis, "| 细线高度:", round(h["height"], 1) if h else None)

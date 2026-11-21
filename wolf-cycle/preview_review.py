@@ -19,7 +19,7 @@ with sync_playwright() as p:
 
     print("HTML: %.2f MB" % (HTML.stat().st_size / 1024 / 1024))
     print("NAV:", pg.locator("#NAV button").count(), "| HEAD:", pg.locator("#HD_TITLE").inner_text())
-    assert pg.locator("#NAV button").count() == 17, "菜单不是 17 栏"
+    assert pg.locator("#NAV button").count() == 18, "菜单不是 18 栏"
     assert "复盘" in pg.locator("#HD_TITLE").inner_text()
 
     items = pg.locator("#rv-list .rv-item")
@@ -37,9 +37,9 @@ with sync_playwright() as p:
     secs = pg.locator("#rv-detail .rv-sec")
     print("SECTIONS:", secs.count(), "| names:",
           [x.strip() for x in secs.locator("> .h > .t").all_inner_texts()][:8])
-    assert secs.count() >= 17, "16栏汇总 + TMT 单列 + 生成机制不足"
+    assert secs.count() >= 18, "17栏汇总 + TMT 单列 + 生成机制不足"
     detail = pg.locator("#rv-detail").inner_text()
-    for key in ["一、16栏数据汇总", "二、操作参考", "短线", "中长线", "触发条件", "证伪场景", "不是投资建议"]:
+    for key in ["一、17栏数据汇总", "二、操作参考", "短线", "中长线", "触发条件", "证伪场景", "不是投资建议"]:
         assert key in detail, "正文缺失: " + key
     print("ADVICE boxes:", pg.locator(".rv-adv .box").count(),
           "| bullets:", pg.locator(".rv-adv li").count())

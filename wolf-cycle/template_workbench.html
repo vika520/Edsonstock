@@ -249,7 +249,8 @@ tbody tr.click{cursor:pointer}
     <button data-v="volume"><span class="no">04</span><span class="txt"><span class="nm">放量信号</span><span class="sb">事件驱动 · 历史放量回看</span></span></button>
     <button data-v="etf"><span class="no">05</span><span class="txt"><span class="nm">ETF 日度申赎</span><span class="sb">季度真实申赎 · 日度份额估计</span></span></button>
     <button data-v="daily"><span class="no">06</span><span class="txt"><span class="nm">日度全景</span><span class="sb">成交额 · 结构 · 月度表格</span></span></button>
-    <button data-v="wyckoff"><span class="no">07</span><span class="txt"><span class="nm">威科夫吸筹</span><span class="sb">结构原理图 · 多周期标注</span></span></button>
+    <button data-v="wyckoff"><span class="no">02</span><span class="txt"><span class="nm">威科夫吸筹</span><span class="sb">结构原理图 · 多周期标注</span></span></button>
+    <button data-v="sth"><span class="no">03</span><span class="txt"><span class="nm">STH 成本基础</span><span class="sb">筹码衰减 · ±2σ 通道 · 因果检验</span></span></button>
     <button data-v="flow"><span class="no">08</span><span class="txt"><span class="nm">市场宽度与拥挤度</span><span class="sb">ADL · 麦克莱伦 · NH-NL · TRIN</span></span></button>
     <button data-v="erp"><span class="no">09</span><span class="txt"><span class="nm">股债利差(ERP)区间</span><span class="sb">估值档位 · ±2σ 通道 · 点位换算</span></span></button>
     <button data-v="derivatives"><span class="no">10</span><span class="txt"><span class="nm">衍生品 / 对冲压力</span><span class="sb">基差贴水 · PCR · 会员净多空</span></span></button>
@@ -567,6 +568,47 @@ tbody tr.click{cursor:pointer}
         </div>
       </div>
       <div class="caveat" id="WY_CAVEAT"></div>
+    </div>
+
+    <!-- 03 STH 成本基础 -->
+    <div class="view" id="V_sth">
+      <div class="lead"><div class="bar"></div><div>
+        <b>STH 成本基础</b> — 复刻 BTC「短期持有者成本基础」模型的 A 股版：筹码衰减马尔可夫链（每日新增筹码按 [low,high] 三角分布摊入、旧筹码按自由流通换手率衰减），短持成本 = 最近 80 个交易日新增筹码层的加权均价。价格相对成本的 z 值通道（250 日均值 ±0.5/1/1.5/2σ）用于识别过热/冷却。
+        <span class="tag real">日线与股本真实</span> <span class="tag proxy">筹码分布为模型推算</span> <span class="tag na">非链上可验证口径</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">标的</span>
+        <div class="seg" id="sx-target"><button class="on" data-t="hs300top">沪深300篮子</button><button data-t="300750">宁德时代</button><button data-t="600519">贵州茅台</button></div>
+        <span style="flex:1"></span>
+        <div class="seg" id="sx-range"><button data-r="250">近 250 日</button><button data-r="500">近 500 日</button><button class="on" data-r="0">全部</button></div>
+        <span class="tag blue" id="sx-cover">—</span>
+      </div>
+      <div class="kpis" id="SX_KPI"></div>
+      <div class="card" id="SX_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">价格 vs STH 成本 · ±σ 通道</span><span class="spacer"></span><span class="d">250 日窗</span></div>
+          <div class="card-b"><div class="cv h340"><canvas id="sx-main"></canvas></div>
+            <div class="cv-note">白＝收盘，金＝STH80 短持成本，红蓝虚线＝±1/±2σ 轨。价格贴近成本＝趋势中继；远离成本上沿＝过热；跌破成本且触 −2σ＝冷却（逆势信号，阴跌中会连续触发）。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">N 值敏感性 · 60 / 80 / 100</span><span class="spacer"></span><span class="d">成本对照</span></div>
+          <div class="card-b"><div class="cv h340"><canvas id="sx-n"></canvas></div>
+            <div class="cv-note">三档短持周期成本线。三条线收敛＝各周期持仓成本趋同（变盘临界）；发散＝短长周期成本严重分化。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">价差 z 值</span><span class="spacer"></span><span class="d">σ</span></div>
+          <div class="card-b"><div class="cv h340"><canvas id="sx-z"></canvas></div>
+            <div class="cv-note">柱＝(收盘−STH80)/250日σ。≥+2 过热、≤−2 冷却。z 值连续为负且加深＝趋势下跌中的逆势陷阱（连续触发连续失效）。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">逐日读数（近 20 日）</span><span class="spacer"></span><span class="d">收盘 / STH80 / 价差 / z</span></div>
+          <div class="card-b"><div class="tw" style="max-height:340px"><table id="sx-tab"><thead><tr>
+            <th class="l">日期</th><th>收盘</th><th>STH80</th><th>价差</th><th>z</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="caveat" id="SX_CAVEAT"></div>
     </div>
 
     <!-- 08 市场宽度与拥挤度（资金流指标） -->
@@ -1097,6 +1139,7 @@ tbody tr.click{cursor:pointer}
 <script id="ERP" type="application/json">__ERP__</script>
 <script id="TMT" type="application/json">__TMT__</script>
 <script id="VIX" type="application/json">__VIX__</script>
+<script id="STH" type="application/json">__STH__</script>
 <script id="EXTRAS" type="application/json">__EXTRAS__</script>
 <script id="HIST" type="application/json">__HIST__</script>
 <script>

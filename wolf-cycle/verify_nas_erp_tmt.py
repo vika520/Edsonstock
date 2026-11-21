@@ -39,7 +39,7 @@ assert VIEWS.get("reviewViewNo") == NAV_N and VIEWS.get("dataViews") == NAV_N - 
 assert st["erp"]["locked"] is True and st["erp"].get("lockedBase")
 assert st["erp"].get("erp") and st["erp"].get("seriesRows", 0) > 0
 assert st["tmt"].get("ratio") and st["tmt"].get("historyDays", 0) >= 1
-assert st["reviews"]["sections"] >= 17 and st["reviews"]["count"] >= 1
+assert st["reviews"]["sections"] >= 18 and st["reviews"]["count"] >= 1
 assert st["reviews"]["viewNo"] == NAV_N, "复盘编号与 status.views 不一致"
 assert st["flow"]["rows"] > 0 and st["wyckoff"]["multiSegment"]
 _latest = (st.get("reviews") or {}).get("latest") or st.get("asof")

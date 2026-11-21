@@ -243,6 +243,7 @@ const HEAD={
   etf:['VIEW 07','ETF 日度申赎',['<span class="tag real">季度申赎真实</span>','<span class="tag proxy">日度份额为估计</span>','<span class="tag na">不做买方身份归因</span>']],
   daily:['VIEW 08','日度全景',['<span class="tag real">成交额真实</span>','<span class="tag proxy">净流入为代理</span>']],
   wyckoff:['VIEW 02','威科夫吸筹结构',['<span class="tag real">多周期 K 线真实</span>','<span class="tag proxy">事件为算法标注</span>']],
+  sth:['VIEW 03','STH 成本基础',['<span class="tag real">日线与股本真实</span>','<span class="tag proxy">筹码分布为模型推算</span>','<span class="tag na">非链上可验证口径</span>']],
   flow:['VIEW 04','市场宽度与拥挤度',['<span class="tag real">逐股日线全市场</span>','<span class="tag real">TMT 行业成交额真实</span>','<span class="tag na">非真实资金流</span>']],
   erp:['VIEW 12','股债利差(ERP)区间',['<span class="tag blue">数值锁定只读</span>','<span class="tag real">PE / 国债 / 指数真实</span>','<span class="tag na">不构成投资建议</span>']],
   derivatives:['VIEW 09','衍生品 / 对冲压力',['<span class="tag real">中金所行情真实</span>','<span class="tag real">会员持仓真实</span>','<span class="tag na">IV / skew 未接入</span>']],

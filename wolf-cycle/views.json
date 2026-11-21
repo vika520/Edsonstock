@@ -7,6 +7,7 @@
     "etf",
     "daily",
     "wyckoff",
+    "sth",
     "flow",
     "erp",
     "derivatives",
@@ -21,29 +22,31 @@
   "fixedNo": {
     "wave": "01",
     "wyckoff": "02",
-    "breadth": "03",
-    "flow": "04",
-    "sentiment": "05",
-    "vix": "06",
-    "volume": "07",
-    "etf": "08",
-    "daily": "09",
-    "derivatives": "10",
-    "leverage": "11",
-    "rotate": "12",
-    "erp": "13",
-    "valuation": "14",
-    "events": "15",
-    "cross": "16",
-    "review": "17"
+    "breadth": "04",
+    "flow": "05",
+    "sentiment": "06",
+    "vix": "07",
+    "volume": "08",
+    "etf": "09",
+    "daily": "10",
+    "derivatives": "11",
+    "leverage": "12",
+    "rotate": "13",
+    "erp": "14",
+    "valuation": "15",
+    "events": "16",
+    "cross": "17",
+    "review": "18",
+    "sth": "03"
   },
   "groups": [
     {
       "name": "趋势与结构",
-      "hint": "相位判读 · 吸筹结构",
+      "hint": "相位判读 · 吸筹结构 · STH 成本",
       "views": [
         "wave",
-        "wyckoff"
+        "wyckoff",
+        "sth"
       ]
     },
     {
@@ -86,5 +89,5 @@
       ]
     }
   ],
-  "note": "order 是栏目清单与复盘栏数的权威来源；fixedNo 是固定编号表，按 groups 的显示顺序连续编号 01~17，菜单分组重排时编号随之连续；groups 只用于左侧菜单插入分组标题。每日复盘 review 必须永远最后；新增数据栏目要插在 review 之前，并同步 fixedNo 与 groups。"
+  "note": "order 是栏目清单与复盘栏数的权威来源；fixedNo 是固定编号表，按 groups 的显示顺序连续编号 01~18，菜单分组重排时编号随之连续；groups 只用于左侧菜单插入分组标题。每日复盘 review 必须永远最后；新增数据栏目要插在 review 之前，并同步 fixedNo 与 groups。"
 }
