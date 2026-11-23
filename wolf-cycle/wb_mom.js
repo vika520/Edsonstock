@@ -60,7 +60,7 @@ function drawMain(){
     {name:'狂热警戒 75',data:d.map(()=>75),color:C.down,dash:[4,4]},
     {name:'警惕线 60',data:d.map(()=>60),color:C.accent,dash:[2,4]},
     {name:'冷清线 20',data:d.map(()=>20),color:C.blue,dash:[4,4]}
-  ],{fmt:f1,fmt2:f1,pad:{l:48,r:20,t:20,b:24},_sxgeo:true});
+  ],{fmt:f1,fmt2:f1,pad:{l:48,r:44,t:20,b:24},_sxgeo:true});
 }
 function drawSectors(){
   const d=hist('overall').map(r=>r.date);
@@ -68,7 +68,7 @@ function drawSectors(){
   const rows=Object.keys(SECTORS).map((k,i)=>({
     name:SECTORS[k],data:hist(k).map(r=>r.index),color:colors[i%4]
   }));
-  XTS('mo-sectors',d,rows,{fmt:f1,fmt2:f1,pad:{l:48,r:20,t:20,b:24},_sxgeo:true});
+  XTS('mo-sectors',d,rows,{fmt:f1,fmt2:f1,pad:{l:48,r:52,t:20,b:24},_sxgeo:true});
 }
 function drawBuySell(){
   const recs=(M.records||[]).slice(RANGE? -RANGE:0);

@@ -122,7 +122,26 @@ function XTS(id, dates, series, opts) {
     } else {
       const pts = [];
       (s.data || []).forEach((v, i) => { if (v != null && isFinite(v)) pts.push([X(i), Y(v, right)]); });
-      poly(x, pts, s.color || C.white, s.width || 1.4, s.dash);
+      const raw = (s.data || []).filter(v => v != null && isFinite(v));
+      const isConst = raw.length > 0 && raw.every(v => v === raw[0]);
+      if (pts.length === 0) {
+        // 无有效点
+      } else if (isConst && (s.dash || n < 3)) {
+        // 常量线（阈值/参考线）或首日单样本：画满宽水平线，保证不空白
+        hline(x, g.L, g.L + g.W, pts[0][1], s.color || C.white, s.dash || [4, 4]);
+        if (s.name && n < 3) txt(x, (opts.fmt || f1)(raw[0]), g.L + g.W + 3,
+                                 pts[0][1] + 3, s.color || C.white, 'left');
+      } else if (pts.length === 1) {
+        // 仅一个数据点（栏目上线首日）：画明显圆点 + 数值标签
+        const [px, py] = pts[0];
+        x.beginPath(); x.arc(px, py, 4.5, 0, Math.PI * 2);
+        x.fillStyle = s.color || C.white; x.fill();
+        x.beginPath(); x.arc(px, py, 8, 0, Math.PI * 2);
+        x.strokeStyle = (s.color || C.white) + '66'; x.lineWidth = 1; x.stroke();
+        txt(x, (opts.fmt || f1)(raw[0]), px + 11, py - 9, s.color || C.white, 'left');
+      } else {
+        poly(x, pts, s.color || C.white, s.width || 1.4, s.dash);
+      }
       if (s.dot) pts.forEach(q => { x.beginPath(); x.arc(q[0], q[1], 2.2, 0, Math.PI * 2); x.fillStyle = s.color; x.fill(); });
     }
     if (s.guide != null) hline(x, g.L, g.L + g.W, Y(s.guide, right), s.color || C.accent, [3, 3]);

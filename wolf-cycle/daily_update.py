@@ -828,13 +828,14 @@ def git_sync(asof):
         return {"ok": False, "pushed": False, "error": str(e)[:200]}
 
 
-def write_log(asof, ok, err="", github=None):
+def write_log(asof, ok, err="", github=None, note=""):
     os.makedirs(LOGS, exist_ok=True)
     os.makedirs(DEPLOY, exist_ok=True)
     p = os.path.join(LOGS, "%s.log" % dt.date.today().isoformat())
     with open(p, "a", encoding="utf-8") as f:
-        f.write("\n=== %s asof=%s %s ===\n" % (dt.datetime.now().isoformat(timespec="seconds"), asof,
-                                               "OK" if ok else "FAIL"))
+        f.write("\n=== %s asof=%s %s%s ===\n" % (dt.datetime.now().isoformat(timespec="seconds"), asof,
+                                               "OK" if ok else "FAIL",
+                                               (" [" + note + "]") if note else ""))
         f.write("\n".join(_LOGLINES) + "\n")
         if err:
             f.write("ERROR: " + err + "\n")
@@ -849,6 +850,8 @@ def main():
     ap.add_argument("--no-deploy", action="store_true", help="只更新数据和重建 HTML")
     ap.add_argument("--no-git", action="store_true", help="同步 NAS 但不推送 GitHub")
     ap.add_argument("--dry-run", action="store_true", help="只探测数据源，不写文件")
+    ap.add_argument("--only-mom", action="store_true",
+                    help="轻量模式：只更新第 08 栏散户反向指数并重建/部署，供晚间独立定时任务使用")
     args = ap.parse_args()
 
     asof = ""
@@ -873,6 +876,28 @@ def main():
             log("--dry-run：仅探测，未写任何文件")
             return 0
 
+        # ---- 轻量模式：仅散户反向指数（晚间独立任务）----
+        # 主任务 16:00 已完成全市场数据/复盘/部署；此处只补采当日股吧帖子、
+        # 重算 MOM、重建复盘与页面、再部署+推送。股吧讨论热度在晚间更完整。
+        if args.only_mom:
+            log("=== 轻量模式：仅更新散户反向指数 asof=%s ===" % asof)
+            fetch_mom_index_snapshot()
+            generate_review(asof)
+            build()
+            sp = os.path.join(DEPLOY, "status.json")
+            prev = jload(sp) if os.path.exists(sp) else {}
+            stats = prev.get("stats") or {}
+            status = stage(asof, stats)
+            github = None
+            if not args.no_deploy:
+                deploy()
+                if not args.no_git:
+                    github = git_sync(asof)
+            write_log(asof, True, github=github, note="only-mom")
+            log("=== 完成（only-mom）：MOM 样本 %s 日 ===" %
+                ((jload(os.path.join(DATA, "mom.json")).get("snapshot") or {}).get("recordCount")))
+            return 0
+
         log("=== 开始盘后更新 asof=%s ===" % asof)
         breadth = fetch_breadth()
         w0 = jload(os.path.join(DATA, "workbench.json"))
@@ -890,8 +915,8 @@ def main():
         fetch_tmt_snapshot()       # 依赖 merge() 写回的 workbench.json（两市成交额）
         fetch_extras_snapshot()    # 6 类补充数据，复盘与工作台新增栏目都依赖它
         fetch_vix_snapshot()       # 第 07 栏 EdsonVIX（中金所期权 XML，盘后可得）
-        fetch_mom_index_snapshot()  # 第 08 栏散户反向指数（东财股吧帖子，盘后可得）
         fetch_sth_snapshot()       # 第 03 栏 STH 成本基础（新浪日线+东财股本，约 1-3 分钟增量）
+        # 第 08 栏 MOM 由晚间独立任务 --only-mom 采集（股吧全天讨论更完整），此处不重复
         backfill_history_step()    # 长历史增量回补，工作台 12/13/15 栏的趋势图依赖它
         generate_review(asof)      # 依赖上面全部已更新的数据，顺序不能提前
         build()

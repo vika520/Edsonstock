@@ -24,26 +24,26 @@
   {
    "date": "2026-11-23",
    "asof": "20261123",
-   "overall": 19.1,
-   "buyAvg": 11.0,
-   "sellAvg": 7.4,
+   "overall": 18.9,
+   "buyAvg": 11.3,
+   "sellAvg": 7.0,
    "sectors": {
     "nasdaq": {
-     "index": 17.6,
+     "index": 17.7,
      "interpretation": "极度冷清：小白沉默，可能接近底部",
      "details": {
       "totalPosts": 146,
       "validPosts": 146,
       "spamPosts": 0,
-      "newbiePosts": 20,
+      "newbiePosts": 19,
       "pureNewbie": 0,
-      "newbieRatio": 13.7,
-      "avgNewbieScore": 24.6,
-      "avgSentiment": 30.0,
+      "newbieRatio": 13.0,
+      "avgNewbieScore": 24.7,
+      "avgSentiment": 31.6,
       "puritySignal": 0.0,
       "activity": 100,
-      "momBuyIndex": 19.7,
-      "momSellIndex": 6.6,
+      "momBuyIndex": 20.5,
+      "momSellIndex": 6.7,
       "buySellRatio": 6.0,
       "buyCount": 6,
       "sellCount": 1
@@ -165,24 +165,24 @@
      "postsUsed": 54
     },
     "cpo": {
-     "index": 22.4,
+     "index": 21.7,
      "interpretation": "正常区间：小白参与度适中",
      "details": {
       "totalPosts": 156,
       "validPosts": 156,
       "spamPosts": 0,
-      "newbiePosts": 32,
+      "newbiePosts": 31,
       "pureNewbie": 1,
-      "newbieRatio": 20.5,
-      "avgNewbieScore": 27.4,
-      "avgSentiment": 34.4,
-      "puritySignal": 3.1,
+      "newbieRatio": 19.9,
+      "avgNewbieScore": 27.3,
+      "avgSentiment": 32.3,
+      "puritySignal": 3.2,
       "activity": 100,
-      "momBuyIndex": 16.0,
-      "momSellIndex": 10.6,
-      "buySellRatio": 1.75,
+      "momBuyIndex": 16.4,
+      "momSellIndex": 9.1,
+      "buySellRatio": 2.33,
       "buyCount": 7,
-      "sellCount": 4
+      "sellCount": 3
      },
      "topPosts": [
       {
@@ -237,19 +237,19 @@
      "postsUsed": 156
     },
     "semiconductor": {
-     "index": 15.8,
+     "index": 15.7,
      "interpretation": "极度冷清：小白沉默，可能接近底部",
      "details": {
-      "totalPosts": 67,
-      "validPosts": 67,
+      "totalPosts": 68,
+      "validPosts": 68,
       "spamPosts": 0,
       "newbiePosts": 9,
       "pureNewbie": 1,
-      "newbieRatio": 13.4,
+      "newbieRatio": 13.2,
       "avgNewbieScore": 26.0,
       "avgSentiment": 11.1,
       "puritySignal": 11.1,
-      "activity": 83.8,
+      "activity": 85.0,
       "momBuyIndex": 0.0,
       "momSellIndex": 0.0,
       "buySellRatio": 0.0,
@@ -297,7 +297,7 @@
      ],
      "name": "半导体",
      "etf": "512480",
-     "postsUsed": 67
+     "postsUsed": 68
     }
    }
   }
@@ -306,7 +306,7 @@
   "nasdaq": [
    {
     "date": "2026-11-23",
-    "index": 17.6
+    "index": 17.7
    }
   ],
   "gold": [
@@ -318,45 +318,45 @@
   "cpo": [
    {
     "date": "2026-11-23",
-    "index": 22.4
+    "index": 21.7
    }
   ],
   "semiconductor": [
    {
     "date": "2026-11-23",
-    "index": 15.8
+    "index": 15.7
    }
   ],
   "overall": [
    {
     "date": "2026-11-23",
-    "index": 19.1
+    "index": 18.9
    }
   ]
  },
  "latest": {
   "date": "2026-11-23",
   "asof": "20261123",
-  "overall": 19.1,
-  "buyAvg": 11.0,
-  "sellAvg": 7.4,
+  "overall": 18.9,
+  "buyAvg": 11.3,
+  "sellAvg": 7.0,
   "sectors": {
    "nasdaq": {
-    "index": 17.6,
+    "index": 17.7,
     "interpretation": "极度冷清：小白沉默，可能接近底部",
     "details": {
      "totalPosts": 146,
      "validPosts": 146,
      "spamPosts": 0,
-     "newbiePosts": 20,
+     "newbiePosts": 19,
      "pureNewbie": 0,
-     "newbieRatio": 13.7,
-     "avgNewbieScore": 24.6,
-     "avgSentiment": 30.0,
+     "newbieRatio": 13.0,
+     "avgNewbieScore": 24.7,
+     "avgSentiment": 31.6,
      "puritySignal": 0.0,
      "activity": 100,
-     "momBuyIndex": 19.7,
-     "momSellIndex": 6.6,
+     "momBuyIndex": 20.5,
+     "momSellIndex": 6.7,
      "buySellRatio": 6.0,
      "buyCount": 6,
      "sellCount": 1
@@ -478,24 +478,24 @@
     "postsUsed": 54
    },
    "cpo": {
-    "index": 22.4,
+    "index": 21.7,
     "interpretation": "正常区间：小白参与度适中",
     "details": {
      "totalPosts": 156,
      "validPosts": 156,
      "spamPosts": 0,
-     "newbiePosts": 32,
+     "newbiePosts": 31,
      "pureNewbie": 1,
-     "newbieRatio": 20.5,
-     "avgNewbieScore": 27.4,
-     "avgSentiment": 34.4,
-     "puritySignal": 3.1,
+     "newbieRatio": 19.9,
+     "avgNewbieScore": 27.3,
+     "avgSentiment": 32.3,
+     "puritySignal": 3.2,
      "activity": 100,
-     "momBuyIndex": 16.0,
-     "momSellIndex": 10.6,
-     "buySellRatio": 1.75,
+     "momBuyIndex": 16.4,
+     "momSellIndex": 9.1,
+     "buySellRatio": 2.33,
      "buyCount": 7,
-     "sellCount": 4
+     "sellCount": 3
     },
     "topPosts": [
      {
@@ -550,19 +550,19 @@
     "postsUsed": 156
    },
    "semiconductor": {
-    "index": 15.8,
+    "index": 15.7,
     "interpretation": "极度冷清：小白沉默，可能接近底部",
     "details": {
-     "totalPosts": 67,
-     "validPosts": 67,
+     "totalPosts": 68,
+     "validPosts": 68,
      "spamPosts": 0,
      "newbiePosts": 9,
      "pureNewbie": 1,
-     "newbieRatio": 13.4,
+     "newbieRatio": 13.2,
      "avgNewbieScore": 26.0,
      "avgSentiment": 11.1,
      "puritySignal": 11.1,
-     "activity": 83.8,
+     "activity": 85.0,
      "momBuyIndex": 0.0,
      "momSellIndex": 0.0,
      "buySellRatio": 0.0,
@@ -610,18 +610,18 @@
     ],
     "name": "半导体",
     "etf": "512480",
-    "postsUsed": 67
+    "postsUsed": 68
    }
   }
  },
  "snapshot": {
   "asof": "20261123",
   "date": "2026-11-23",
-  "overall": 19.1,
+  "overall": 18.9,
   "interpretation": "极度冷清：小白沉默，可能接近底部",
   "percentile": null,
-  "buyAvg": 11.0,
-  "sellAvg": 7.4,
+  "buyAvg": 11.3,
+  "sellAvg": 7.0,
   "recordCount": 1
  }
 }
