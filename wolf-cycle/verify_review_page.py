@@ -29,7 +29,7 @@ def check(pg, label, errs):
     print("[%s] KPI %d | 分节 %d | 建议框 %d | 建议条目 %d | 免责 %d 字" %
           (label, kpi, sec, box, li, len(note)))
     assert kpi == 6, "大盘 KPI 不是 6 个"
-    assert sec == 18, "17栏汇总 + TMT 单列不是 18 节"
+    assert sec == 19, "18栏汇总 + TMT 单列不是 19 节"
     assert box == 2 and li >= 12, "短线/中长线建议缺失"
     assert "上证" in h1 and "栏速览" in h1 and "ERP" in h1, "标题未汇总大盘、全栏与 ERP"
     assert "证伪场景" in pg.content(), "缺少证伪场景"

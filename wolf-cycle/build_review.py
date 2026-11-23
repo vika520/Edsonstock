@@ -486,6 +486,39 @@ def read_erp(erp):
                      {"k": "90分位点位", "v": locked(th[0].get("point")) if th else "—"}]}
 
 
+def read_mom(mom, review_date=None):
+    """08 散户反向指数：只读 mom.json 快照，不做二次计算。"""
+    s = mom.get("snapshot") or {}
+    latest = mom.get("latest") or {}
+    sec = latest.get("sectors") or {}
+    base = (mom.get("meta") or {}).get("lockedBase") or "2026-11-23"
+    if review_date and review_date.replace("-", "") < base.replace("-", ""):
+        return {"kpis": [{"k": "状态", "v": "栏目尚未上线"}],
+                "text": ("散户反向指数自 %s 起逐日累积（东财股吧真实帖子，历史不可回补），"
+                         "当日复盘早于栏目起点，本栏无读数，不回填、不伪造。" % base)}
+    per = "、".join("%s %s" % ((r or {}).get("name", k), fmt((r or {}).get("index"), 1))
+                    for k, r in sec.items())
+    pct = s.get("percentile")
+    text = ("综合散户反向指数 %s（%s），四板块：%s。小白买入/卖出子指数 %s / %s。"
+            "样本 %s 日（%s 起逐日累积，历史不可回补），%s。"
+            "数据源为东财股吧 4 个主题 ETF 吧当日真实帖子标题，词库与权重参考 "
+            "mihang123/mom-index v0.1 公开框架（MIT）；该仓库 data/ 为合成演示数据，本栏未使用。"
+            "指数越高＝小白讨论越集中、情绪越极端＝市场越危险（反向含义）；"
+            "关键词规则未经充分实证，当前样本不足以做统计推断，非交易指令。" %
+            (fmt(s.get("overall"), 1), s.get("interpretation", "—"), per or "—",
+             fmt(s.get("buyAvg"), 1), fmt(s.get("sellAvg"), 1),
+             fmt(s.get("recordCount"), 0), (mom.get("meta") or {}).get("lockedBase", "—"),
+             ("全样本分位 %s%%" % fmt(pct, 1)) if pct is not None else "未输出历史分位（样本 <20 日）"))
+    return {
+        "kpis": [{"k": "综合指数", "v": fmt(s.get("overall"), 1)},
+                 {"k": "判读", "v": (s.get("interpretation") or "—").split("：")[0]},
+                 {"k": "买入子指数", "v": fmt(s.get("buyAvg"), 1)},
+                 {"k": "卖出子指数", "v": fmt(s.get("sellAvg"), 1)},
+                 {"k": "样本日数", "v": fmt(s.get("recordCount"), 0, " 日")}],
+        "text": text,
+    }
+
+
 def read_sth(sth):
     """03 STH 成本基础：只读 sth.json 快照与因果检验结论，不做二次计算。"""
     s = (sth.get("snapshot") or {}).get("hs300top") or \
@@ -810,6 +843,7 @@ def build(asof):
         "tmt": read_tmt(tmt, w), "erp": read_erp(erp),
         "vix": read_vix(jload("vix.json")),
         "sth": read_sth(jload("sth.json")),
+        "mom": read_mom(jload("mom.json"), asof),
     }
     s.update(read_extras(ex))
 
@@ -831,6 +865,7 @@ def build(asof):
              "tmt": "TMT 交易拥挤度（第 04 栏扩展）", "erp": "股债利差(ERP)区间",
              "derivatives": "衍生品 / 对冲压力", "leverage": "杠杆与真实资金",
              "sentiment": "短线情绪与连板", "vix": "波动率与恐慌指数",
+             "mom": "散户反向指数",
              "valuation": "行业估值与预期修正",
              "events": "筹码供给与事件", "cross": "跨市场与宏观"}
 
@@ -896,7 +931,7 @@ def build(asof):
 
     sections = []
     for k in ["wave", "breadth", "rotate", "volume", "etf", "daily", "wyckoff", "sth",
-              "flow", "tmt", "erp", "derivatives", "leverage", "sentiment", "vix",
+              "flow", "tmt", "erp", "derivatives", "leverage", "sentiment", "vix", "mom",
               "valuation", "events", "cross"]:
         sections.append({"id": k, "name": names[k], "kpis": s[k]["kpis"],
                          "text": s[k]["text"],

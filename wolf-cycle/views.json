@@ -14,6 +14,7 @@
     "leverage",
     "sentiment",
     "vix",
+    "mom",
     "valuation",
     "events",
     "cross",
@@ -26,18 +27,19 @@
     "flow": "05",
     "sentiment": "06",
     "vix": "07",
-    "volume": "08",
-    "etf": "09",
-    "daily": "10",
-    "derivatives": "11",
-    "leverage": "12",
-    "rotate": "13",
-    "erp": "14",
-    "valuation": "15",
-    "events": "16",
-    "cross": "17",
-    "review": "18",
-    "sth": "03"
+    "volume": "09",
+    "etf": "10",
+    "daily": "11",
+    "derivatives": "12",
+    "leverage": "13",
+    "rotate": "14",
+    "erp": "15",
+    "valuation": "16",
+    "events": "17",
+    "cross": "18",
+    "review": "19",
+    "sth": "03",
+    "mom": "08"
   },
   "groups": [
     {
@@ -51,12 +53,13 @@
     },
     {
       "name": "情绪与广度",
-      "hint": "广度极值 · 宽度 · 封板 · 恐慌指数",
+      "hint": "广度极值 · 宽度 · 封板 · 恐慌 · 散户反向",
       "views": [
         "breadth",
         "flow",
         "sentiment",
-        "vix"
+        "vix",
+        "mom"
       ]
     },
     {
@@ -89,5 +92,5 @@
       ]
     }
   ],
-  "note": "order 是栏目清单与复盘栏数的权威来源；fixedNo 是固定编号表，按 groups 的显示顺序连续编号 01~18，菜单分组重排时编号随之连续；groups 只用于左侧菜单插入分组标题。每日复盘 review 必须永远最后；新增数据栏目要插在 review 之前，并同步 fixedNo 与 groups。"
+  "note": "order 是栏目清单与复盘栏数的权威来源；fixedNo 是固定编号表，按 groups 的显示顺序连续编号 01~19，菜单分组重排时编号随之连续；groups 只用于左侧菜单插入分组标题。每日复盘 review 必须永远最后；新增数据栏目要插在 review 之前，并同步 fixedNo 与 groups。"
 }

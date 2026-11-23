@@ -413,6 +413,19 @@ def fetch_tmt_snapshot():
         log("警告：TMT 更新失败，第 04 栏沿用上一版数据：%s" % str(e)[:160])
 
 
+def fetch_mom_index_snapshot():
+    """第 08 栏散户反向指数：东财股吧 4 板块真实帖子 → 词库规则指数，按日期幂等累积。"""
+    try:
+        r = subprocess.run([PY, os.path.join(HERE, "fetch_mom.py"), "--incremental"],
+                           cwd=HERE, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=300)
+        if r.returncode != 0:
+            raise RuntimeError((r.stderr or r.stdout)[-300:])
+        log("散户反向指数更新完成：" + (r.stdout or "").strip().splitlines()[-1])
+    except Exception as e:
+        log("警告：MOM 更新失败，第 08 栏沿用上一版数据：%s" % str(e)[:160])
+
+
 def fetch_sth_snapshot():
     """第 03 栏 STH 成本基础：新浪日线+东财股本 → 筹码衰减模型，幂等累积。
     全量重算约 20 分钟（含篮子 15 只成员），日常增量只补最新交易日（快）。"""
@@ -733,15 +746,15 @@ def sync_project():
                "build_workbench.py", "build_html.py", "build_breadth.py", "build_review.py",
                "build_review_page.py", "build_wyckoff_backtest_report.py", "brand.py",
                "fetch_wyckoff.py", "fetch_flow.py", "fetch_extras.py",
-               "fetch_erp.py", "fetch_tmt.py", "fetch_vix.py", "fetch_sth.py", "erp_q90_study.py", "build_erp_q90_report.py",
+               "fetch_erp.py", "fetch_tmt.py", "fetch_vix.py", "fetch_sth.py", "fetch_mom.py", "erp_q90_study.py", "build_erp_q90_report.py",
                "erp_q75_study.py", "build_erp_q75_report.py",
                "backfill_history.py", "daily_update.py",
                "preview_wyckoff_long.py", "preview_flow.py", "preview_review.py",
-               "preview_erp_tmt.py", "preview_extras.py", "preview_groups.py", "preview_vix.py", "preview_sth.py",
+               "preview_erp_tmt.py", "preview_extras.py", "preview_groups.py", "preview_vix.py", "preview_sth.py", "preview_mom.py",
                "verify_review_page.py", "verify_nas_wyckoff.py",
                "verify_nas_flow.py", "verify_nas_review.py", "verify_nas_erp_tmt.py",
                "probe_flow.py"]
-    datafiles = ["flow.json", "wyckoff.json", "reviews.json", "erp.json", "vix.json", "sth.json", "erp_q90_study.json", "erp_q75_study.json",
+    datafiles = ["flow.json", "wyckoff.json", "reviews.json", "erp.json", "vix.json", "sth.json", "mom.json", "erp_q90_study.json", "erp_q75_study.json",
                  "tmt.json", "extras.json", "history.json"]
     base = ["-o", "BatchMode=yes", "-o", "ConnectTimeout=10"]
     try:
@@ -877,6 +890,7 @@ def main():
         fetch_tmt_snapshot()       # 依赖 merge() 写回的 workbench.json（两市成交额）
         fetch_extras_snapshot()    # 6 类补充数据，复盘与工作台新增栏目都依赖它
         fetch_vix_snapshot()       # 第 07 栏 EdsonVIX（中金所期权 XML，盘后可得）
+        fetch_mom_index_snapshot()  # 第 08 栏散户反向指数（东财股吧帖子，盘后可得）
         fetch_sth_snapshot()       # 第 03 栏 STH 成本基础（新浪日线+东财股本，约 1-3 分钟增量）
         backfill_history_step()    # 长历史增量回补，工作台 12/13/15 栏的趋势图依赖它
         generate_review(asof)      # 依赖上面全部已更新的数据，顺序不能提前

@@ -37,13 +37,13 @@ with sync_playwright() as p:
     print("HTML %.2f MB" % (HTML.stat().st_size / 1024 / 1024))
     nav = pg.locator("#NAV button")
     print("NAV count:", nav.count(), "| label:", pg.locator("#NAVLABEL").inner_text())
-    assert nav.count() == 18, "菜单不是 18 栏"
+    assert nav.count() == 19, "菜单不是 19 栏"
     assert pg.locator("#NAV button").last.get_attribute("data-v") == "review", "复盘不在末尾"
-    assert pg.locator("#NAV button").last.locator(".no").inner_text() == "18", "复盘编号不是 18"
-    assert "18 VIEWS" in pg.locator("#NAVLABEL").inner_text()
+    assert pg.locator("#NAV button").last.locator(".no").inner_text() == "19", "复盘编号不是 19"
+    assert "19 VIEWS" in pg.locator("#NAVLABEL").inner_text()
     print("REVIEW lead n:", pg.locator("#RV_NCOL").inner_text(),
           "| tag:", pg.locator("#RV_TAG_NCOL").inner_text())
-    assert pg.locator("#RV_NCOL").inner_text() == "17"
+    assert pg.locator("#RV_NCOL").inner_text() == "18"
 
     alltxt = pg.locator("#V_etf").inner_text()
     print("ETF head:", pg.locator("#HD_TITLE").inner_text())
@@ -123,7 +123,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(620)
     print("REVIEW:", pg.locator("#HD_EYEBROW").inner_text(),
           "| sections:", pg.locator("#rv-detail .rv-sec").count())
-    assert pg.locator("#HD_EYEBROW").inner_text() == "VIEW 18"
+    assert pg.locator("#HD_EYEBROW").inner_text() == "VIEW 19"
 
     # 截图：衍生品 / 短线情绪 / ETF 申赎
     def shot(v, name):

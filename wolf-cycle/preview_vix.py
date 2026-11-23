@@ -11,10 +11,10 @@ var d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
 var n=0;for(var i=3;i<d.length;i+=40)if(d[i]>0)n++;return n;}"""
 
 EXPECT = {
-    "wave": "01", "wyckoff": "02", "breadth": "03", "flow": "04", "sentiment": "05",
-    "vix": "06", "volume": "07", "etf": "08", "daily": "09", "derivatives": "10",
-    "leverage": "11", "rotate": "12", "erp": "13", "valuation": "14", "events": "15",
-    "cross": "16", "review": "17",
+    "wave": "01", "wyckoff": "02", "sth": "03", "breadth": "04", "flow": "05",
+    "sentiment": "06", "vix": "07", "mom": "08", "volume": "09", "etf": "10",
+    "daily": "11", "derivatives": "12", "leverage": "13", "rotate": "14",
+    "erp": "15", "valuation": "16", "events": "17", "cross": "18", "review": "19",
 }
 
 with sync_playwright() as p:
@@ -33,14 +33,14 @@ with sync_playwright() as p:
     nos = [btns.nth(i).locator(".no").inner_text() for i in range(n)]
     vs = [btns.nth(i).get_attribute("data-v") for i in range(n)]
     print("NAV:", n, nos)
-    assert n == 17 and nos == ["%02d" % i for i in range(1, 18)], "编号不连续"
+    assert n == 19 and nos == ["%02d" % i for i in range(1, 20)], "编号不连续"
     for v, no in zip(vs, nos):
         assert EXPECT[v] == no, "%s=%s 应为 %s" % (v, no, EXPECT[v])
-    assert vs[-1] == "review" and nos[-1] == "17"
+    assert vs[-1] == "review" and nos[-1] == "19"
     print("17 栏连续编号: PASS")
 
     # VIX 栏内容
-    assert pg.locator("#HD_EYEBROW").inner_text() == "VIEW 06"
+    assert pg.locator("#HD_EYEBROW").inner_text() == "VIEW 07"
     assert "恐慌指数" in pg.locator("#HD_TITLE").inner_text()
     kpi = pg.locator("#VX_KPI .kpi").count()
     print("VX KPI:", kpi)
@@ -80,11 +80,11 @@ with sync_playwright() as p:
     pg.screenshot(path=str(PNG), full_page=False)
 
     # 其他栏目 spot check：ERP 13、衍生品 10、复盘 17
-    for v, want in (("erp", "VIEW 13"), ("derivatives", "VIEW 10"), ("review", "VIEW 17")):
+    for v, want in (("erp", "VIEW 15"), ("derivatives", "VIEW 12"), ("review", "VIEW 19")):
         pg.locator('#NAV button[data-v="%s"]' % v).click()
         pg.wait_for_timeout(200)
         assert pg.locator("#HD_EYEBROW").inner_text() == want, v
-    print("spot check erp13/deriv10/review17: PASS")
+    print("spot check erp15/deriv12/review19: PASS")
 
     real = [e for e in errs if "favicon" not in e.lower()]
     print("ERRORS:", real if real else "none")

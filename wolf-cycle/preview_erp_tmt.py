@@ -46,7 +46,7 @@ with sync_playwright() as p:
 
     print("HTML: %.2f MB" % (HTML.stat().st_size / 1024 / 1024))
     print("NAV:", pg.locator("#NAV button").count(), "| HEAD:", pg.locator("#HD_TITLE").inner_text())
-    assert pg.locator("#NAV button").count() == 18, "菜单不是 18 栏"
+    assert pg.locator("#NAV button").count() == 19, "菜单不是 19 栏"
     assert "股债利差" in pg.locator("#HD_TITLE").inner_text()
 
     kpi = pg.locator("#EP_KPI .kpi")
@@ -118,7 +118,7 @@ with sync_playwright() as p:
     print("REVIEW TITLE:", t[:130])
     assert "栏速览" in t and "ERP" in t and "TMT" in t
     print("REVIEW SEC:", pg.locator("#rv-detail .rv-sec").count())
-    assert pg.locator("#rv-detail .rv-sec").count() >= 18, "17栏汇总 + TMT 单列 + 生成机制不足"
+    assert pg.locator("#rv-detail .rv-sec").count() >= 19, "18栏汇总 + TMT 单列 + 生成机制不足"
     detail = pg.locator("#rv-detail").inner_text()
     assert "股债利差(ERP)区间" in detail and "TMT 交易拥挤度" in detail
     assert str(_S["erp"]) in detail and str(_S["thresholds"][0]["point"]) in detail

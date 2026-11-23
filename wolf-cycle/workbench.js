@@ -1,7 +1,7 @@
 const PAGE_B64={wave:'',breadth:''};
-const VIEW_ORDER = ["wave", "breadth", "rotate", "volume", "etf", "daily", "wyckoff", "sth", "flow", "erp", "derivatives", "leverage", "sentiment", "vix", "valuation", "events", "cross", "review"];
-const VIEW_GROUPS = [{"name": "趋势与结构", "hint": "相位判读 · 吸筹结构 · STH 成本", "views": ["wave", "wyckoff", "sth"]}, {"name": "情绪与广度", "hint": "广度极值 · 宽度 · 封板 · 恐慌指数", "views": ["breadth", "flow", "sentiment", "vix"]}, {"name": "资金与杠杆", "hint": "量能 · ETF · 两融 · 对冲", "views": ["volume", "etf", "daily", "derivatives", "leverage"]}, {"name": "估值与宏观", "hint": "轮动 · 股债 · 事件 · 外盘", "views": ["rotate", "erp", "valuation", "events", "cross"]}, {"name": "每日复盘", "hint": "全栏汇总 · 永远末尾", "views": ["review"]}];
-const FIXED_NO = {"wave": "01", "wyckoff": "02", "breadth": "04", "flow": "05", "sentiment": "06", "vix": "07", "volume": "08", "etf": "09", "daily": "10", "derivatives": "11", "leverage": "12", "rotate": "13", "erp": "14", "valuation": "15", "events": "16", "cross": "17", "review": "18", "sth": "03"};
+const VIEW_ORDER = ["wave", "breadth", "rotate", "volume", "etf", "daily", "wyckoff", "sth", "flow", "erp", "derivatives", "leverage", "sentiment", "vix", "mom", "valuation", "events", "cross", "review"];
+const VIEW_GROUPS = [{"name": "趋势与结构", "hint": "相位判读 · 吸筹结构 · STH 成本", "views": ["wave", "wyckoff", "sth"]}, {"name": "情绪与广度", "hint": "广度极值 · 宽度 · 封板 · 恐慌 · 散户反向", "views": ["breadth", "flow", "sentiment", "vix", "mom"]}, {"name": "资金与杠杆", "hint": "量能 · ETF · 两融 · 对冲", "views": ["volume", "etf", "daily", "derivatives", "leverage"]}, {"name": "估值与宏观", "hint": "轮动 · 股债 · 事件 · 外盘", "views": ["rotate", "erp", "valuation", "events", "cross"]}, {"name": "每日复盘", "hint": "全栏汇总 · 永远末尾", "views": ["review"]}];
+const FIXED_NO = {"wave": "01", "wyckoff": "02", "breadth": "04", "flow": "05", "sentiment": "06", "vix": "07", "volume": "09", "etf": "10", "daily": "11", "derivatives": "12", "leverage": "13", "rotate": "14", "erp": "15", "valuation": "16", "events": "17", "cross": "18", "review": "19", "sth": "03", "mom": "08"};
 /* ==== wb_core.js ==== */
 /* ===== 工作台共享内核：数据、绘图工具、导航 ===== */
 'use strict';
@@ -242,23 +242,24 @@ const B=(()=>{
 const MODS={};
 const HEAD={
   wave:['VIEW 01','狼波周期指数',['<span class="tag real">指数日线真实</span>','<span class="tag proxy">公式为等价复刻</span>']],
-  breadth:['VIEW 03','双冰点情绪',['<span class="tag real">涨跌家数真实</span>','<span class="tag proxy">阈值口径可切换</span>']],
-  rotate:['VIEW 11','板块轮动',['<span class="tag real">板块快照真实</span>','<span class="tag proxy">周度动量为代理</span>']],
-  volume:['VIEW 06','放量信号',['<span class="tag real">成交额真实</span>','<span class="tag proxy">事件研究含样本重叠</span>']],
-  etf:['VIEW 07','ETF 日度申赎',['<span class="tag real">季度申赎真实</span>','<span class="tag proxy">日度份额为估计</span>','<span class="tag na">不做买方身份归因</span>']],
-  daily:['VIEW 08','日度全景',['<span class="tag real">成交额真实</span>','<span class="tag proxy">净流入为代理</span>']],
+  breadth:['VIEW 04','双冰点情绪',['<span class="tag real">涨跌家数真实</span>','<span class="tag proxy">阈值口径可切换</span>']],
+  rotate:['VIEW 14','板块轮动',['<span class="tag real">板块快照真实</span>','<span class="tag proxy">周度动量为代理</span>']],
+  volume:['VIEW 09','放量信号',['<span class="tag real">成交额真实</span>','<span class="tag proxy">事件研究含样本重叠</span>']],
+  etf:['VIEW 10','ETF 日度申赎',['<span class="tag real">季度申赎真实</span>','<span class="tag proxy">日度份额为估计</span>','<span class="tag na">不做买方身份归因</span>']],
+  daily:['VIEW 11','日度全景',['<span class="tag real">成交额真实</span>','<span class="tag proxy">净流入为代理</span>']],
   wyckoff:['VIEW 02','威科夫吸筹结构',['<span class="tag real">多周期 K 线真实</span>','<span class="tag proxy">事件为算法标注</span>']],
   sth:['VIEW 03','STH 成本基础',['<span class="tag real">日线与股本真实</span>','<span class="tag proxy">筹码分布为模型推算</span>','<span class="tag na">非链上可验证口径</span>']],
-  flow:['VIEW 04','市场宽度与拥挤度',['<span class="tag real">逐股日线全市场</span>','<span class="tag real">TMT 行业成交额真实</span>','<span class="tag na">非真实资金流</span>']],
-  erp:['VIEW 12','股债利差(ERP)区间',['<span class="tag blue">数值锁定只读</span>','<span class="tag real">PE / 国债 / 指数真实</span>','<span class="tag na">不构成投资建议</span>']],
-  derivatives:['VIEW 09','衍生品 / 对冲压力',['<span class="tag real">中金所行情真实</span>','<span class="tag real">会员持仓真实</span>','<span class="tag na">IV / skew 未接入</span>']],
-  leverage:['VIEW 10','杠杆与真实资金',['<span class="tag real">两融全历史真实</span>','<span class="tag real">ETF 季度申赎真实</span>','<span class="tag proxy">T+1 披露</span>']],
-  sentiment:['VIEW 05','短线情绪与连板',['<span class="tag real">涨跌停池真实</span>','<span class="tag real">涨停/连板已回补 250 日</span>','<span class="tag na">炸板率历史不可得</span>']],
-  vix:['VIEW 06','波动率与恐慌指数',['<span class="tag real">中金所结算价真实</span>','<span class="tag proxy">自编 EdsonVIX · 方法同 CBOE</span>','<span class="tag na">非官方复刻</span>']],
-  valuation:['VIEW 13','行业估值与预期修正',['<span class="tag real">行业 PE 真实</span>','<span class="tag proxy">预期修正为业绩预告代理</span>']],
-  events:['VIEW 14','筹码供给与事件',['<span class="tag real">解禁 / 龙虎榜真实</span>','<span class="tag na">无 Level-2 委托</span>']],
-  cross:['VIEW 15','跨市场与宏观',['<span class="tag real">外盘 / 汇率 / 中债真实</span>','<span class="tag proxy">非盘中实时</span>']],
-  review:['VIEW 16','每日复盘',['<span class="tag real">九栏数据同源</span>','<span class="tag proxy">固定规则生成</span>','<span class="tag na">非投资建议</span>']],
+  mom:['VIEW 08','散户反向指数',['<span class="tag real">股吧帖子真实</span>','<span class="tag proxy">词库判定为规则近似</span>','<span class="tag na">历史不可回补</span>']],
+  flow:['VIEW 05','市场宽度与拥挤度',['<span class="tag real">逐股日线全市场</span>','<span class="tag real">TMT 行业成交额真实</span>','<span class="tag na">非真实资金流</span>']],
+  erp:['VIEW 15','股债利差(ERP)区间',['<span class="tag blue">数值锁定只读</span>','<span class="tag real">PE / 国债 / 指数真实</span>','<span class="tag na">不构成投资建议</span>']],
+  derivatives:['VIEW 12','衍生品 / 对冲压力',['<span class="tag real">中金所行情真实</span>','<span class="tag real">会员持仓真实</span>','<span class="tag na">IV / skew 未接入</span>']],
+  leverage:['VIEW 13','杠杆与真实资金',['<span class="tag real">两融全历史真实</span>','<span class="tag real">ETF 季度申赎真实</span>','<span class="tag proxy">T+1 披露</span>']],
+  sentiment:['VIEW 06','短线情绪与连板',['<span class="tag real">涨跌停池真实</span>','<span class="tag real">涨停/连板已回补 250 日</span>','<span class="tag na">炸板率历史不可得</span>']],
+  vix:['VIEW 07','波动率与恐慌指数',['<span class="tag real">中金所结算价真实</span>','<span class="tag proxy">自编 EdsonVIX · 方法同 CBOE</span>','<span class="tag na">非官方复刻</span>']],
+  valuation:['VIEW 16','行业估值与预期修正',['<span class="tag real">行业 PE 真实</span>','<span class="tag proxy">预期修正为业绩预告代理</span>']],
+  events:['VIEW 17','筹码供给与事件',['<span class="tag real">解禁 / 龙虎榜真实</span>','<span class="tag na">无 Level-2 委托</span>']],
+  cross:['VIEW 18','跨市场与宏观',['<span class="tag real">外盘 / 汇率 / 中债真实</span>','<span class="tag proxy">非盘中实时</span>']],
+  review:['VIEW 19','每日复盘',['<span class="tag real">九栏数据同源</span>','<span class="tag proxy">固定规则生成</span>','<span class="tag na">非投资建议</span>']],
 };
 /* ---- 动态栏目顺序 ----------------------------------------------------
    VIEW_ORDER 由 build_workbench.py 从 views.json 注入。
@@ -3222,6 +3223,135 @@ function sxDbl(){
 });
 draw();
 MODS.sth={draw};
+})();
+
+/* ==== wb_mom.js ==== */
+/* ===== 08 散户反向指数（宝妈指数 / Mom Index）=====
+   数据：MOM = JSON#MOM（fetch_mom.py 产出：东财股吧真实帖子 + mom-index v0.1 词库/权重）。 */
+(function(){
+const M = JSON.parse((document.getElementById('MOM')||{textContent:'{}'}).textContent);
+const META = M.meta || {}, SNAP = M.snapshot || {};
+const SECTORS = (META.sectors) || {nasdaq:'纳斯达克',gold:'黄金',cpo:'CPO通信',semiconductor:'半导体'};
+let RANGE = 0;
+let CUR = 'overall';
+
+function hist(k){
+  const a=(M.history||{})[k]||[];
+  return (RANGE && a.length>RANGE) ? a.slice(-RANGE) : a;
+}
+function dates(){ return hist('overall').map(r=>r.date); }
+
+function tone(v){
+  if(v==null) return C.dim;
+  if(v>=75) return C.down;
+  if(v>=60) return C.accent;
+  if(v<=20) return C.blue;
+  return C.dim;
+}
+function dec(){
+  const last=M.latest||{}, s=last.sectors||{};
+  const v=SNAP.overall, p=SNAP.percentile;
+  let level='散户情绪：正常区间', t=C.dim;
+  if(v>=75){level='极度狂热：擦鞋童时刻（反向警戒）';t=C.down;}
+  else if(v>=60){level='高度警惕：小白大量涌入';t=C.accent;}
+  else if(v<=20){level='极度冷清：小白沉默（可能近底）';t=C.blue;}
+  const per=Object.keys(SECTORS).map(k=>SECTORS[k]+' '+xf((s[k]||{}).index,1)).join(' / ');
+  const body=
+    '<b>综合散户反向指数</b>＝ <b style="color:'+tone(v)+'">'+xf(v,1)+'</b>（'+esc(SNAP.interpretation||'—')+'），'+
+    '四板块等权平均：'+per+'。<br>'+
+    '小白买入子指数 '+xf(SNAP.buyAvg,1)+' / 卖出 '+xf(SNAP.sellAvg,1)+
+    '（样本 '+xf0(last.sectors?Object.values(last.sectors).reduce((a,r)=>a+(r.postsUsed||0),0):0)+' 条当日股吧帖子）。'+
+    '全样本分位 '+(p!=null?xf(p,1)+'%':'样本不足 20 日，暂不输出')+'。<br>'+
+    '<span style="color:#8892a0">反向含义：</span>指数越高＝小白讨论越集中、情绪越极端＝市场越危险；'+
+    '越低＝散户沉默，历史上更接近底部区域。<b>这是研究性观察指标，不是买卖指令</b>——'+
+    '关键词规则为 v0.1 可读基线，未经充分实证验证，请与狼波/STH/EdsonVIX 合读。';
+  XDEC('MO_DEC','散户反向判读 · '+dateFmt((SNAP.asof||'').replace(/-/g,'')),level,t,body,
+    ['<span class="tag real">股吧帖子真实</span>','<span class="tag proxy">词库判定为规则近似</span>','<span class="tag na">历史不可回补</span>']);
+}
+function kpi(){
+  const last=M.latest||{}, s=last.sectors||{};
+  const parts=Object.keys(SECTORS).map(k=>[SECTORS[k],xf((s[k]||{}).index,1),'反向热度']);
+  XKPI('MO_KPI',[
+    ['综合指数',xf(SNAP.overall,1),'四板块等权',tone(SNAP.overall)===C.down?'down':(tone(SNAP.overall)===C.blue?'blue':'amber')],
+    ['判读',esc(SNAP.interpretation||'—').split('：')[0],'越高越危险'],
+    ['买入子指数',xf(SNAP.buyAvg,1),'小白买入倾向'],
+    ['卖出子指数',xf(SNAP.sellAvg,1),'小白卖出倾向'],
+    ...parts.slice(0,2),
+    ['样本日数',xf0(SNAP.recordCount)+' 日','逐日累积',SNAP.recordCount<20?'amber':''],
+    ['采集帖子',xf0(Object.values(s).reduce((a,r)=>a+(r.postsUsed||0),0))+' 条','当日股吧']
+  ]);
+}
+function drawMain(){
+  const d=dates();
+  XTS('mo-main',d,[
+    {name:'综合指数',data:hist('overall').map(r=>r.index),color:C.accent,width:2},
+    {name:'狂热警戒 75',data:d.map(()=>75),color:C.down,dash:[4,4]},
+    {name:'警惕线 60',data:d.map(()=>60),color:C.accent,dash:[2,4]},
+    {name:'冷清线 20',data:d.map(()=>20),color:C.blue,dash:[4,4]}
+  ],{fmt:f1,fmt2:f1,pad:{l:48,r:20,t:20,b:24},_sxgeo:true});
+}
+function drawSectors(){
+  const d=hist('overall').map(r=>r.date);
+  const colors=[C.white,C.blue,C.purple,C.up];
+  const rows=Object.keys(SECTORS).map((k,i)=>({
+    name:SECTORS[k],data:hist(k).map(r=>r.index),color:colors[i%4]
+  }));
+  XTS('mo-sectors',d,rows,{fmt:f1,fmt2:f1,pad:{l:48,r:20,t:20,b:24},_sxgeo:true});
+}
+function drawBuySell(){
+  const recs=(M.records||[]).slice(RANGE? -RANGE:0);
+  XTS('mo-bs',recs.map(r=>r.date),[
+    {name:'买入子指数',data:recs.map(r=>r.buyAvg),color:C.up,type:'bar'},
+    {name:'卖出子指数',data:recs.map(r=>r.sellAvg),color:C.down,type:'bar'}
+  ],{zero:true,fmt:f1,fmt2:f1,pad:{l:48,r:20,t:20,b:24},_sxgeo:true});
+}
+function table(){
+  const tb=document.querySelector('#mo-tab tbody'); if(!tb) return;
+  const recs=(M.records||[]).slice().reverse().slice(0,20);
+  tb.innerHTML=recs.map(r=>{
+    const s=r.sectors||{};
+    return '<tr><td class="l">'+esc(r.date)+'</td><td>'+xf(r.overall,1)+'</td>'+
+      Object.keys(SECTORS).map(k=>'<td>'+xf((s[k]||{}).index,1)+'</td>').join('')+
+      '<td>'+xf(r.buyAvg,1)+'</td><td>'+xf(r.sellAvg,1)+'</td></tr>';
+  }).join('');
+}
+function posts(){
+  const el=document.getElementById('MO_POSTS'); if(!el) return;
+  const s=(M.latest||{}).sectors||{};
+  let h='';
+  Object.keys(SECTORS).forEach(k=>{
+    const r=s[k]||{}, ps=r.topPosts||[];
+    h+='<div class="grp"><b>'+esc(SECTORS[k])+'</b>（指数 '+xf(r.index,1)+'）<br>'+
+      (ps.length?ps.slice(0,3).map(p=>'<span class="p">「'+esc(p.title)+'」<i>'+esc(p.level)+' '+xf(p.score,0)+'分</i></span>').join('<br>')
+       :'<span style="color:#8892a0">当日无小白帖样本</span>')+'</div>';
+  });
+  el.innerHTML=h;
+}
+function cover(){
+  const el=document.getElementById('mo-cover'); if(!el) return;
+  el.textContent='样本 '+xf0(SNAP.recordCount)+' 日（'+(META.lockedBase||'—')+' 起逐日累积，历史不可回补）· 股吧 4 板块';
+}
+function caveat(){
+  const el=document.getElementById('MO_CAVEAT'); if(!el) return;
+  el.innerHTML='<b>口径与边界。</b><ul>'+
+    (META.disclosure||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+
+    '<li>参考仓库 <span class="mono">mihang123/mom-index</span>（MIT）为公开框架版 v0.1，其 <span class="mono">data/</span> 为合成演示数据，本栏只用真实采集结果。</li>'+
+    '<li>反向指标的有效性需要长期样本验证；当前样本 '+(SNAP.recordCount||0)+' 日，<b>不足以做任何统计推断</b>。</li>'+
+    '<li>本栏全部内容为行为金融研究观察，不构成投资建议。</li></ul>';
+}
+function draw(){
+  if(!(M.records||[]).length){const el=document.getElementById('mo-cover');if(el)el.textContent='无数据';return;}
+  dec();kpi();drawMain();drawSectors();drawBuySell();table();posts();cover();caveat();
+}
+document.querySelectorAll('#mo-range button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#mo-range button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); RANGE=+b.dataset.r||0;
+    drawMain();drawSectors();drawBuySell();
+  });
+});
+draw();
+MODS.mom={draw};
 })();
 
 /* ==== wb_derivatives.js ==== */

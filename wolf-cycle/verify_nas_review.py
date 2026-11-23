@@ -26,7 +26,7 @@ assert VIEWS.get("reviewViewNo") == NAV_N, "复盘编号不等于栏目总数"
 assert VIEWS.get("dataViews") == NAV_N - 1, "数据栏目数不等于总数-1"
 assert st.get("reviews", {}).get("count", 0) >= 1, "复盘篇数异常"
 assert st.get("reviews", {}).get("latest") == st.get("asof")
-assert st.get("reviews", {}).get("sections") >= 18, "复盘分节数异常"
+assert st.get("reviews", {}).get("sections") >= 19, "复盘分节数异常"
 assert st.get("reviews", {}).get("viewNo") == NAV_N, "复盘编号与 status.views 不一致"
 assert st.get("erp", {}).get("locked") is True
 assert st.get("tmt", {}).get("ratio") is not None

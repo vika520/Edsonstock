@@ -24,7 +24,7 @@ with sync_playwright() as p:
     nos = [btns.nth(i).locator(".no").inner_text() for i in range(n)]
     vs = [btns.nth(i).get_attribute("data-v") for i in range(n)]
     print("NAV:", n, vs)
-    assert n == 18 and nos == ["%02d" % i for i in range(1, 19)], "编号不连续"
+    assert n == 19 and nos == ["%02d" % i for i in range(1, 20)], "编号不连续"
     assert vs[0] == "wave" and vs[1] == "wyckoff" and vs[2] == "sth", vs[:4]
     assert vs[-1] == "review"
     print("18 栏连续编号 + sth=03: PASS")
@@ -68,8 +68,8 @@ with sync_playwright() as p:
     assert pg.evaluate("__ink('sx-main')") > 50
 
     # 编号 spot check
-    for v, want in (("erp", "VIEW 14"), ("vix", "VIEW 07"), ("wyckoff", "VIEW 02"),
-                    ("sentiment", "VIEW 06"), ("review", "VIEW 18")):
+    for v, want in (("erp", "VIEW 15"), ("vix", "VIEW 07"), ("wyckoff", "VIEW 02"),
+                    ("sentiment", "VIEW 06"), ("review", "VIEW 19")):
         pg.locator('#NAV button[data-v="%s"]' % v).click()
         pg.wait_for_timeout(180)
         assert pg.locator("#HD_EYEBROW").inner_text() == want, (v, want)

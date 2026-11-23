@@ -256,7 +256,8 @@ tbody tr.click{cursor:pointer}
     <button data-v="derivatives"><span class="no">10</span><span class="txt"><span class="nm">衍生品 / 对冲压力</span><span class="sb">基差贴水 · PCR · 会员净多空</span></span></button>
     <button data-v="leverage"><span class="no">11</span><span class="txt"><span class="nm">杠杆与真实资金</span><span class="sb">两融全历史 · ETF 真实申赎</span></span></button>
     <button data-v="sentiment"><span class="no">12</span><span class="txt"><span class="nm">短线情绪与连板</span><span class="sb">涨跌停 · 连板高度 · 炸板率</span></span></button>
-    <button data-v="vix"><span class="no">13</span><span class="txt"><span class="nm">波动率与恐慌指数</span><span class="sb">EdsonVIX · Skew · 三品种</span></span></button>
+    <button data-v="vix"><span class="no">07</span><span class="txt"><span class="nm">波动率与恐慌指数</span><span class="sb">EdsonVIX · Skew · 三品种</span></span></button>
+    <button data-v="mom"><span class="no">08</span><span class="txt"><span class="nm">散户反向指数</span><span class="sb">股吧情绪 · 四板块 · 买卖倾向</span></span></button>
     <button data-v="valuation"><span class="no">13</span><span class="txt"><span class="nm">行业估值与预期修正</span><span class="sb">PE 横截面 · 业绩预告方向</span></span></button>
     <button data-v="events"><span class="no">14</span><span class="txt"><span class="nm">筹码供给与事件</span><span class="sb">解禁 · 龙虎榜 · 事件日历</span></span></button>
     <button data-v="cross"><span class="no">15</span><span class="txt"><span class="nm">跨市场与宏观</span><span class="sb">外盘 · 汇率 · 中债10Y</span></span></button>
@@ -1012,6 +1013,49 @@ tbody tr.click{cursor:pointer}
       <div class="caveat" id="VX_CAVEAT"></div>
     </div>
 
+    <!-- 08 散户反向指数（宝妈指数 / Mom Index） -->
+    <div class="view" id="V_mom">
+      <div class="lead"><div class="bar"></div><div>
+        <b>散户反向指数</b> — 参考 <span class="mono">mihang123/mom-index</span> v0.1 公开框架（MIT）：追踪东财股吧 4 个主题 ETF 吧（纳斯达克 / 黄金 / CPO通信 / 半导体）的小白讨论热度，指数＝小白占比×40% + 小白强度×25% + 情绪极端度×20% + 信号纯度×15%。<b>指数越高＝散户情绪越极端＝市场越危险</b>（反向含义）。所有帖子为当日真实采集，参考仓库的演示数据未使用。
+        <span class="tag real">股吧帖子真实</span> <span class="tag proxy">词库判定为规则近似</span> <span class="tag na">历史不可回补</span>
+      </div></div>
+      <div class="wbar">
+        <span class="lb">范围</span>
+        <div class="seg" id="mo-range"><button data-r="30">近 30 日</button><button class="on" data-r="0">全部</button></div>
+        <span style="flex:1"></span><span class="tag blue" id="mo-cover">—</span>
+      </div>
+      <div class="kpis" id="MO_KPI"></div>
+      <div class="card" id="MO_DEC"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="t">散户反向指数 · 综合</span><span class="spacer"></span><span class="d">0-100</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="mo-main"></canvas></div>
+            <div class="cv-note">金线＝四板块等权综合指数。红虚线 75＝极度狂热（擦鞋童时刻）、橙虚线 60＝高度警惕、蓝虚线 20＝极度冷清（可能近底）。<b>反向读法：越高越危险，越低越接近底部区域。</b></div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">四板块对照</span><span class="spacer"></span><span class="d">纳斯达克 / 黄金 / CPO / 半导体</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="mo-sectors"></canvas></div>
+            <div class="cv-note">四个主题 ETF 吧独立计算。哪一板块先狂热＝散户资金正涌入该主题，是结构性过热的先行信号。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">小白买卖倾向</span><span class="spacer"></span><span class="d">买入 vs 卖出子指数</span></div>
+          <div class="card-b"><div class="cv h300"><canvas id="mo-bs"></canvas></div>
+            <div class="cv-note">柱＝小白帖中买入/卖出意图子指数。买入显著高于卖出＝追涨情绪；反之＝恐慌割肉。两者需与指数水平合读。</div></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="t">逐日读数</span><span class="spacer"></span><span class="d">综合 / 四板块 / 买卖</span></div>
+          <div class="card-b"><div class="tw" style="max-height:300px"><table id="mo-tab"><thead><tr>
+            <th class="l">日期</th><th>综合</th><th>纳指</th><th>黄金</th><th>CPO</th><th>半导体</th><th>买入</th><th>卖出</th>
+          </tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="t">当日小白帖样本（真实标题，已脱敏仅标题）</span><span class="spacer"></span><span class="d">词库命中示例</span></div>
+        <div class="card-b"><div id="MO_POSTS" style="font-size:12px;line-height:1.9"></div></div>
+      </div>
+      <div class="caveat" id="MO_CAVEAT"></div>
+    </div>
+
     <!-- 13 行业估值与预期修正 -->
     <div class="view" id="V_valuation">
       <div class="lead"><div class="bar"></div><div>
@@ -1140,6 +1184,7 @@ tbody tr.click{cursor:pointer}
 <script id="TMT" type="application/json">__TMT__</script>
 <script id="VIX" type="application/json">__VIX__</script>
 <script id="STH" type="application/json">__STH__</script>
+<script id="MOM" type="application/json">__MOM__</script>
 <script id="EXTRAS" type="application/json">__EXTRAS__</script>
 <script id="HIST" type="application/json">__HIST__</script>
 <script>
