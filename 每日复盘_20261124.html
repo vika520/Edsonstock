@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EdsonStock</title><style>
+:root{--ink:#1f2430;--dim:#5d6675;--line:#e3e7ed;--up:#c0392b;--down:#178a5a;--acc:#b7791f}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f5f7;color:var(--ink);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+ font-size:14px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:28px auto;background:#fff;padding:40px 46px 46px;
+ border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 28px #1f24300d}
+.eyebrow{font:600 11px "JetBrains Mono",Consolas,monospace;color:var(--acc);letter-spacing:2px}
+h1{font-size:22px;line-height:1.65;margin:12px 0 8px;font-weight:700;letter-spacing:.2px}
+.meta{font-size:12px;color:var(--dim);border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+.tags span{display:inline-block;font-size:10.5px;color:var(--dim);border:1px solid var(--line);
+ border-radius:4px;padding:2px 7px;margin:0 5px 5px 0}
+h2{font-size:15px;margin:26px 0 12px;padding-left:10px;border-left:4px solid var(--acc)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 20px}
+.kpi{background:#f8f9fb;border:1px solid var(--line);border-radius:7px;padding:10px 12px}
+.kpi .k{font-size:10.5px;color:var(--dim)}
+.kpi .v{font:600 17px "JetBrains Mono",Consolas,monospace;margin-top:4px}
+.kpi .v.up{color:var(--up)}.kpi .v.down{color:var(--down)}
+.sum{background:#fdf9ee;border-left:4px solid var(--acc);padding:13px 16px;border-radius:0 6px 6px 0;
+ font-size:13px;line-height:1.95;color:#4a463c;margin-bottom:8px}
+.sec{border:1px solid var(--line);border-radius:7px;margin:10px 0;overflow:hidden}
+.sec .h{display:flex;align-items:center;gap:9px;padding:9px 13px;background:#f7f8fa;border-bottom:1px solid var(--line)}
+.sec .h .n{font:700 10px "JetBrains Mono",Consolas,monospace;color:var(--acc);
+ border:1px solid #e0c98f;border-radius:3px;padding:1px 5px;background:#fff}
+.sec .h .t{font-size:13px;font-weight:700}
+.sec .h .q{margin-left:auto;font-size:10.5px;color:var(--dim)}
+.sec .b{padding:11px 13px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.chip{background:#f2f4f7;border-radius:4px;padding:3px 8px;font-size:11px;color:var(--dim)}
+.chip b{color:var(--ink);font-family:"JetBrains Mono",Consolas,monospace;margin-left:5px}
+.sec p{margin:0;font-size:12.5px;line-height:1.95;color:#4a5260}
+.adv{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.adv .box{border:1px solid var(--line);border-radius:7px;padding:14px;background:#fbfcfd}
+.adv .box h3{font-size:13.5px;margin:0 0 4px}
+.adv .box .st{font-size:11px;color:var(--acc);margin-bottom:8px}
+.adv .lbl{font-size:10.5px;color:var(--acc);letter-spacing:.6px;margin:10px 0 3px;font-weight:600}
+.adv ul{margin:0;padding-left:17px}
+.adv li{font-size:11.5px;line-height:1.85;color:#4a5260;margin:3px 0}
+.note{background:#f7f8fa;border:1px solid var(--line);border-radius:7px;padding:13px 16px;
+ font-size:11.5px;line-height:1.9;color:var(--dim)}
+.note ul{margin:6px 0 0;padding-left:18px}
+.hist-intro{background:#fdf9ee;border-left:4px solid var(--acc);padding:10px 14px;border-radius:0 6px 6px 0;
+ font-size:11.5px;line-height:1.9;color:#4a463c;margin-bottom:10px}
+.hist{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hist .col{border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.hist .ch{padding:9px 13px;font-size:12.5px;font-weight:700;border-bottom:1px solid var(--line)}
+.hist .ok .ch{background:#e9f6ef;color:#178a5a}
+.hist .no .ch{background:#fbecea;color:#c0392b}
+.hist .row{padding:9px 13px;border-bottom:1px dashed var(--line);font-size:11.5px;line-height:1.75;color:#4a5260}
+.hist .row:last-child{border-bottom:0}
+.hist .row b{color:var(--ink)}
+.hist .row .d{font:600 11px "JetBrains Mono",Consolas,monospace;color:var(--acc)}
+.hist .row .s{display:block;color:var(--dim);font-size:11px;margin-top:2px}
+.foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--dim)}
+@media(max-width:760px){.wrap{margin:0;padding:22px 18px;border:0;border-radius:0}
+ .kpis,.adv{grid-template-columns:1fr}h1{font-size:18px}}
+@media print{body{background:#fff}.wrap{box-shadow:none;border:0;margin:0;max-width:none}}
+</style><link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkVkc29uU3RvY2siPgogIDx0aXRsZT5FZHNvblN0b2NrPC90aXRsZT4KICA8IS0tIOa3seiJsuW6le+8jOS4juW3peS9nOWPsOS+p+agjyAjMGQxMTE3IOS4gOiHtO+8m+S/neivgea1heiJsiAvIOa3seiJsuagh+etvuagj+mDveiDveeci+a4hSAtLT4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0iIzBkMTExNyIvPgogIDwhLS0gbG9nbyDlj7Pkvqflm77lvaLkuYvkuIDvvJo1IOagueeUseefruWIsOmrmOeahOepuuW/g+afse+8jOW6lemDqOWvuem9kCAtLT4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiNlOGVjZjMiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxyZWN0IHg9IjYiICB5PSI0MiIgd2lkdGg9IjgiIGhlaWdodD0iMTIiLz4KICAgIDxyZWN0IHg9IjE4IiB5PSIzNiIgd2lkdGg9IjgiIGhlaWdodD0iMTgiLz4KICAgIDxyZWN0IHg9IjMwIiB5PSIyOSIgd2lkdGg9IjgiIGhlaWdodD0iMjUiLz4KICAgIDxyZWN0IHg9IjQyIiB5PSIyMiIgd2lkdGg9IjgiIGhlaWdodD0iMzIiLz4KICAgIDxyZWN0IHg9IjU0IiB5PSIxNCIgd2lkdGg9IjgiIGhlaWdodD0iNDAiLz4KICA8L2c+CiAgPCEtLSBsb2dvIOWPs+S+p+WbvuW9ouS5i+S6jO+8muW3puS4i+WQkeWPs+S4iueahOS4iuWNh+aKmOe6vyArIOWPs+S4iueureWktO+8iOmHkSA9IOW3peS9nOWPsCBhY2NlbnTvvIkgLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjBiNDI5IiBzdHJva2Utd2lkdGg9IjMuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgIDxwYXRoIGQ9Ik00IDUwIEwyMSAzMiBMMzEgMzggTDU3IDciLz4KICAgIDxwYXRoIGQ9Ik00NCA3IEg1NyBWMjAiLz4KICA8L2c+Cjwvc3ZnPgo=">
+</head><body><div class="wrap">
+<div class="eyebrow">A 股市场结构工作台 · 每日复盘 / DAILY REVIEW</div>
+<h1>上证 +0.27% 收 3548.37，1951/3498 家涨跌、成交 16676 亿（环比 +6.6%）；18栏速览：狼波下行确认段、情绪未极、主线「无线耳机」、量比 1.02×（量能持平）、宽基 ETF 0.95×·量能常态、方向代理 -4623 亿、威科夫 Phase C 候选、拥挤度 23.3·偏冷清、TMT 占比 46.2877%、VIX 20.9（77.1% 分位）、ERP 6.3143·偏便宜（77.0802% 分位） —— 广度与量能双弱，结构仍在确认期；新增六栏：次月年化 -12.16%、涨停 55 家 / 跌停 2 家、两融 2.1711 万亿、行业 PE 中位 29.05 倍、解禁 547 亿、USDCNY 6.6632</h1>
+<div class="meta">20261124（周二）盘后 · 生成于 2026-11-24 16:05 · 数据截止 20261124 · build_review.py · 固定规则 · 本地数据驱动（无大模型、无联网）</div>
+<div class="tags"><span>狼波周期指数</span><span>双冰点情绪</span><span>板块轮动</span><span>放量信号</span><span>ETF 日度申赎</span><span>日度全景</span><span>威科夫吸筹</span><span>STH 成本基础</span><span>市场宽度与拥挤度</span><span>TMT 交易拥挤度（第 04 栏扩展）</span><span>股债利差(ERP)区间</span><span>衍生品 / 对冲压力</span><span>杠杆与真实资金</span><span>短线情绪与连板</span><span>波动率与恐慌指数</span><span>散户反向指数</span><span>行业估值与预期修正</span><span>筹码供给与事件</span><span>跨市场与宏观</span></div>
+<h2>大盘快照</h2><div class="kpis">
+<div class="kpi"><div class="k">上证收盘</div><div class="v ">3548.37</div></div>
+<div class="kpi"><div class="k">涨跌幅</div><div class="v up">+0.27%</div></div>
+<div class="kpi"><div class="k">两市成交额</div><div class="v ">16,676 亿</div></div>
+<div class="kpi"><div class="k">涨 / 跌 / 平</div><div class="v ">1951 / 3498 / 131</div></div>
+<div class="kpi"><div class="k">最高 / 最低</div><div class="v ">3585.22 / 3539.01</div></div>
+<div class="kpi"><div class="k">全市场标的</div><div class="v ">5,580</div></div>
+</div><div class="sum">全市场 5580 只标的、成交 16676 亿、涨跌 1951/3498/131。18 个数据栏目一致指向：广度急冻且量能收缩，趋势结构尚未获得确认；第 12 栏 ERP 为 偏便宜（历史分位 77.0802%），属估值性价比而非择时信号；新增栏目中，两融 / 中金所行情 / 涨跌停池 / 行业 PE / 解禁 / 跨市场均为公开真实数据，其中三类长历史已按日回补；第 06 栏 EdsonVIX 用中金所期权结算价自编（方法同 CBOE），非官方 iVIX 复刻；ETF 日度份额仍是量价反推估计，另有 TMT 同口径占比历史、炸板率/跌停家数历史确认不可回补；本页多项信号经严格因果检验并不显著（双冰点次日、威科夫 Phase C、ERP 分位反弹、VIX 高位后 20 日），因此结论以「观察与条件」为主，不作为买卖依据。</div>
+<h2>一、18栏数据汇总（第 04 栏 TMT 交易拥挤度单列一节）</h2>
+<div class="sec"><div class="h"><span class="n">01</span><span class="t">狼波周期指数</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">因果相位<b>下行确认段</b></span>
+<span class="chip">最近确认极值<b>4242.57</b></span>
+<span class="chip">确认滞后<b>87 根</b></span>
+</div><p>因果 ZigZag（反转阈值 8%）最近一次确认高点在 4242.57（20260513），确认滞后 87 根；当前处于下行确认段，未确认段位于 2% 分位。</p></div></div>
+<div class="sec"><div class="h"><span class="n">02</span><span class="t">双冰点情绪</span><span class="q">偏弱</span></div><div class="b"><div class="chips">
+<span class="chip">下跌家数<b>3498</b></span>
+<span class="chip">连续冰点<b>0 天</b></span>
+<span class="chip">历史双冰点<b>28 次</b></span>
+<span class="chip">次日胜率 / 基准<b>53.6% / 52.5%</b></span>
+</div><p>今日下跌 3498 家，上涨 1951 家；连续冰点 0 天，未构成双冰点。历史双冰点 28 次，次日上涨 53.6%（全样本基准 52.5%），差距不显著，不宜把「双冰点＝次日反弹」当作可交易规律。</p></div></div>
+<div class="sec"><div class="h"><span class="n">03</span><span class="t">板块轮动</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">板块上涨占比<b>37.1%</b></span>
+<span class="chip">首选主线<b>无线耳机</b></span>
+<span class="chip">最拥挤<b>电子信息</b></span>
+</div><p>剔除属性类板块后 237 个可交易板块，上涨 88 个（37.1%）。主线前三：无线耳机(+1.55%)、华为海思(+2.00%)、北京市(+1.64%)；放量下跌（退潮）前三：电子信息、黄河三角、超大盘；成交额最拥挤：电子信息(7.42%)、电子器件(7.01%)、机械行业(5.08%)。「退潮」只是当日横截面判断，公开源没有板块指数日度历史，无法确认为趋势反转。</p></div></div>
+<div class="sec"><div class="h"><span class="n">04</span><span class="t">放量信号</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">成交额<b>16676 亿</b></span>
+<span class="chip">量比 / MA20<b>1.02×</b></span>
+<span class="chip">最近放量<b>20261105</b></span>
+</div><p>两市成交额 16676 亿，前 20 日均额 16352 亿，量比 1.02×，未触发当前 1.20× 阈值。最近一次放量在 20261105（1.30×，距今 13 日）；近 250 日共 25 个放量日。放量本身不含方向，既可能是增量入场也可能是恐慌换手。</p></div></div>
+<div class="sec"><div class="h"><span class="n">05</span><span class="t">ETF 日度申赎</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">核心宽基成交<b>712 亿</b></span>
+<span class="chip">量比<b>0.95×</b></span>
+<span class="chip">判定<b>量能常态</b></span>
+</div><p>20 只核心宽基 ETF 合计成交 712 亿，为前 20 日均额的 0.95×；上证 +0.27% → 量能常态。这只是二级市场量能背景，不是份额申赎。季度真实申赎（5 只核心 ETF 最近一期）净额 +110.89 亿份；日度份额估计从入库首日起累积，当前 8 个交易日，样本不足 2 日时不计算净申赎。本栏已撤销「国家队护盘」归因，成交额放量无法证明买方身份。</p></div></div>
+<div class="sec"><div class="h"><span class="n">06</span><span class="t">日度全景</span><span class="q">偏弱</span></div><div class="b"><div class="chips">
+<span class="chip">成交额环比<b>+6.6%</b></span>
+<span class="chip">方向代理<b>-4623 亿</b></span>
+<span class="chip">10 日累计<b>-59092 亿</b></span>
+</div><p>成交额 16676 亿（环比 +6.65%），MA20 16352 亿 / MA60 17375 亿。方向代理 -4623.4 亿，10 日累计 -59092.2 亿。该代理＝(涨−跌)/总家数×成交额，是广度加权方向估计，不是真实资金净流入。</p></div></div>
+<div class="sec"><div class="h"><span class="n">07</span><span class="t">威科夫吸筹</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">当前判读<b>Phase C：弹簧与测试（吸筹末段）</b></span>
+<span class="chip">事件数<b>6</b></span>
+<span class="chip">区间分位<b>-12.4%</b></span>
+</div><p>当前判读「Phase C：弹簧与测试（吸筹末段）」，识别 6 个事件；最新收盘位于区间 -12.4% 分位，SOS/BU 尚未确认。近三年严格因果回测：12 次信号，20 日内结构兑现率 25.0%，方向胜率 66.7% vs 基准 53.0%，单尾二项 p=0.256、bootstrap 差值 CI 跨 0 —— 不显著，不能据此下注。</p></div></div>
+<div class="sec"><div class="h"><span class="n">08</span><span class="t">STH 成本基础</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">STH80 成本<b>168.73</b></span>
+<span class="chip">收盘<b>163.14</b></span>
+<span class="chip">价差<b>-5.59</b></span>
+<span class="chip">z 值<b>0.00σ</b></span>
+<span class="chip">档位<b>中性</b></span>
+</div><p>STH80 短持成本 168.73 vs 收盘 163.14，价差 -5.59 → z=0.00（中性）。−2σ 触发 17 次；其后 20 日胜率 76.5%（基准 50.7%，p=0.028）、60 日 68.8%（p=0.132），均不显著。筹码衰减模型（三角分布+自由流通换手），价位未复权、股本跳变检测除权；−2σ 为逆势信号，单边阴跌中连续触发连续失效，须与狼波/威科夫趋势合读。篮子为等权 15 只抽样股收益率合成口径（等仓持有损益，与市值加权指数在分化市可方向背离，非指数复刻）。</p></div></div>
+<div class="sec"><div class="h"><span class="n">09</span><span class="t">市场宽度与拥挤度</span><span class="q">偏弱</span></div><div class="b"><div class="chips">
+<span class="chip">ADL 当日<b>-1544</b></span>
+<span class="chip">TRIN<b>0.80</b></span>
+<span class="chip">NH−NL(250)<b>-998</b></span>
+<span class="chip">拥挤度<b>23.3 · 偏冷清</b></span>
+</div><p>ADL 当日 -1544、20 日 -17379；OSC -5.76、SUM 831。TRIN 0.80（UV/DV 0.70），NH60−NL60 -1175、NH250−NL250 -998，等权全 A -0.12%；拥挤度 23.3（偏冷清）。未见显著指数—广度背离。</p></div></div>
+<div class="sec"><div class="h"><span class="n">10</span><span class="t">TMT 交易拥挤度（第 04 栏扩展）</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">TMT 占比<b>46.2877%</b></span>
+<span class="chip">TMT 成交额<b>7719.11 亿</b></span>
+<span class="chip">两市成交额<b>16676.38 亿</b></span>
+<span class="chip">电子<b>26.6765%</b></span>
+<span class="chip">通信<b>8.2517%</b></span>
+<span class="chip">计算机<b>7.5086%</b></span>
+<span class="chip">传媒<b>3.8509%</b></span>
+<span class="chip">历史样本<b>8 日</b></span>
+</div><p>TMT 交易拥挤度＝电子 / 通信 / 计算机 / 传媒四大行业成交额合计 ÷ 沪深两市成交额。当日 TMT 7719.11 亿 / 两市 16676.38 亿 ＝ 46.2877%；分行业：电子 26.6765%（4448.67 亿，0.8%）、通信 8.2517%（1376.09 亿，0.68%）、计算机 7.5086%（1252.16 亿，0.01%）、传媒 3.8509%（642.19 亿，0.05%），共 11 个东财二级行业板块。历史样本 8 日，不足 20 日，不输出历史分位，也不做时序拥挤度判断；仅作当日横截面描述。按板块名称精确匹配归入申万口径，板块互斥不重复计入，概念板块不计入；成交占比只衡量交易集中度，不是资金净流入，行业行情接口不含逐笔主动买卖方向。</p></div></div>
+<div class="sec"><div class="h"><span class="n">11</span><span class="t">股债利差(ERP)区间</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">ERP<b>6.3143</b></span>
+<span class="chip">历史分位<b>77.0802%</b></span>
+<span class="chip">档位<b>偏便宜</b></span>
+<span class="chip">PE-TTM<b>12.6577</b></span>
+<span class="chip">10Y<b>1.5861%</b></span>
+<span class="chip">中枢 / ±2σ<b>6.1895 / 4.9582~7.4207</b></span>
+<span class="chip">σ 偏离<b>0.2027</b></span>
+<span class="chip">90分位点位<b>3695.691</b></span>
+</div><p>固定口径 ERP = 100 / 沪深300 PE-TTM − 中债10Y，通道为 1250 交易日滚动均值 ±2σ，档位按全样本分位划分。当日 ERP 6.3143（偏便宜，历史分位 77.0802%），PE-TTM 12.6577、盈利收益率 7.9004%、中债10Y 1.5861%，沪深300 收 3963.82 点；通道中枢 6.1895、σ 0.6156、上轨 7.4207、下轨 4.9582，σ 偏离 0.2027。四档阈值点位换算（假设盈利与国债收益率不变）：90 分位（低估线） ERP 6.8874 → PE 11.8014 → 3695.691 点（-268.129 点 / -6.7644%）；95 分位（深度低估） ERP 7.348 → PE 11.1931 → 3505.1693 点（-458.6507 点 / -11.5709%）；98 分位（极端低估） ERP 7.7833 → PE 10.673 → 3342.3092 点（-621.5108 点 / -15.6796%）；1250 日 +2σ 极端上轨 ERP 7.4207 → PE 11.1027 → 3476.8813 点（-486.9387 点 / -12.2846%）。历史条件收益：20 日：样本 1290、胜率 56.2791%、平均 1.4697%、中位 0.8914%；60 日：样本 1271、胜率 58.4579%、平均 5.2018%、中位 3.2777%；120 日：样本 1271、胜率 67.3485%、平均 10.8365%、中位 6.7061%。区间事件：当前未进入区间，历史 34 次、中位 9.0 日、最长 232 日，当前进度 —%，距进入还差 0.5732 个 ERP 百分点。建议立场「略偏权益，但安全垫不厚」：维持均衡配置，等 ERP 进入 90 分位再加仓；证伪：若国债收益率下行推动 ERP 被动抬升，不等于股票更便宜。以上数字全部来自 erp.json 锁定快照，复盘不做任何重算或取整；日频 PE 由月末官方锚点重构，条件概率样本重叠、未做显著性检验，ERP 对短期方向无稳定预测力。</p></div></div>
+<div class="sec"><div class="h"><span class="n">12</span><span class="t">衍生品 / 对冲压力</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">IF 当月基差<b>-42.9 点</b></span>
+<span class="chip">IF 次月年化<b>-12.16%</b></span>
+<span class="chip">IO 成交量 PCR<b>0.565</b></span>
+<span class="chip">四品种总持仓<b>1290996 手</b></span>
+<span class="chip">IF 会员净多空<b>0 手</b></span>
+</div><p>中金所真实日行情：IF 当月基差 -42.9 点，次月年化贴水 -12.16%（当月临近到期会放大年化，以次月口径为准）；IO 成交量 PCR 0.565、持仓量 PCR 0.687；四品种总持仓 1290996 手，IF 前 20 席位净多空 0 手（仅会员排名口径，不含全市场账户）。XML 无隐含波动率字段，真实 IV / IV skew 未接入，本栏不推算冒充。</p></div></div>
+<div class="sec"><div class="h"><span class="n">13</span><span class="t">杠杆与真实资金</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">两融余额<b>2.1711 万亿</b></span>
+<span class="chip">日变动<b>-87 亿</b></span>
+<span class="chip">融资买入<b>1232 亿</b></span>
+<span class="chip">占流通市值<b>2.492%</b></span>
+<span class="chip">披露频率<b>T+1</b></span>
+</div><p>两融是少数真实可核验的杠杆资金：截至 2026-11-23（T+1 披露），余额 2.1711 万亿元，日变动 -87 亿元，融资买入额 1232 亿元，占流通市值 2.492%。属同步指标且滞后一日，不作领先信号。ETF 份额只采用基金定期报告的季度真实申赎，交易所日度申赎份额无免费公开源；第 07 栏日度曲线是量价反推估计，不做「国家队」买方归因。</p></div></div>
+<div class="sec"><div class="h"><span class="n">14</span><span class="t">短线情绪与连板</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">涨停<b>55 家</b></span>
+<span class="chip">跌停<b>2 家</b></span>
+<span class="chip">炸板<b>68 家</b></span>
+<span class="chip">最高连板<b>4 板</b></span>
+<span class="chip">炸板率<b>55.28%</b></span>
+<span class="chip">晋级率<b>20.55%</b></span>
+</div><p>涨停池 / 跌停池 / 炸板池当日真实快照：涨停 55、跌停 2、炸板 68 家，最高 4 板、连板 30 家、炸板率 55.28%。晋级率 20.55%。与双冰点形成两层：双冰点是收盘后广度极值，本栏是日内封板与接力结构。涨停 / 连板 / 晋级率已用同花顺按日回补长历史；炸板率与跌停家数实测无可用历史源，只有当日快照，不伪造回补。</p></div></div>
+<div class="sec"><div class="h"><span class="n">15</span><span class="t">波动率与恐慌指数</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">EdsonVIX<b>20.86</b></span>
+<span class="chip">全样本分位<b>77.1%</b></span>
+<span class="chip">恐慌溢价 VIX−HV30<b>+6.06%</b></span>
+<span class="chip">Skew<b>4.79</b></span>
+<span class="chip">HO / MO<b>16.1 / 36.7</b></span>
+</div><p>EdsonVIX（IO 沪深300，近月+次月 30 日口径）20.86，全样本分位 77.1%（波动偏高）；HV30 已实现 14.80，恐慌溢价 +6.06%；Skew 4.79。对照 HO 上证50 16.09 / MO 中证1000 36.67。自编指数，方法同 CBOE 方差互换、结算价与行权价来自中金所真实披露；官方 iVIX 2018-02 起停发。VIX 只标价波动不含方向；expanding 90 分位触发后 20 日胜率 50.0%（p=0.406，不显著），不构成「恐慌见底即反弹」的依据。</p></div></div>
+<div class="sec"><div class="h"><span class="n">16</span><span class="t">散户反向指数</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">综合指数<b>18.9</b></span>
+<span class="chip">判读<b>极度冷清</b></span>
+<span class="chip">买入子指数<b>11.3</b></span>
+<span class="chip">卖出子指数<b>7.0</b></span>
+<span class="chip">样本日数<b>1 日</b></span>
+</div><p>综合散户反向指数 18.9（极度冷清：小白沉默，可能接近底部），四板块：纳斯达克 17.7、黄金 20.6、CPO通信 21.7、半导体 15.7。小白买入/卖出子指数 11.3 / 7.0。样本 1 日（2026-11-23 起逐日累积，历史不可回补），未输出历史分位（样本 &lt;20 日）。数据源为东财股吧 4 个主题 ETF 吧当日真实帖子标题，词库与权重参考 mihang123/mom-index v0.1 公开框架（MIT）；该仓库 data/ 为合成演示数据，本栏未使用。指数越高＝小白讨论越集中、情绪越极端＝市场越危险（反向含义）；关键词规则未经充分实证，当前样本不足以做统计推断，非交易指令。</p></div></div>
+<div class="sec"><div class="h"><span class="n">17</span><span class="t">行业估值与预期修正</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">有效行业<b>368 个</b></span>
+<span class="chip">PE 中位数<b>29.05 倍</b></span>
+<span class="chip">P25 / P75<b>20.34 / 46.12</b></span>
+<span class="chip">业绩预增<b>159 条</b></span>
+<span class="chip">业绩预减<b>18 条</b></span>
+</div><p>当日 368 个有效行业板块 PE-TTM 横截面：中位数 29.05 倍、P25 20.34 / P75 46.12。最近 200 条业绩预告中预增 159 条、预减 18 条（公告口径，不是分析师一致预期修正）。中位数 / 四分位已用东财行业估值报表按日回补长历史（127 行业口径，与当日 219 个板块横截面是两套口径，不横向比绝对值）；与 ERP 分工是「结构维度」而非「股债总量性价比」。</p></div></div>
+<div class="sec"><div class="h"><span class="n">18</span><span class="t">筹码供给与事件</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">未来解禁<b>60 笔</b></span>
+<span class="chip">解禁市值<b>547 亿</b></span>
+<span class="chip">龙虎榜<b>60 条</b></span>
+<span class="chip">上榜成交额<b>283 亿</b></span>
+<span class="chip">口径<b>公开披露</b></span>
+</div><p>未来 60 笔限售解禁合计约 547 亿元，当日龙虎榜 60 条、上榜成交合计约 283 亿元。解禁是可流通股本增加，不等于实际减持；龙虎榜只说明达到交易所异动阈值，不能识别买方身份。Level-2 逐笔委托 / 封单 / 主动买卖方向无免费源，未接入。事件是「需要留意的条件」，不是因果结论。</p></div></div>
+<div class="sec"><div class="h"><span class="n">19</span><span class="t">跨市场与宏观</span><span class="q">中性</span></div><div class="b"><div class="chips">
+<span class="chip">恒生指数<b>-0.80%</b></span>
+<span class="chip">纳斯达克<b>+6.51%</b></span>
+<span class="chip">美元指数<b>104.30</b></span>
+<span class="chip">USDCNY<b>6.6632</b></span>
+<span class="chip">中债 10Y<b>2.0499%</b></span>
+</div><p>恒指 -0.80%、纳指 +6.51%、标普 +4.73%；美元指数 104.30、COMEX 黄金 3620.50；在岸人民币 USDCNY 6.6632，中债 10 年期国债收益率 2.0499%（与第 12 栏 ERP 固定口径同源）。各市场收盘时点不同，不是同步快照，也不是盘中实时；仅作外部语境，不作为 A 股次日方向的领先信号。</p></div></div>
+<h2>二、操作参考（条件化，不构成建议）</h2><div class="adv">
+<div class="box"><h3>短线 · 1~3 个交易日</h3><div class="st">立场：观望 / 等确认</div>
+<div class="lbl">观察要点</div><ul>
+<li>广度：3498 家下跌 / 1951 家上涨，连续冰点 0 天。历史双冰点次日上涨 53.6% 对基准 52.5%，差距不显著，不因「跌得多」就预期反弹。</li>
+<li>量价：成交额 16676 亿、量比 1.02×；TRIN 0.80 与 UV/DV 0.70 需合读——普跌日 TRIN&lt;1 只说明少数抗跌股放量，不等于买盘转强。</li>
+<li>结构：威科夫「Phase C：弹簧与测试（吸筹末段）」，SOS/BU 未确认；近三年 12 次同类信号 20 日结构兑现率仅 25.0%，方向胜率差值 bootstrap CI 跨 0，不把 Phase C 当买点。</li>
+<li>交易集中度：TMT 四大行业成交占比 46.2877%（7719.11 亿 / 两市 16676.38 亿）；历史样本仅 8 日，不足 20 日不输出历史分位，短线只把它当作当日横截面，不推断「拥挤趋势」。</li>
+<li>短线情绪两层：收盘广度看双冰点（连续两日 4000 家以上下跌），日内结构看涨停 55 家 / 跌停 2 家 / 炸板 68 家、最高 4 板、炸板率 55.28%；晋级率 20.55%。对冲压力看 IF 次月年化贴水 -12.16%，但当月临近到期会放大年化，两者都只作为条件描述，不作方向依据。</li>
+</ul>
+<div class="lbl">触发条件</div><ul>
+<li>修复条件：次日上涨家数回升至 &gt; 2500 且 UV/DV &gt; 1、成交额不再低于 MA20 的 0.9×</li>
+<li>转弱条件：继续 &gt; 4000 家下跌且 NH60/NL60 占比差继续扩大、TRIN 抬升</li>
+<li>结构确认：出现放量收盘站上区间上沿（SOS）并回踩不破（BU）才算升级</li>
+</ul>
+<div class="lbl">证伪场景</div><ul>
+<li>若出现「指数涨但 ADL 继续走低 / NH−NL 继续为负」，说明上涨由权重拉动，广度修复证伪</li>
+<li>已完成的严格因果检验显示双冰点（次日胜率 53.6% vs 基准 52.5%）与威科夫 Phase C（p=0.256）均不显著，任何据此的短线择时都缺乏统计支撑</li>
+</ul>
+</div>
+<div class="box"><h3>中长线 · 1~3 个月</h3><div class="st">立场：等待广度与结构同步确认</div>
+<div class="lbl">观察要点</div><ul>
+<li>ADL 单日 -1544、20 日 -17379，麦克莱伦 SUM 831、OSC -5.76；宽度与指数未明显背离</li>
+<li>NH250−NL250 = -998 家，创 250 日新低的个股显著多于创新高，中期广度尚未修复；等权全 A 当日 -0.12% 反映个股整体弱于权重。</li>
+<li>板块结构：无线耳机、华为海思、北京市；但板块指数无日度历史，只能看当日横截面，「主线」需连续多日成交额占比与涨幅同时居前才算成立。</li>
+<li>ETF 日度申赎：核心宽基量比 0.95×（量能常态）只是量价背景；季度真实申赎为唯一可核验份额口径，日度份额为量价反推估计且只从入库首日起累积。交易所日度申赎份额无免费公开源，本工作台不做「国家队」买方归因，也不据成交额放量推断中长期资金托底。</li>
+<li>杠杆与估值结构：两融余额 2.1711 万亿（T+1）属同步指标，行业 PE 横截面中位数 29.05 倍、业绩预告预增 159 条 / 预减 18 条 只说明公告口径的盈利预期方向；两者都不构成中期择时信号。</li>
+<li>股债性价比：ERP 6.3143（偏便宜，全样本 77.0802% 分位），1250 日中枢 6.1895、σ 0.6156、±2σ 通道 [4.9582, 7.4207]，σ 偏离 0.2027；90 分位低估线对应沪深300 3695.691 点（-6.7644%），当前 3963.82 点。</li>
+<li>ERP 历史条件收益（样本重叠，仅作描述）：20 日胜率 56.2791% / 平均 1.4697%；60 日胜率 58.4579% / 平均 5.2018%；120 日胜率 67.3485% / 平均 10.8365%；当前建议立场「略偏权益，但安全垫不厚」，维持均衡配置，等 ERP 进入 90 分位再加仓。</li>
+</ul>
+<div class="lbl">触发条件</div><ul>
+<li>中期转强：ADL 20 日变化转正 + NH250−NL250 连续 5 日收敛 + 麦克莱伦 SUM 上穿其 60 日均值</li>
+<li>结构升级：威科夫出现 SOS/BU，且伴随全市场放量（量比 &gt; 1.2×）而非缩量突破</li>
+<li>风格确认：等权全 A / 沪深300 相对强度连续走高，说明上涨有广度而非仅权重</li>
+<li>估值确认：ERP 上穿全样本 90 分位（6.8874）并进入连续区间，才把「略偏权益」升级为分批加仓；仅凭当日 77.0802% 分位不足以行动</li>
+<li>集中度确认：TMT 成交占比需连续多日与电子 / 通信 / 计算机 / 传媒同步抬升，且历史样本累积满 20 日后才给出分位判断</li>
+</ul>
+<div class="lbl">证伪场景</div><ul>
+<li>若成交额持续低于 MA60 且 NH−NL 长期为负，任何「底部结构」判读都应降级为区间震荡</li>
+<li>板块与 ETF 数据存在横截面选择偏差与代理口径，不能当作真实资金流或申赎数据</li>
+<li>ERP 证伪：若国债收益率下行推动 ERP 被动抬升，或盈利大幅下修使 PE 跳升，「股更便宜」的判断即不成立；ERP 高位可以长期更高位，不等于见底</li>
+<li>TMT 成交占比不是资金净流入；行业板块行情接口无逐笔主动买卖方向，用占比反推「资金抱团」属于口径误用</li>
+<li>本报告由固定规则自动生成，未做参数寻优；若未来调参以贴合历史曲线，即构成过拟合</li>
+</ul>
+</div>
+</div>
+<h2>三、长历史数据可得性清单（实测结论）</h2>
+<div class="hist-intro">长历史实测回补：行业 PE 中位数/四分位 257 日、涨停/连板/晋级率 257 日、外部环境 466 日；另有 3 项确认无免费历史源：ETF 日度份额估计 / 净申赎、TMT 交易拥挤度（成交占比）历史、炸板率 / 跌停家数历史。</div>
+<div class="hist">
+<div class="col ok"><div class="ch">已按日回补 · 现在就有历史</div>
+<div class="row"><b>横截面中位数 / 四分位</b> <span class="d">257 日</span><span class="s">东财 RPT_VALUEINDUSTRY_DET 行业估值报表（127 行业 PE-TTM）按日回补</span></div>
+<div class="row"><b>炸板率与晋级率（拆开看）</b> <span class="d">257 日</span><span class="s">晋级率 / 涨停 / 连板用同花顺涨停池 + 连板池按 date 回补；炸板率 / 跌停家数实测无历史源，仍只有当日快照</span></div>
+<div class="row"><b>外部环境逐日累积</b> <span class="d">466 日</span><span class="s">腾讯外盘指数日线（恒指 / 纳指 / 标普）+ 东财中债 10Y 按日回补</span></div>
+<div class="row"><b>ETF 日度量价（第 07 栏主视觉）</b> <span class="d">700 日</span><span class="s">腾讯 ETF 日线成交额 / 量比 / 方向代理 / 宽基分类堆积，真实日线</span></div>
+</div>
+<div class="col no"><div class="ch">确认拿不到历史 · 只有当日 / 逐日累积</div>
+<div class="row"><b>ETF 日度份额估计 / 净申赎</b><span class="s">交易所日度申赎份额无免费公开源。东财 f116 总市值只有当日快照、无历史接口；腾讯 ETF 日线 693 根含 OHLCV 但不含份额或换手率；RPT_FUND_ETFLIST 的 DEC_TOTALSHARE 只是当前快照。因此无法反推历史份额，只能从 2026-11-13 起逐日累积。</span><span class="s" style="color:#178a5a">替代：第 07 栏已改用真实可得的每日量价序列（32 只 ETF 逐日成交额、量比、方向代理、宽基分类堆积，约 690 日）作为日度主视觉；季度真实申赎保留为唯一可核验份额口径。</span></div>
+<div class="row"><b>TMT 交易拥挤度（成交占比）历史</b><span class="s">同口径历史需要东财 push2his 板块 K 线的 f57 每日成交额，且必须 11 个 TMT 二级行业板块全部有数据。2026-11-15 实测上游对板块代码随机限流：同一批 11 个代码每次仅 3~5 个返回，经 6 轮补齐仍无法凑齐。已验证可取板块的 f57 与当日 ulist.np/get f6 精确一致（消费电子 46623680731、通信设备 119824772329），说明口径本身一致、问题在历史覆盖不全；用部分板块加总会系统性低估占比，因此不发布残缺历史。</span><span class="s" style="color:#178a5a">替代：fetch_tmt.py 已实现 --backfill：11 个板块全齐、且回补出的当日占比与锁定 44.5443% 一致时自动补齐，并带同日一致性校验（不一致则拒绝发布）。当前状态为 partial，历史保持逐日累积。同花顺板块 K 线虽有 2007 年起成交额，但板块划分不同，不混用以免破坏锁定口径。</span></div>
+<div class="row"><b>炸板率 / 跌停家数历史</b><span class="s">东财涨停池、跌停池、炸板池的 date 参数实测失效（请求 20261112 仍返回 qdate=20261113）；同花顺只有涨停池与连板池的历史接口，无炸板 / 跌停历史池；逐股缓存 flow_state.json 只保留收盘价与成交量，没有最高价，无法自行判定「盘中触板但收盘未封」。</span><span class="s" style="color:#178a5a">替代：涨停家数、最高连板、连板家数、晋级率已用同花顺按日回补约 1 年；炸板率与跌停家数仍只有当日快照，图上历史段留空并标注，不插值、不伪造。</span></div>
+</div></div>
+<h2>四、生成机制与免责</h2><div class="note">
+<div>数据源：workbench.json、breadth.json、board_mom.json、indices.json、flow.json、wyckoff.json、wyckoff_backtest.json、erp.json（锁定）、tmt.json、extras.json、history.json（长历史回补）</div>
+<ul>
+<li>本报告是数据汇总结构化描述，不是投资建议，不构成任何证券买卖依据。</li>
+<li>「净流入」「方向代理」「申赎结构」与「TMT 成交占比」均为量价代理；真实资金流需要逐笔成交方向数据。第 07 栏已撤销「国家队护盘」归因，ETF 季度申赎为真实季报、日度份额为量价反推估计，两者不可混用。</li>
+<li>新增 6 栏的公开源均为盘后 T / T+1 可得，不是盘中实时；两融 T+1、中金所行情收盘后公布、外盘为各自最近收盘，跨时区不同步。</li>
+<li>中金所 XML 无隐含波动率字段，真实 IV / IV skew 未接入；会员净多空只是前 20 席位排名口径，不是全市场净头寸；当月合约临近到期会放大年化贴水，需以次月口径为主。</li>
+<li>短线情绪已分源回补：涨停 / 连板 / 晋级率用同花顺按日回补 250 日，与当日东财涨跌停池是两套口径、家数不混算；炸板率 / 跌停家数因东财三池 date 参数失效、同花顺无对应历史池、逐股缓存无最高价，实测无法回补，只有当日快照，不伪造、不插值。</li>
+<li>行业 PE 当日为 219 个东财二级行业板块 f9 横截面；中位数 / 四分位趋势用东财 RPT_VALUEINDUSTRY_DET 报表（127 行业）按日回补 250 日，两套口径样本数不同，趋势图只用于看方向，不与 KPI 数字直接比较。业绩预告是公告口径代理，不是分析师一致预期修正。</li>
+<li>板块快照为当日横截面、股票池为当前全 A 名单，存在选择与幸存者偏差。</li>
+<li>报告不回填历史日期：用当日板块快照反推过去会产生未来函数。</li>
+<li>第 12 栏 ERP 的全部数字来自 erp.json 锁定快照（fetch_erp.py 一次性计算），复盘只读、不重算、不改口径、不做四舍五入；日频 PE 由月末官方锚点重构，条件概率样本重叠且未做显著性检验，ERP 对短期指数方向无稳定预测力。</li>
+<li>第 12 栏为工作台独立实现，与既有「每周股债利差(ERP)区间与操作建议」周报的主读数同源同公式，但历史条件概率 / 区间事件 / 建议措辞的定义不同，两者胜率与区间进度不可直接比较，也不互相覆盖。</li>
+<li>TMT 成交占比同口径历史需东财 push2his 11 个二级行业板块 K 线的每日成交额；实测仅 4 个可取、7 个经 6 轮补齐仍为空，用残缺板块加总会严重低估占比，因此不发布残缺历史，仍只保留当日锁定读数与逐日累积，样本不足 20 日不出分位。</li>
+<li>长历史实测回补：行业 PE 中位数/四分位 257 日、涨停/连板/晋级率 257 日、外部环境 466 日；另有 3 项确认无免费历史源：ETF 日度份额估计 / 净申赎、TMT 交易拥挤度（成交占比）历史、炸板率 / 跌停家数历史。</li>
+<li>所有阈值与判读规则为预设固定值，未做参数寻优；建议只给条件与证伪场景。</li>
+</ul></div>
+<div class="foot">本文件由 build_review.py / build_review_page.py 自动生成，可离线打开 / 打印。局域网在线版：<a href="<NAS_HOST>/review-latest.html" style="color:var(--acc)">最新一篇</a> · <a href="<NAS_HOST>/#review" style="color:var(--acc)">工作台第 19 栏</a></div>
+</div></body></html>
