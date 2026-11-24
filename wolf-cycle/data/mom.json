@@ -18,7 +18,7 @@
   ],
   "license": "MIT (mihang123/mom-index)",
   "lockedBase": "2026-11-23",
-  "recordCount": 1
+  "recordCount": 2
  },
  "records": [
   {
@@ -300,6 +300,293 @@
      "postsUsed": 68
     }
    }
+  },
+  {
+   "date": "2026-11-24",
+   "asof": "20261124",
+   "overall": 17.0,
+   "buyAvg": 11.9,
+   "sellAvg": 8.5,
+   "sectors": {
+    "nasdaq": {
+     "index": 17.3,
+     "interpretation": "极度冷清：小白沉默，可能接近底部",
+     "details": {
+      "totalPosts": 142,
+      "validPosts": 142,
+      "spamPosts": 0,
+      "newbiePosts": 26,
+      "pureNewbie": 0,
+      "newbieRatio": 18.3,
+      "avgNewbieScore": 27.5,
+      "avgSentiment": 15.4,
+      "puritySignal": 0.0,
+      "activity": 100,
+      "momBuyIndex": 8.0,
+      "momSellIndex": 15.7,
+      "buySellRatio": 0.4,
+      "buyCount": 2,
+      "sellCount": 5
+     },
+     "topPosts": [
+      {
+       "title": "有没有大佬解答一下这货是跟大A吗",
+       "score": 42.0,
+       "level": "偏小白",
+       "intent": "neutral",
+       "signals": [
+        "知识求助"
+       ]
+      },
+      {
+       "title": "纳斯达克科技公司们赚不到钱，请问还有什么公司没有风险！？",
+       "score": 42.0,
+       "level": "偏小白",
+       "intent": "neutral",
+       "signals": [
+        "知识求助"
+       ]
+      },
+      {
+       "title": "狗主力全天出货！大部分为割肉盘！今天买进的全是活蕾枫！",
+       "score": 42.0,
+       "level": "偏小白",
+       "intent": "sell",
+       "signals": [
+        "情绪恐慌",
+        "短期思维"
+       ]
+      },
+      {
+       "title": "一堆刚玩的小白要傻了，诶为什么和评论区说的不一样啊，最低点溢价最高，涨上去了溢价",
+       "score": 42.0,
+       "level": "偏小白",
+       "intent": "neutral",
+       "signals": [
+        "身份自述"
+       ]
+      },
+      {
+       "title": "明天涨停，黄总发力了",
+       "score": 34.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": [
+        "短期思维"
+       ]
+      }
+     ],
+     "name": "纳斯达克",
+     "etf": "513100",
+     "postsUsed": 142
+    },
+    "gold": {
+     "index": 14.6,
+     "interpretation": "极度冷清：小白沉默，可能接近底部",
+     "details": {
+      "totalPosts": 51,
+      "validPosts": 51,
+      "spamPosts": 0,
+      "newbiePosts": 5,
+      "pureNewbie": 0,
+      "newbieRatio": 9.8,
+      "avgNewbieScore": 26.8,
+      "avgSentiment": 20.0,
+      "puritySignal": 0.0,
+      "activity": 63.7,
+      "momBuyIndex": 25.0,
+      "momSellIndex": 0.0,
+      "buySellRatio": 2.0,
+      "buyCount": 2,
+      "sellCount": 0
+     },
+     "topPosts": [
+      {
+       "title": "不懂就问，为啥15.29分还有交易呢？正常情况不是15点结束交易的吗？",
+       "score": 42.0,
+       "level": "偏小白",
+       "intent": "neutral",
+       "signals": [
+        "知识求助"
+       ]
+      },
+      {
+       "title": "11月20【今日债市收评】今天股市下跌，债市冲高回落涨幅收窄，债基收中大蛋！",
+       "score": 26.0,
+       "level": "中间派",
+       "intent": "buy",
+       "signals": [
+        "过度乐观"
+       ]
+      },
+      {
+       "title": "每跌六个点补一万",
+       "score": 22.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": []
+      },
+      {
+       "title": "跑步买入，希望别套我",
+       "score": 22.0,
+       "level": "中间派",
+       "intent": "buy",
+       "signals": []
+      },
+      {
+       "title": "跌的还不够一年，都别急",
+       "score": 22.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": []
+      }
+     ],
+     "name": "黄金",
+     "etf": "518880",
+     "postsUsed": 51
+    },
+    "cpo": {
+     "index": 18.6,
+     "interpretation": "极度冷清：小白沉默，可能接近底部",
+     "details": {
+      "totalPosts": 149,
+      "validPosts": 149,
+      "spamPosts": 0,
+      "newbiePosts": 11,
+      "pureNewbie": 0,
+      "newbieRatio": 7.4,
+      "avgNewbieScore": 26.4,
+      "avgSentiment": 45.5,
+      "puritySignal": 0.0,
+      "activity": 100,
+      "momBuyIndex": 0.0,
+      "momSellIndex": 18.3,
+      "buySellRatio": 0.0,
+      "buyCount": 0,
+      "sellCount": 3
+     },
+     "topPosts": [
+      {
+       "title": "救命",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": [
+        "情绪恐慌"
+       ]
+      },
+      {
+       "title": "跟跌不跟涨，明天好像又要完了",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": [
+        "情绪恐慌"
+       ]
+      },
+      {
+       "title": "看不到希望了怎么办全部亏完了那句反弹一波大的负债能解决就可以了本金没了已经不重要",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": [
+        "情绪恐慌"
+       ]
+      },
+      {
+       "title": "今天套这批可难受了，明天不割肉的话，又要套一阵了",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "sell",
+       "signals": [
+        "情绪恐慌"
+       ]
+      },
+      {
+       "title": "今天估计都跑了吧，给你机会不要，就不要怪老板明天砸到你哭了",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "sell",
+       "signals": [
+        "情绪恐慌"
+       ]
+      }
+     ],
+     "name": "CPO通信",
+     "etf": "515880",
+     "postsUsed": 149
+    },
+    "semiconductor": {
+     "index": 17.5,
+     "interpretation": "极度冷清：小白沉默，可能接近底部",
+     "details": {
+      "totalPosts": 83,
+      "validPosts": 83,
+      "spamPosts": 0,
+      "newbiePosts": 10,
+      "pureNewbie": 0,
+      "newbieRatio": 12.0,
+      "avgNewbieScore": 26.8,
+      "avgSentiment": 30.0,
+      "puritySignal": 0.0,
+      "activity": 100,
+      "momBuyIndex": 14.5,
+      "momSellIndex": 0.0,
+      "buySellRatio": 2.0,
+      "buyCount": 2,
+      "sellCount": 0
+     },
+     "topPosts": [
+      {
+       "title": "今天打脸，昨天卖掉，今天买回来了，怎么买都是亏",
+       "score": 46.0,
+       "level": "偏小白",
+       "intent": "neutral",
+       "signals": [
+        "知识求助",
+        "短期思维"
+       ]
+      },
+      {
+       "title": "后悔开盘没走，他这基本每天都让人后悔中",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": [
+        "情绪恐慌"
+       ]
+      },
+      {
+       "title": "今天会涨停吗",
+       "score": 30.0,
+       "level": "中间派",
+       "intent": "neutral",
+       "signals": []
+      },
+      {
+       "title": "应该明天再买回来的，今天尾盘接回来感觉有点冲动了。",
+       "score": 26.0,
+       "level": "中间派",
+       "intent": "buy",
+       "signals": [
+        "过度乐观"
+       ]
+      },
+      {
+       "title": "快冲啊",
+       "score": 26.0,
+       "level": "中间派",
+       "intent": "buy",
+       "signals": [
+        "过度乐观"
+       ]
+      }
+     ],
+     "name": "半导体",
+     "etf": "512480",
+     "postsUsed": 83
+    }
+   }
   }
  ],
  "history": {
@@ -307,161 +594,161 @@
    {
     "date": "2026-11-23",
     "index": 17.7
+   },
+   {
+    "date": "2026-11-24",
+    "index": 17.3
    }
   ],
   "gold": [
    {
     "date": "2026-11-23",
     "index": 20.6
+   },
+   {
+    "date": "2026-11-24",
+    "index": 14.6
    }
   ],
   "cpo": [
    {
     "date": "2026-11-23",
     "index": 21.7
+   },
+   {
+    "date": "2026-11-24",
+    "index": 18.6
    }
   ],
   "semiconductor": [
    {
     "date": "2026-11-23",
     "index": 15.7
+   },
+   {
+    "date": "2026-11-24",
+    "index": 17.5
    }
   ],
   "overall": [
    {
     "date": "2026-11-23",
     "index": 18.9
+   },
+   {
+    "date": "2026-11-24",
+    "index": 17.0
    }
   ]
  },
  "latest": {
-  "date": "2026-11-23",
-  "asof": "20261123",
-  "overall": 18.9,
-  "buyAvg": 11.3,
-  "sellAvg": 7.0,
+  "date": "2026-11-24",
+  "asof": "20261124",
+  "overall": 17.0,
+  "buyAvg": 11.9,
+  "sellAvg": 8.5,
   "sectors": {
    "nasdaq": {
-    "index": 17.7,
+    "index": 17.3,
     "interpretation": "极度冷清：小白沉默，可能接近底部",
     "details": {
-     "totalPosts": 146,
-     "validPosts": 146,
+     "totalPosts": 142,
+     "validPosts": 142,
      "spamPosts": 0,
-     "newbiePosts": 19,
+     "newbiePosts": 26,
      "pureNewbie": 0,
-     "newbieRatio": 13.0,
-     "avgNewbieScore": 24.7,
-     "avgSentiment": 31.6,
+     "newbieRatio": 18.3,
+     "avgNewbieScore": 27.5,
+     "avgSentiment": 15.4,
      "puritySignal": 0.0,
      "activity": 100,
-     "momBuyIndex": 20.5,
-     "momSellIndex": 6.7,
-     "buySellRatio": 6.0,
-     "buyCount": 6,
-     "sellCount": 1
+     "momBuyIndex": 8.0,
+     "momSellIndex": 15.7,
+     "buySellRatio": 0.4,
+     "buyCount": 2,
+     "sellCount": 5
     },
     "topPosts": [
      {
-      "title": "如纳指数回去了还亏损的，你们从此告别炒股可以吗，这个群里面80%的人都不适合炒股",
-      "score": 38.0,
+      "title": "有没有大佬解答一下这货是跟大A吗",
+      "score": 42.0,
       "level": "偏小白",
-      "intent": "neutral",
-      "signals": [
-       "决策依赖"
-      ]
-     },
-     {
-      "title": "什么意思？那跌五个多点，这怎么跌都不跌。还准备买一笔的",
-      "score": 34.0,
-      "level": "中间派",
       "intent": "neutral",
       "signals": [
        "知识求助"
       ]
      },
      {
-      "title": "被纳指QDII的小额限购搞怕了，一百一百加真的累。融通核心价值混合额度这块很友好",
-      "score": 30.0,
-      "level": "中间派",
+      "title": "纳斯达克科技公司们赚不到钱，请问还有什么公司没有风险！？",
+      "score": 42.0,
+      "level": "偏小白",
       "intent": "neutral",
       "signals": [
-       "情绪恐慌"
+       "知识求助"
       ]
      },
      {
-      "title": "21个点溢价也有人买？",
-      "score": 30.0,
-      "level": "中间派",
-      "intent": "neutral",
-      "signals": []
+      "title": "狗主力全天出货！大部分为割肉盘！今天买进的全是活蕾枫！",
+      "score": 42.0,
+      "level": "偏小白",
+      "intent": "sell",
+      "signals": [
+       "情绪恐慌",
+       "短期思维"
+      ]
      },
      {
-      "title": "纳指叔叔给我看清他们给我冲",
-      "score": 26.0,
-      "level": "中间派",
-      "intent": "buy",
+      "title": "一堆刚玩的小白要傻了，诶为什么和评论区说的不一样啊，最低点溢价最高，涨上去了溢价",
+      "score": 42.0,
+      "level": "偏小白",
+      "intent": "neutral",
       "signals": [
-       "过度乐观"
+       "身份自述"
+      ]
+     },
+     {
+      "title": "明天涨停，黄总发力了",
+      "score": 34.0,
+      "level": "中间派",
+      "intent": "neutral",
+      "signals": [
+       "短期思维"
       ]
      }
     ],
     "name": "纳斯达克",
     "etf": "513100",
-    "postsUsed": 146
+    "postsUsed": 142
    },
    "gold": {
-    "index": 20.6,
-    "interpretation": "正常区间：小白参与度适中",
+    "index": 14.6,
+    "interpretation": "极度冷清：小白沉默，可能接近底部",
     "details": {
-     "totalPosts": 54,
-     "validPosts": 54,
+     "totalPosts": 51,
+     "validPosts": 51,
      "spamPosts": 0,
-     "newbiePosts": 12,
+     "newbiePosts": 5,
      "pureNewbie": 0,
-     "newbieRatio": 22.2,
-     "avgNewbieScore": 27.0,
-     "avgSentiment": 25.0,
+     "newbieRatio": 9.8,
+     "avgNewbieScore": 26.8,
+     "avgSentiment": 20.0,
      "puritySignal": 0.0,
-     "activity": 67.5,
-     "momBuyIndex": 8.4,
-     "momSellIndex": 12.4,
-     "buySellRatio": 1.0,
-     "buyCount": 1,
-     "sellCount": 1
+     "activity": 63.7,
+     "momBuyIndex": 25.0,
+     "momSellIndex": 0.0,
+     "buySellRatio": 2.0,
+     "buyCount": 2,
+     "sellCount": 0
     },
     "topPosts": [
      {
-      "title": "还好开盘卖了。。。割肉",
-      "score": 42.0,
-      "level": "偏小白",
-      "intent": "sell",
-      "signals": [
-       "情绪恐慌"
-      ]
-     },
-     {
-      "title": "什么意思！怎么才1个多点？",
+      "title": "不懂就问，为啥15.29分还有交易呢？正常情况不是15点结束交易的吗？",
       "score": 42.0,
       "level": "偏小白",
       "intent": "neutral",
       "signals": [
        "知识求助"
       ]
-     },
-     {
-      "title": "为啥我有一手卖不出去呢",
-      "score": 30.0,
-      "level": "中间派",
-      "intent": "neutral",
-      "signals": []
-     },
-     {
-      "title": "我咋这么会买呢",
-      "score": 30.0,
-      "level": "中间派",
-      "intent": "neutral",
-      "signals": []
      },
      {
       "title": "11月20【今日债市收评】今天股市下跌，债市冲高回落涨幅收窄，债基收中大蛋！",
@@ -471,157 +758,184 @@
       "signals": [
        "过度乐观"
       ]
+     },
+     {
+      "title": "每跌六个点补一万",
+      "score": 22.0,
+      "level": "中间派",
+      "intent": "neutral",
+      "signals": []
+     },
+     {
+      "title": "跑步买入，希望别套我",
+      "score": 22.0,
+      "level": "中间派",
+      "intent": "buy",
+      "signals": []
+     },
+     {
+      "title": "跌的还不够一年，都别急",
+      "score": 22.0,
+      "level": "中间派",
+      "intent": "neutral",
+      "signals": []
      }
     ],
     "name": "黄金",
     "etf": "518880",
-    "postsUsed": 54
+    "postsUsed": 51
    },
    "cpo": {
-    "index": 21.7,
-    "interpretation": "正常区间：小白参与度适中",
+    "index": 18.6,
+    "interpretation": "极度冷清：小白沉默，可能接近底部",
     "details": {
-     "totalPosts": 156,
-     "validPosts": 156,
+     "totalPosts": 149,
+     "validPosts": 149,
      "spamPosts": 0,
-     "newbiePosts": 31,
-     "pureNewbie": 1,
-     "newbieRatio": 19.9,
-     "avgNewbieScore": 27.3,
-     "avgSentiment": 32.3,
-     "puritySignal": 3.2,
+     "newbiePosts": 11,
+     "pureNewbie": 0,
+     "newbieRatio": 7.4,
+     "avgNewbieScore": 26.4,
+     "avgSentiment": 45.5,
+     "puritySignal": 0.0,
      "activity": 100,
-     "momBuyIndex": 16.4,
-     "momSellIndex": 9.1,
-     "buySellRatio": 2.33,
-     "buyCount": 7,
+     "momBuyIndex": 0.0,
+     "momSellIndex": 18.3,
+     "buySellRatio": 0.0,
+     "buyCount": 0,
      "sellCount": 3
     },
     "topPosts": [
      {
-      "title": "能不能涨6-7个点",
-      "score": 50.0,
-      "level": "纯小白",
-      "intent": "neutral",
-      "signals": [
-       "决策依赖"
-      ]
-     },
-     {
-      "title": "今天放量上涨的，能不能进，谁来说说",
-      "score": 38.0,
-      "level": "偏小白",
-      "intent": "neutral",
-      "signals": [
-       "决策依赖"
-      ]
-     },
-     {
-      "title": "有没有大佬帮我预测一下，我0.5的本什么时候才能回本呀",
-      "score": 34.0,
+      "title": "救命",
+      "score": 30.0,
       "level": "中间派",
       "intent": "neutral",
       "signals": [
-       "知识求助"
+       "情绪恐慌"
       ]
      },
      {
-      "title": "明天涨停",
-      "score": 34.0,
+      "title": "跟跌不跟涨，明天好像又要完了",
+      "score": 30.0,
       "level": "中间派",
       "intent": "neutral",
       "signals": [
-       "短期思维"
+       "情绪恐慌"
       ]
      },
      {
-      "title": "太难了，刚玩个股连吃6个地板，买个ETF7连绿。今天终于红了。这就是新手待遇嘛？",
-      "score": 34.0,
+      "title": "看不到希望了怎么办全部亏完了那句反弹一波大的负债能解决就可以了本金没了已经不重要",
+      "score": 30.0,
       "level": "中间派",
       "intent": "neutral",
       "signals": [
-       "身份自述",
-       "专业术语"
+       "情绪恐慌"
+      ]
+     },
+     {
+      "title": "今天套这批可难受了，明天不割肉的话，又要套一阵了",
+      "score": 30.0,
+      "level": "中间派",
+      "intent": "sell",
+      "signals": [
+       "情绪恐慌"
+      ]
+     },
+     {
+      "title": "今天估计都跑了吧，给你机会不要，就不要怪老板明天砸到你哭了",
+      "score": 30.0,
+      "level": "中间派",
+      "intent": "sell",
+      "signals": [
+       "情绪恐慌"
       ]
      }
     ],
     "name": "CPO通信",
     "etf": "515880",
-    "postsUsed": 156
+    "postsUsed": 149
    },
    "semiconductor": {
-    "index": 15.7,
+    "index": 17.5,
     "interpretation": "极度冷清：小白沉默，可能接近底部",
     "details": {
-     "totalPosts": 68,
-     "validPosts": 68,
+     "totalPosts": 83,
+     "validPosts": 83,
      "spamPosts": 0,
-     "newbiePosts": 9,
-     "pureNewbie": 1,
-     "newbieRatio": 13.2,
-     "avgNewbieScore": 26.0,
-     "avgSentiment": 11.1,
-     "puritySignal": 11.1,
-     "activity": 85.0,
-     "momBuyIndex": 0.0,
+     "newbiePosts": 10,
+     "pureNewbie": 0,
+     "newbieRatio": 12.0,
+     "avgNewbieScore": 26.8,
+     "avgSentiment": 30.0,
+     "puritySignal": 0.0,
+     "activity": 100,
+     "momBuyIndex": 14.5,
      "momSellIndex": 0.0,
-     "buySellRatio": 0.0,
-     "buyCount": 0,
+     "buySellRatio": 2.0,
+     "buyCount": 2,
      "sellCount": 0
     },
     "topPosts": [
      {
-      "title": "有没有个懂的指导下，只有小白叫唤吗",
-      "score": 50.0,
-      "level": "纯小白",
+      "title": "今天打脸，昨天卖掉，今天买回来了，怎么买都是亏",
+      "score": 46.0,
+      "level": "偏小白",
       "intent": "neutral",
       "signals": [
-       "身份自述"
+       "知识求助",
+       "短期思维"
       ]
      },
      {
-      "title": "今天会跌停吗",
+      "title": "后悔开盘没走，他这基本每天都让人后悔中",
+      "score": 30.0,
+      "level": "中间派",
+      "intent": "neutral",
+      "signals": [
+       "情绪恐慌"
+      ]
+     },
+     {
+      "title": "今天会涨停吗",
       "score": 30.0,
       "level": "中间派",
       "intent": "neutral",
       "signals": []
      },
      {
-      "title": "半导体连涨3年了",
-      "score": 22.0,
+      "title": "应该明天再买回来的，今天尾盘接回来感觉有点冲动了。",
+      "score": 26.0,
       "level": "中间派",
-      "intent": "neutral",
-      "signals": []
+      "intent": "buy",
+      "signals": [
+       "过度乐观"
+      ]
      },
      {
-      "title": "一天跌5个点太轻松了",
-      "score": 22.0,
+      "title": "快冲啊",
+      "score": 26.0,
       "level": "中间派",
-      "intent": "neutral",
-      "signals": []
-     },
-     {
-      "title": "跟我反着买，别墅靠大海",
-      "score": 22.0,
-      "level": "中间派",
-      "intent": "neutral",
-      "signals": []
+      "intent": "buy",
+      "signals": [
+       "过度乐观"
+      ]
      }
     ],
     "name": "半导体",
     "etf": "512480",
-    "postsUsed": 68
+    "postsUsed": 83
    }
   }
  },
  "snapshot": {
-  "asof": "20261123",
-  "date": "2026-11-23",
-  "overall": 18.9,
+  "asof": "20261124",
+  "date": "2026-11-24",
+  "overall": 17.0,
   "interpretation": "极度冷清：小白沉默，可能接近底部",
   "percentile": null,
-  "buyAvg": 11.3,
-  "sellAvg": 7.0,
-  "recordCount": 1
+  "buyAvg": 11.9,
+  "sellAvg": 8.5,
+  "recordCount": 2
  }
 }
