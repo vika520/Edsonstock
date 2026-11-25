@@ -6124,6 +6124,31 @@
     "w2": 0.0714
    },
    "hv30": 14.8
+  },
+  {
+   "date": "20261125",
+   "IO": {
+    "vix": 20.07,
+    "skew": 3.09,
+    "near": "2612",
+    "second": "2701",
+    "w2": 0.25
+   },
+   "HO": {
+    "vix": 16.16,
+    "skew": 1.51,
+    "near": "2612",
+    "second": "2701",
+    "w2": 0.25
+   },
+   "MO": {
+    "vix": 39.05,
+    "skew": 7.99,
+    "near": "2612",
+    "second": "2701",
+    "w2": 0.25
+   },
+   "hv30": 15.06
   }
  ],
  "meta": {
@@ -6143,15 +6168,15 @@
   "lockedBase": "20261120"
  },
  "snapshot": {
-  "asof": "20261120",
-  "vix": 20.86,
-  "skew": 4.79,
-  "hv30": 14.8,
-  "percentile": 77.14,
-  "seriesDays": 245,
+  "asof": "20261125",
+  "vix": 20.07,
+  "skew": 3.09,
+  "hv30": 15.06,
+  "percentile": 66.26,
+  "seriesDays": 246,
   "min": 15.53,
   "max": 26.32,
-  "median": 19.17
+  "median": 19.2
  },
  "causal": {
   "entries": 8,
@@ -6169,25 +6194,25 @@
    "5": {
     "events": 8,
     "winRate": 50.0,
-    "baseline": 46.25,
+    "baseline": 46.06,
     "avgRet": 0.15,
-    "p": 0.5521,
+    "p": 0.5477,
     "sig": false
    },
    "20": {
     "events": 8,
     "winRate": 50.0,
-    "baseline": 40.0,
+    "baseline": 39.82,
     "avgRet": -1.0,
-    "p": 0.4059,
+    "p": 0.4018,
     "sig": false
    },
    "60": {
     "events": 8,
     "winRate": 12.5,
-    "baseline": 42.7,
+    "baseline": 42.47,
     "avgRet": -5.82,
-    "p": 0.9884,
+    "p": 0.988,
     "sig": false
    }
   }
