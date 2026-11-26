@@ -13,7 +13,10 @@ const f2 = v => (v==null||!isFinite(v)) ? '—' : Number(v).toFixed(2);
 const f0 = v => (v==null||!isFinite(v)) ? '—' : Math.round(v).toLocaleString('en-US');
 const sgn = v => (v==null||!isFinite(v)) ? '—' : (v>0?'+':'')+Number(v).toFixed(2);
 const cls = v => v==null||!isFinite(v) ? '' : (v>0?'up':(v<0?'down':''));
-const dateFmt = d => d ? d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8) : '—';
+// 兼容 8 位（20261123）与 ISO（2026-11-23）两种日期；后者见 MOM 栏 history
+const dateFmt = d => d ? (/^\d{4}-\d{2}-\d{2}/.test(String(d))
+  ? String(d).slice(0,10)
+  : String(d).slice(0,4)+'-'+String(d).slice(4,6)+'-'+String(d).slice(6,8)) : '—';
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
 
