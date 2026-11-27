@@ -74,37 +74,17 @@ a{color:var(--blue);text-decoration:none}
 .side .foot{padding:12px 16px 16px;border-top:1px solid var(--line);font-size:10px;color:var(--dim2);line-height:1.7}
 .side .foot b{color:var(--dim);font-weight:600}
 
-/* ---------- 页脚导航特效按钮：EdsonStock 超短版（单行，位于页脚文字上方） ---------- */
-.daban-btn{
-  position:relative;display:flex;align-items:center;justify-content:center;gap:7px;
-  width:100%;box-sizing:border-box;margin:0 0 12px;padding:8px 12px;
-  border-radius:8px;text-decoration:none;color:var(--txt);font-size:11px;font-weight:600;
-  white-space:nowrap;line-height:1.2;
-  background:linear-gradient(var(--panel2),var(--panel2)) padding-box,
-             conic-gradient(from var(--db-deg,0deg),#f0b429,#ff6b4a,#f0b429 28%,transparent 32%,transparent 68%,#f0b429 72%,#ff6b4a,#f0b429)
-             border-box;
-  border:1.5px solid transparent;isolation:isolate;
-  transition:transform .25s ease,box-shadow .25s ease;
-  animation:db-breathe 4.5s ease-in-out infinite;
+/* ---------- 顶栏文字链接：EdsonStock 超短版（白字 + 金色下划线） ---------- */
+.daban-link{
+  display:inline-flex;align-items:baseline;gap:2px;margin-right:14px;padding:2px 0 3px;
+  font-size:12px;font-weight:600;line-height:1.2;white-space:nowrap;text-decoration:none;
+  color:var(--txt);border-bottom:2px solid var(--accent);
+  transition:color .2s ease,border-color .2s ease;
 }
-.daban-btn::before{ /* 扫光：hover 时从左到右掠过 */
-  content:"";position:absolute;inset:0;border-radius:inherit;overflow:hidden;z-index:-1;
-  background:linear-gradient(105deg,transparent 30%,rgba(240,180,41,.16) 50%,transparent 70%);
-  background-size:240% 100%;background-position:130% 0;
-  transition:background-position .7s ease;
-}
-.daban-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(240,180,41,.22);animation:db-spin 1.6s linear infinite}
-.daban-btn:hover::before{background-position:-30% 0}
-.daban-btn:active{transform:translateY(0)}
-.daban-btn .db-ico{font-size:13px;line-height:1;filter:drop-shadow(0 0 4px rgba(240,180,41,.6))}
-.daban-btn .nm{color:var(--accent);letter-spacing:.2px}
-.daban-btn .db-arrow{color:var(--accent);font-size:12px;transition:transform .25s ease}
-.daban-btn:hover .db-arrow{transform:translateX(3px)}
-@property --db-deg{syntax:"<angle>";inherits:false;initial-value:0deg}
-@keyframes db-spin{to{--db-deg:360deg}}
-@keyframes db-breathe{0%,100%{box-shadow:0 0 0 rgba(240,180,41,0)}50%{box-shadow:0 0 12px rgba(240,180,41,.14)}}
-@media (prefers-reduced-motion:reduce){.daban-btn,.daban-btn::before{animation:none;transition:none}}
-.side.collapsed .daban-btn{display:none}
+.daban-link:hover{color:var(--accent)}
+.daban-link:hover .dl-ar{color:var(--accent);transform:translate(1px,-1px)}
+.daban-link .dl-ar{display:inline-block;font-size:11px;color:var(--dim);transition:transform .2s ease,color .2s ease}
+@media (prefers-reduced-motion:reduce){.daban-link,.dl-ar{transition:none}}
 
 /* ---------- main ---------- */
 .main{margin-left:212px;height:100vh;display:flex;flex-direction:column;min-width:0;
@@ -296,11 +276,6 @@ tbody tr.click{cursor:pointer}
     <button data-v="review"><span class="no">16</span><span class="txt"><span class="nm">每日复盘</span><span class="sb">全栏汇总 · 短线与中长线建议</span></span></button>
   </div>
   <div class="foot">
-    <a class="daban-btn" href="https://daban.edson.hk/" target="_blank" rel="noopener noreferrer" title="打开 EdsonStock 超短版">
-      <span class="db-ico">⚡</span>
-      <span class="nm">EdsonStock 超短版</span>
-      <span class="db-arrow">→</span>
-    </a>
     数据截止 <b id="ASOF">—</b><span style="font-size:9px">（每天更新会变动）</span><br>
     网站作者微信：<b style="color:#c9a24c">edsonzj</b>
   </div>
@@ -311,6 +286,7 @@ tbody tr.click{cursor:pointer}
     <div><div class="eyebrow" id="HD_EYEBROW">VIEW 01</div><h1 id="HD_TITLE">狼波周期指数</h1></div>
     <div class="spacer"></div>
     <div id="HD_TAGS"></div>
+    <a class="daban-link" href="https://daban.edson.hk/" target="_blank" rel="noopener noreferrer" title="打开 EdsonStock 超短版">A股结构数据 <span class="dl-ar">↗</span></a>
     <div class="badge" id="HD_DATE">—</div>
     <div class="badge warn">代理口径已标注</div>
   </div>
