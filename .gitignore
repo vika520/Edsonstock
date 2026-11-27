@@ -10,6 +10,7 @@ wolf-cycle/hosts.py
 
 # 运行日志 / 运行时状态（每日变化，含完整日志，不入库；本地文件保留）
 wolf-cycle/logs/
+wolf-cycle/.run_*.log
 deploy/last_run.json
 
 # deploy/ 是 stage() 每次重建的暂存目录（含真实站点 URL 的复盘页），不入库；
