@@ -426,13 +426,14 @@ def fetch_mom_index_snapshot():
         log("警告：MOM 更新失败，第 08 栏沿用上一版数据：%s" % str(e)[:160])
 
 
-def fetch_sth_snapshot():
+def fetch_sth_snapshot(full=False):
     """第 03 栏 STH 成本基础：新浪日线+东财股本 → 筹码衰减模型，幂等累积。
-    全量重算约 20 分钟（含篮子 15 只成员），日常增量只补最新交易日（快）。"""
+    --incremental 只更新单股（约 1 分钟，篮子沿用）；--full 含 3 篮子×15 成员约 50 分钟。"""
     try:
-        r = subprocess.run([PY, os.path.join(HERE, "fetch_sth.py"), "--incremental"],
+        r = subprocess.run([PY, os.path.join(HERE, "fetch_sth.py"),
+                            "--full" if full else "--incremental"],
                            cwd=HERE, capture_output=True, text=True,
-                           encoding="utf-8", errors="replace", timeout=1800)
+                           encoding="utf-8", errors="replace", timeout=3900)
         if r.returncode != 0:
             raise RuntimeError((r.stderr or r.stdout)[-300:])
         log("STH 成本基础更新完成：" + (r.stdout or "").strip().splitlines()[-1])
@@ -852,6 +853,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="只探测数据源，不写文件")
     ap.add_argument("--only-mom", action="store_true",
                     help="轻量模式：只更新第 08 栏散户反向指数并重建/部署，供晚间独立定时任务使用")
+    ap.add_argument("--only-sth-full", action="store_true",
+                    help="轻量模式：STH 篮子全量重算（约 50 分钟）并重建/部署，供周六独立定时任务使用")
     args = ap.parse_args()
 
     asof = ""
@@ -879,6 +882,27 @@ def main():
         # ---- 轻量模式：仅散户反向指数（晚间独立任务）----
         # 主任务 16:00 已完成全市场数据/复盘/部署；此处只补采当日股吧帖子、
         # 重算 MOM、重建复盘与页面、再部署+推送。股吧讨论热度在晚间更完整。
+        if args.only_sth_full:
+            log("=== 轻量模式：STH 篮子全量重算 asof=%s（约 50 分钟，等待完成）===" % asof)
+            fetch_sth_snapshot(full=True)
+            generate_review(asof)
+            build()
+            sp = os.path.join(DEPLOY, "status.json")
+            prev = jload(sp) if os.path.exists(sp) else {}
+            stats = prev.get("stats") or {}
+            status = stage(asof, stats)
+            github = None
+            if not args.no_deploy:
+                deploy()
+                if not args.no_git:
+                    github = git_sync(asof)
+            write_log(asof, True, github=github, note="only-sth-full")
+            sth = jload(os.path.join(DATA, "sth.json"))
+            snaps = ", ".join("%s→%s" % (k, (v or {}).get("asof"))
+                              for k, v in (sth.get("snapshot") or {}).items())
+            log("=== 完成（only-sth-full）：%s ===" % snaps)
+            return 0
+
         if args.only_mom:
             log("=== 轻量模式：仅更新散户反向指数 asof=%s ===" % asof)
             fetch_mom_index_snapshot()
